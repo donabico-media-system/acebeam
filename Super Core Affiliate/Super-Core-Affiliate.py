@@ -2,28 +2,35 @@
 """
 EATHESEN Matrix V3000-Ω / acebeam Core
 Super-Core-Affiliate Processor v2026.07
-Fix: TypeError - Multiple values for default (Pydantic v2 specification)
+Fix: Pydantic ConfigDict deprecation & Dict/List integration for Siphon Matrix
 """
 import json
 import os
 import sys
-from typing import List, Dict, Any
-from pydantic import BaseModel, Field
+from typing import List, Dict, Any, Union
+from pydantic import BaseModel, Field, ConfigDict
 
-# 1. Định chuẩn Schema với cơ chế khởi tạo default_factory chuẩn xác cho Pydantic v2
+# 1. Định chuẩn Schema SOTA 2026 sử dụng ConfigDict và chấp nhận linh hoạt Union[List, Dict]
 class BridgeMatrixSchema(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+    
     sync_status: str = Field(default="UNKNOWN", description="Trạng thái đồng bộ nơ-ron")
-    active_matrix: List[Any] = Field(default_factory=list, alias="active_modules_matrix", description="Ma trận phân phối module")
-
-    class Config:
-        populate_by_name = True
+    # Chấp nhận cả mảng (List) hoặc đối tượng (Dict) để triệt tiêu lỗi nhập liệu từ bot siphon
+    active_matrix: Union[List[Any], Dict[str, Any]] = Field(
+        default_factory=list, 
+        alias="active_modules_matrix", 
+        description="Ma trận phân phối module"
+    )
 
 class ProtocolMatrixSchema(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+    
     sync_status: str = Field(default="UNKNOWN", description="Trạng thái đồng bộ giao thức")
-    active_matrix: List[Any] = Field(default_factory=list, alias="active_protocols_matrix", description="Ma trận phân phối giao thức")
-
-    class Config:
-        populate_by_name = True
+    active_matrix: Union[List[Any], Dict[str, Any]] = Field(
+        default_factory=list, 
+        alias="active_protocols_matrix", 
+        description="Ma trận phân phối giao thức"
+    )
 
 def super_intelligent_core():
     # Xác định đường dẫn phân rã cấu trúc tệp tin cục bộ
@@ -57,14 +64,15 @@ def super_intelligent_core():
             p_data = ProtocolMatrixSchema(**p_raw)
             
     except Exception as e:
-        print(f"[FATAL ERROR] Dữ liệu cấu trúc JSON bị nhiễm bẩn (Entropy Corrupted): {str(e)}")
+        print(f"[FATAL ERROR] Dữ liệu cấu trúc JSON bị nhiễm bẩn nặng: {str(e)}")
         print("[ACTION] Chuyển mạch khẩn cấp sang chế độ dự phòng an toàn (Fallback Node Singapore).")
         sys.exit(1)
     
-    # Phân tích dòng chảy logic điều phối chéo giữa Modules và Protocols
-    modules_count = len(m_data.active_matrix)
-    protocols_count = len(p_data.active_matrix)
-    print(f"[SYNC CONTROL] Active Modules Map: {modules_count} | Active Protocols Map: {protocols_count}")
+    # Tính toán số lượng phần tử dựa trên kiểu dữ liệu thực tế nạp vào
+    modules_count = len(m_data.active_matrix) if isinstance(m_data.active_matrix, (list, dict)) else 0
+    protocols_count = len(p_data.active_matrix) if isinstance(p_data.active_matrix, (list, dict)) else 0
+    
+    print(f"[SYNC CONTROL] Active Modules Map Items: {modules_count} | Active Protocols Map Items: {protocols_count}")
     
     # Áp dụng cơ chế kiểm soát chốt chặn với trạng thái đồng bộ
     if m_data.sync_status == "PULSING_GREEN" and p_data.sync_status == "PULSING_GREEN":
