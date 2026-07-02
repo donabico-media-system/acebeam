@@ -7,38 +7,63 @@ on:
 
 permissions:
   contents: read
-  actions: write # Cần quyền này để kích hoạt Workflow khác
+  actions: write # Quyền tối cao kích hoạt và giám sát các hạ tầng Workflow khác
 
 jobs:
   orchestrate:
     runs-on: ubuntu-latest
     steps:
-      - name: CHECKOUT REPOSITORY
-        uses: actions/checkout@v3
+      - name: 🛰️ CHECKOUT REPOSITORY SUBSTRATE
+        uses: actions/checkout@v4 # Nâng cấp lên v4 tối ưu hóa bộ nhớ đệm và tốc độ mạng
 
-      - name: TRIGGER SUB-WORKFLOWS
-        run: |
-          # Kích hoạt ACTIVE-MODULES-SOTA
-          curl -X POST -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-          -H "Accept: application/vnd.github.v3+json" \
-          https://api.github.com/repos/${{ github.repository }}/actions/workflows/ACTIVE-MODULES-SOTA.yml/dispatches \
-          -d '{"ref":"main"}'
-          
-          # Kích hoạt ACTIVE-PROTOCOLS-SOTA
-          curl -X POST -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-          -H "Accept: application/vnd.github.v3+json" \
-          https://api.github.com/repos/${{ github.repository }}/actions/workflows/ACTIVE-PROTOCOLS-SOTA.yml/dispatches \
-          -d '{"ref":"main"}'
+      - name: ⚡ SETUP PYTHON RUNTIME ENVIRONMENT
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
 
-      - name: EXECUTE SUPER CORE LOGIC
+      - name: ⚙️ INSTALL SOTA VALIDATION DEPENDENCIES
         run: |
-          # Sử dụng dấu ngoặc kép để xử lý khoảng trắng trong tên thư mục
+          python -m pip install --upgrade pip
+          pip install pydantic lxml
+
+      - name: 🚀 TRIGGER ACTIVE-MODULES-SOTA
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            console.log("[ORCHESTRATOR] Đang phát xung kích hoạt ACTIVE-MODULES-SOTA...");
+            await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'ACTIVE-MODULES-SOTA.yml',
+              ref: 'main'
+            });
+
+      - name: 🚀 TRIGGER ACTIVE-PROTOCOLS-SOTA
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            console.log("[ORCHESTRATOR] Đang phát xung kích hoạt ACTIVE-PROTOCOLS-SOTA...");
+            await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'ACTIVE-PROTOCOLS-SOTA.yml',
+              ref: 'main'
+            });
+
+      - name: 🧠 EXECUTE SUPER CORE AFFILIATE LOGIC (RECURSION ENGINE)
+        run: |
           if [ -d "Super Core Affiliate" ]; then
+            echo "[SUCCESS] Tìm thấy phân vùng lõi 'Super Core Affiliate'. Khởi chạy bộ xử lý nhận thức..."
             python "Super Core Affiliate/Super-Core-Affiliate.py"
           else
-            echo "[ERROR] Thư mục 'Super Core Affiliate' không tồn tại."
-            ls -F
+            echo "[CRITICAL ERROR] Không tìm thấy thư mục 'Super Core Affiliate'. Kích hoạt cơ chế cô lập."
+            ls -laF
             exit 1
           fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          EXECUTION_MODE: "SUPER_SMART_INTELLIGENT"
+          DUNG_SAI_CHOT_CHAN: "Super-Omega-Planck-128"
