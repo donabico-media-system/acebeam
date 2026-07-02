@@ -1,21 +1,47 @@
 # -*- coding: utf-8 -*-
-import os
+import requests
 from datetime import datetime
 
 class EHCInternetConnectAuto:
     def __init__(self):
         self.log_file = "Connection-Log.txt"
+        self.targets = [
+            "https://www.google.com",
+            "https://www.cloudflare.com",
+            "https://www.github.com",
+            "https://www.bing.com",
+            "https://www.wikipedia.org",
+            "https://www.amazon.com",
+            "https://www.microsoft.com",
+            "https://www.apple.com",
+            "https://www.cloudflare.com/cdn-cgi/trace",
+            "https://www.fast.com",
+            "https://www.facebook.com",
+            "https://www.youtube.com",
+            "https://www.adobe.com",
+            "https://www.stackoverflow.com"
+        ]
         
     def launch_ocean_pulse(self):
-        # Ghi lại trạng thái vào file trong kho
-        log_entry = f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] SYSTEM_SIGNAL: ACTIVE_SUCCESS\n"
+        timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        log_entries = []
+        
+        for url in self.targets:
+            try:
+                response = requests.get(url, timeout=15)
+                status = f"SUCCESS({response.status_code})"
+            except Exception as e:
+                status = f"FAILED"
+            
+            log_entries.append(f"[{timestamp}] TARGET: {url} -> {status}")
         
         try:
             with open(self.log_file, "a", encoding="utf-8") as f:
-                f.write(log_entry)
-            print(f"[SUCCESS] ✅ Ghi nhận nhật ký thành công: {log_entry.strip()}")
+                for entry in log_entries:
+                    f.write(entry + "\n")
+            print(f"✅ Đã quét xong {len(self.targets)} đích đến.")
         except Exception as e:
-            print(f"[ERROR] Không thể ghi log: {str(e)}")
+            print(f"❌ Lỗi ghi log: {str(e)}")
 
 if __name__ == "__main__":
     EHCInternetConnectAuto().launch_ocean_pulse()
