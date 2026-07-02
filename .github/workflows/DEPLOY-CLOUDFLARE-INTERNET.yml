@@ -47,7 +47,7 @@ jobs:
         id: deployment
         uses: actions/deploy-pages@v4
 
-  # LUỒNG 2: TỰ ĐỘNG TẠO VÀ ĐẨY LÊN EDGE CLOUDFLARE (KHÔNG CẦN TẠO TRƯỚC)
+  # LUỒNG 2: TỰ ĐỘNG KHỞI TẠO VÀ ĐẨY LÊN EDGE CLOUDFLARE QUY MÔ LỚN
   deploy-cloudflare-pages:
     runs-on: ubuntu-latest
     steps:
@@ -59,14 +59,19 @@ jobs:
         with:
           node-version: 24
 
-      - name: 3. Sử dụng Wrangler CLI để tự động tạo Project và Deploy
+      - name: 3. Ép Cloudflare tự tạo Project và Deploy tự động
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
-          # Tự động lấy tên kho GitHub hiện tại làm tên dự án (Ví dụ: acebeam, 8000kicks...)
           REPO_NAME="${{ github.event.repository.name }}"
-          echo "Bắt đầu quét hạ tầng Cloudflare cho dự án: $REPO_NAME"
+          echo "Hệ thống bắt đầu quét hạ tầng cho kho thương hiệu: $REPO_NAME"
           
-          # Lệnh tổng lực: Tự động deploy, nếu chưa có project -> TỰ ĐỘNG TẠO MỚI TINH!
+          # [BƯỚC CHÌA KHÓA]: Thử tạo dự án mới trên Cloudflare. 
+          # Nếu dự án đã tồn tại, lệnh sẽ báo lỗi nhưng "|| true" sẽ bỏ qua để chạy tiếp luồng.
+          npx wrangler pages project create "$REPO_NAME" --production-branch="main" || true
+          
+          echo "Khởi tạo hạ tầng hoàn tất! Tiến hành bắn dữ liệu lên Edge CDN..."
+          
+          # Thực hiện Deploy dữ liệu lên phân vùng vừa tạo
           npx wrangler pages deploy . --project-name="$REPO_NAME" --branch="main"
