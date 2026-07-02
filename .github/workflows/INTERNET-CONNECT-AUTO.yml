@@ -1,0 +1,37 @@
+name: 🌊 INTERNET CONNECT AUTO
+
+on:
+  # Cho phép Ngài bấm chạy thủ công ngay tức thì từ trình duyệt Chrome
+  workflow_dispatch:
+  # Tự động kích hoạt khi phát hiện thay đổi trong phân vùng này hoặc file index.html
+  push:
+    paths:
+      - 'Internet-Connect-Auto/**'
+      - 'index.html'
+
+jobs:
+  autonomous-ocean-pulse:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 CHECKOUT REPOSITORY COMPONENT
+        uses: actions/checkout@v4
+
+      - name: 🐍 SETUP PYTHON ENVIRONMENT (SOTA)
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+          cache: 'pip'
+
+      - name: 📦 INSTALL REQUIRED DEPENDENCIES
+        run: |
+          pip install requests
+
+      # KÍCH HOẠT TIẾN TRÌNH TỰ TRỊ — ĐỘC LẬP TUYỆT ĐỐI — CHỐNG XUNG ĐỘT
+      - name: 🛰️ LAUNCH INTERNET CONNECT AUTO SYSTEM
+        run: |
+          if [ -f "Internet-Connect-Auto/Internet-Connect-Auto.py" ]; then
+            python "Internet-Connect-Auto/Internet-Connect-Auto.py"
+          else
+            echo "[ERROR] Không tìm thấy cấu trúc Internet-Connect-Auto Lõi!"
+            exit 1
+          fi
