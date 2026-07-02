@@ -2,6 +2,7 @@
 """
 EATHESEN Matrix V3000-Ω / acebeam Core
 Super-Core-Affiliate Processor v2026.07
+Fix: TypeError - Multiple values for default (Pydantic v2 specification)
 """
 import json
 import os
@@ -9,17 +10,17 @@ import sys
 from typing import List, Dict, Any
 from pydantic import BaseModel, Field
 
-# 1. Khai báo Schema định chuẩn ma trận đầu vào theo giao thức Model Context Protocol (MCP)
+# 1. Định chuẩn Schema với cơ chế khởi tạo default_factory chuẩn xác cho Pydantic v2
 class BridgeMatrixSchema(BaseModel):
-    sync_status: str = Field(..., description="Trạng thái đồng bộ nơ-ron")
-    active_matrix: List[Any] = Field(..., alias="active_modules_matrix", default=[])
+    sync_status: str = Field(default="UNKNOWN", description="Trạng thái đồng bộ nơ-ron")
+    active_matrix: List[Any] = Field(default_factory=list, alias="active_modules_matrix", description="Ma trận phân phối module")
 
     class Config:
         populate_by_name = True
 
 class ProtocolMatrixSchema(BaseModel):
-    sync_status: str = Field(..., description="Trạng thái đồng bộ giao thức")
-    active_matrix: List[Any] = Field(..., alias="active_protocols_matrix", default=[])
+    sync_status: str = Field(default="UNKNOWN", description="Trạng thái đồng bộ giao thức")
+    active_matrix: List[Any] = Field(default_factory=list, alias="active_protocols_matrix", description="Ma trận phân phối giao thức")
 
     class Config:
         populate_by_name = True
@@ -37,12 +38,11 @@ def super_intelligent_core():
     # Bẫy lỗi Tầng 1: Kiểm tra sự tồn tại vật lý của các điểm kết nối (Bridge Files)
     if not os.path.exists(m_bridge_path) or not os.path.exists(p_bridge_path):
         print("[CRITICAL] Khuyết thiếu tệp tin cầu nối cấu hình hạ tầng Bridge. Kích hoạt cơ chế tự phục hồi...")
-        # Tự động tạo tệp tin mặc định chuẩn hóa nếu khuyết thiếu để tránh sập hệ thống (Crash)
         if not os.path.exists(m_bridge_path):
-            with open(m_bridge_path, "w") as f:
+            with open(m_bridge_path, "w", encoding="utf-8") as f:
                 json.dump({"sync_status": "PULSING_GREEN", "active_modules_matrix": []}, f, indent=4)
         if not os.path.exists(p_bridge_path):
-            with open(p_bridge_path, "w") as f:
+            with open(p_bridge_path, "w", encoding="utf-8") as f:
                 json.dump({"sync_status": "PULSING_GREEN", "active_protocols_matrix": []}, f, indent=4)
 
     try:
@@ -66,7 +66,7 @@ def super_intelligent_core():
     protocols_count = len(p_data.active_matrix)
     print(f"[SYNC CONTROL] Active Modules Map: {modules_count} | Active Protocols Map: {protocols_count}")
     
-    # Áp dụng cơ chế kiểm soát chốt chặn [Sự Thật Tàn Nhẫn] với trạng thái đồng bộ
+    # Áp dụng cơ chế kiểm soát chốt chặn với trạng thái đồng bộ
     if m_data.sync_status == "PULSING_GREEN" and p_data.sync_status == "PULSING_GREEN":
         print("[CORE STATUS] Mạng lưới logic ổn định tối đa. Kích hoạt Siphon Traffic Protocol...")
         print("[ADTECH] Đang rải và tối ưu hóa hệ thống liên kết chiến dịch [AFFILIATE_ANCHOR_TAG]...")
