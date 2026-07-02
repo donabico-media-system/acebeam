@@ -1,0 +1,64 @@
+name: DEPLOY-CLOUDFLARE-INTERNET
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write      
+  id-token: write   
+
+concurrency:
+  group: "cloudflare-internet-symbiosis"
+  cancel-in-progress: true
+
+jobs:
+  # LUỒNG 1: XUẤT FILE LOG VÀ ĐẨY LÊN GITHUB PAGES TĨNH
+  deploy-github-pages:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 1. Checkout Code Matrix
+        uses: actions/checkout@v4
+
+      - name: 2. Tự động sinh Log Internet-Bridge.json
+        run: |
+          CURRENT_TIME=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          cat <<EOF > Internet-Bridge.json
+          {
+            "status": "Online",
+            "protocol": "INTERNET-EDGE-BRIDGE",
+            "system_activity_indicator": "green",
+            "last_deploy_utc": "$CURRENT_TIME",
+            "repository": "${{ github.repository }}"
+          }
+          EOF
+
+      - name: 3. Kích hoạt cấu hình Pages bản địa
+        uses: actions/configure-pages@v5
+
+      - name: 4. Đóng gói và phát tán ra Internet-Vệ tinh
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '.' 
+      - id: deployment
+        uses: actions/deploy-pages@v4
+
+  # LUỒNG 2: ĐẨY THẲNG LÊN EDGE CDN CLOUDFLARE (TỰ ĐỘNG TẠO PROJECT)
+  deploy-cloudflare-pages:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 1. Checkout Code Matrix
+        uses: actions/checkout@v4
+
+      - name: 2. Bắn trực tiếp dữ liệu lên Edge Cloudflare
+        uses: cloudflare/pages-action@v1
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          # Tự động lấy tên kho "acebeam" làm tên dự án Pages trên Cloudflare
+          projectName: "${{ github.event.repository.name }}"
+          directory: "."
+          # Sử dụng token nội bộ để cấp quyền tự tạo dự án tự động
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
