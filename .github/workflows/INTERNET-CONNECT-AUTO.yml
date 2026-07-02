@@ -16,11 +16,11 @@ jobs:
       - name: 📥 CHECKOUT REPOSITORY COMPONENT
         uses: actions/checkout@v4
 
-      - name: 🐍 SETUP PYTHON ENVIRONMENT (SOTA)
+      - name: 🐍 SETUP PYTHON ENVIRONMENT (SOTA CLEAN)
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
-          cache: 'pip'
+          # ĐÃ XÓA BỎ BỘ NHỚ ĐỆM CACHE ĐỂ TRÁNH LỖI KHI REPO KHÔNG CÓ REQUIREMENTS.TXT
 
       - name: 📦 INSTALL REQUIRED DEPENDENCIES
         run: |
