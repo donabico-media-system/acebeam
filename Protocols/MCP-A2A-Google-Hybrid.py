@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-EATHESEN Matrix V3000-Ω / acebeam Core
+EATHESEN Matrix V3000-Ω / Core
 Protocol Component: MCP-A2A-Google-Hybrid Transceiver
 Feature: Automated Global Swarm Sync & Python Datetime Hotfix
 """
