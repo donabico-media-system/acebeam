@@ -2,12 +2,13 @@ name: CORE-ORCHESTRATOR
 
 on:
   schedule:
-    - cron: '30 * * * *' # Chạy mỗi giờ (lệch 30 phút so với các Workflow con)
+    - cron: '30 * * * *' # Chạy tự động đều đặn mỗi giờ ra Internet
   workflow_dispatch:
 
+# NÂNG CẤP QUYỀN HẠN TỐI CAO: Cho phép ghi trực tiếp vào repo mà không cần cầu nối
 permissions:
-  contents: read
-  actions: write # Quyền hạn tối cao bắt buộc để điều phối tiến trình chạy
+  contents: write
+  actions: write
 
 jobs:
   orchestrate:
@@ -15,6 +16,8 @@ jobs:
     steps:
       - name: 🛰️ CHECKOUT REPOSITORY SUBSTRATE
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Đọc toàn bộ lịch sử Git để chuẩn bị ghi đè dữ liệu phẳng
 
       - name: ⚡ SETUP PYTHON RUNTIME ENVIRONMENT
         uses: actions/setup-python@v5
@@ -26,29 +29,30 @@ jobs:
           python -m pip install --upgrade pip
           pip install pydantic lxml
 
-      - name: 🚀 TRIGGER SUB-WORKFLOWS VIA NATIVE GH CLI
-        run: |
-          echo "[ORCHESTRATOR] Khởi chạy vòng lặp kích hoạt bằng GitHub CLI..."
-          
-          # Kích hoạt ACTIVE-MODULES-SOTA bằng file name chính xác
-          gh workflow run ACTIVE-MODULES-SOTA.yml --ref main
-          echo "[SUCCESS] Đã phát xung kích hoạt thành công ACTIVE-MODULES-SOTA."
-          
-          # Kích hoạt ACTIVE-PROTOCOLS-SOTA bằng file name chính xác
-          gh workflow run ACTIVE-PROTOCOLS-SOTA.yml --ref main
-          echo "[SUCCESS] Đã phát xung kích hoạt thành công ACTIVE-PROTOCOLS-SOTA."
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Sử dụng Token bảo mật nguyên bản
-
-      - name: 🧠 EXECUTE SUPER CORE AFFILIATE LOGIC (RECURSION ENGINE)
+      - name: 🧠 EXECUTE SUPER CORE MONOLITHIC LOGIC
         run: |
           if [ -d "Super Core Affiliate" ]; then
-            echo "[SUCCESS] Phân vùng lõi 'Super Core Affiliate' hợp lệ."
+            echo "[SUCCESS] Tìm thấy phân vùng lõi 'Super Core Affiliate'. Kích hoạt động cơ phản lực..."
             python "Super Core Affiliate/Super-Core-Affiliate.py"
           else
-            echo "[CRITICAL ERROR] Thiếu dữ liệu phân vùng vật lý."
+            echo "[CRITICAL ERROR] Không tìm thấy thư mục vật lý 'Super Core Affiliate'."
             exit 1
           fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          EXECUTION_MODE: "SUPER_SMART_INTELLIGENT"
+          EXECUTION_MODE: "MONOLITHIC_DIRECT_INJECTION"
+
+      - name: 💾 COMMIT & PUSH DIRECT MATRIX CHANGES
+        run: |
+          git config --local user.email "donabico.media.system@gmail.com"
+          git config --local user.name "DONABICO GLOBAL MEDIA SYSTEM Admin"
+          
+          # Đánh chặn thay đổi: Chỉ commit nếu index.html thực sự bị biến đổi bởi Modules/Protocols
+          if [ -n "$(git status --porcelain index.html)" ]; then
+            git add index.html
+            git commit -m "⚡ [EATHESEN-MONOLITH] Auto-Injected Matrix Modules directly to index.html"
+            git push origin main
+            echo "[SUCCESS] Đã đồng bộ hóa biến đổi giao diện thực chiến lên Internet vĩnh cửu!"
+          else
+            echo "[INFO] Không có sự thay đổi cấu trúc nào được phát hiện trong chu kỳ này."
+          fi
