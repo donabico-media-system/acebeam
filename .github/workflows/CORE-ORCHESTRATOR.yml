@@ -2,10 +2,9 @@ name: CORE-ORCHESTRATOR
 
 on:
   schedule:
-    - cron: '30 * * * *' # Chạy tự động đều đặn mỗi giờ ra Internet
+    - cron: '30 * * * *' # Chạy tự động đều đặn mỗi giờ
   workflow_dispatch:
 
-# NÂNG CẤP QUYỀN HẠN TỐI CAO: Cho phép ghi trực tiếp vào repo mà không cần cầu nối
 permissions:
   contents: write
   actions: write
@@ -17,7 +16,7 @@ jobs:
       - name: 🛰️ CHECKOUT REPOSITORY SUBSTRATE
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # Đọc toàn bộ lịch sử Git để chuẩn bị ghi đè dữ liệu phẳng
+          fetch-depth: 0
 
       - name: ⚡ SETUP PYTHON RUNTIME ENVIRONMENT
         uses: actions/setup-python@v5
@@ -27,15 +26,15 @@ jobs:
       - name: ⚙️ INSTALL SOTA VALIDATION DEPENDENCIES
         run: |
           python -m pip install --upgrade pip
-          pip install pydantic lxml
+          pip install pydantic lxml beautifulsoup4 httpx requests
 
       - name: 🧠 EXECUTE SUPER CORE MONOLITHIC LOGIC
         run: |
           if [ -d "Super Core Affiliate" ]; then
-            echo "[SUCCESS] Tìm thấy phân vùng lõi 'Super Core Affiliate'. Kích hoạt động cơ phản lực..."
+            echo "[SUCCESS] Tìm thấy Lõi. Kích hoạt động cơ Hộp Đen..."
             python "Super Core Affiliate/Super-Core-Affiliate.py"
           else
-            echo "[CRITICAL ERROR] Không tìm thấy thư mục vật lý 'Super Core Affiliate'."
+            echo "[CRITICAL ERROR] Không tìm thấy thư mục 'Super Core Affiliate'."
             exit 1
           fi
         env:
@@ -47,12 +46,11 @@ jobs:
           git config --local user.email "donabico.media.system@gmail.com"
           git config --local user.name "DONABICO GLOBAL MEDIA SYSTEM Admin"
           
-          # Đánh chặn thay đổi: Chỉ commit nếu index.html thực sự bị biến đổi bởi Modules/Protocols
           if [ -n "$(git status --porcelain index.html)" ]; then
             git add index.html
             git commit -m "⚡ [EATHESEN-MONOLITH] Auto-Injected Matrix Modules directly to index.html"
             git push origin main
-            echo "[SUCCESS] Đã đồng bộ hóa biến đổi giao diện thực chiến lên Internet vĩnh cửu!"
+            echo "[SUCCESS] Đã đồng bộ hóa lên Internet!"
           else
-            echo "[INFO] Không có sự thay đổi cấu trúc nào được phát hiện trong chu kỳ này."
+            echo "[INFO] Không có sự thay đổi cấu trúc nào được phát hiện."
           fi
