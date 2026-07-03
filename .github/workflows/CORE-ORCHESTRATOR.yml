@@ -2,9 +2,10 @@ name: CORE-ORCHESTRATOR
 
 on:
   schedule:
-    - cron: '30 * * * *' # Chạy tự động đều đặn mỗi giờ
+    - cron: '30 * * * *' # Chạy tự động đều đặn mỗi giờ ra Internet
   workflow_dispatch:
 
+# NÂNG CẤP QUYỀN HẠN TỐI CAO: Cho phép đọc ghi trực tiếp và bẻ gãy xung đột
 permissions:
   contents: write
   actions: write
@@ -16,7 +17,7 @@ jobs:
       - name: 🛰️ CHECKOUT REPOSITORY SUBSTRATE
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 0 # Đọc toàn bộ lịch sử Git để chuẩn bị Rebase hòa trộn dữ liệu phẳng
 
       - name: ⚡ SETUP PYTHON RUNTIME ENVIRONMENT
         uses: actions/setup-python@v5
@@ -31,10 +32,10 @@ jobs:
       - name: 🧠 EXECUTE SUPER CORE MONOLITHIC LOGIC
         run: |
           if [ -d "Super Core Affiliate" ]; then
-            echo "[SUCCESS] Tìm thấy Lõi. Kích hoạt động cơ Hộp Đen..."
+            echo "[SUCCESS] Tìm thấy phân vùng lõi 'Super Core Affiliate'. Kích hoạt động cơ phản lực..."
             python "Super Core Affiliate/Super-Core-Affiliate.py"
           else
-            echo "[CRITICAL ERROR] Không tìm thấy thư mục 'Super Core Affiliate'."
+            echo "[CRITICAL ERROR] Không tìm thấy thư mục vật lý 'Super Core Affiliate'."
             exit 1
           fi
         env:
@@ -46,11 +47,18 @@ jobs:
           git config --local user.email "donabico.media.system@gmail.com"
           git config --local user.name "DONABICO GLOBAL MEDIA SYSTEM Admin"
           
+          # Đánh chặn thay đổi vật lý tại index.html
           if [ -n "$(git status --porcelain index.html)" ]; then
             git add index.html
             git commit -m "⚡ [EATHESEN-MONOLITH] Auto-Injected Matrix Modules directly to index.html"
+            
+            echo "[GIT] Phát hiện thay đổi. Tiến hành kéo dữ liệu mới nhất và Rebase chống xung đột..."
+            # Lệnh then chốt: Tự động kéo commit từ Server về, xếp chồng thay đổi của máy ảo lên đầu nhánh
+            git pull origin main --rebase
+            
+            # Tiến hành đẩy mã nguồn sạch tuyệt đối lên Server
             git push origin main
-            echo "[SUCCESS] Đã đồng bộ hóa lên Internet!"
+            echo "[SUCCESS] Đã đồng bộ hóa và vượt qua xung đột (Bypass Rejected) thành công lên Internet!"
           else
-            echo "[INFO] Không có sự thay đổi cấu trúc nào được phát hiện."
+            echo "[INFO] Không có sự thay đổi cấu trúc nào được phát hiện trong chu kỳ này."
           fi
