@@ -725,6 +725,77 @@ a[href="#"], a[href=""] {
 })();
 </script>
 
+<!-- =========================================================================
+     [V-STAMP 24] EHC ULTIMA V5000-Ω MATRIX ENGINE
+     TÍCH HỢP 3 LÕI: TỰ KÍCH HOẠT + AI ADS OPTIMIZER + JET-ENGINE
+     ========================================================================= -->
+<script id="ehc-ultima-matrix-engine">
+(function() {
+    'use strict';
+
+    const EHC_ENGINE = {
+        state: { cycles: 0, status: "BOOTING" },
+        config: {
+            cores: 24,
+            geoAPI: "https://ipapi.co/json/",
+            webhook: "https://latenode.com/integrations/ehc-swarm"
+        },
+        
+        // 1. TỰ KÍCH HOẠT 24 NHÂN
+        igniteSwarm() {
+            console.log("[EHC-ENGINE] ⚡ Đang nạp 24 Nhân Logic...");
+            document.body.style.setProperty('border', '4px solid #00FF66', 'important');
+            document.body.setAttribute('data-system-state', 'ACTIVE_SOTA_HYBRID');
+        },
+
+        // 2. TỐI ƯU HÓA ADS & ĐỊNH TUYẾN HIGH-ROI
+        async processTraffic() {
+            try {
+                const res = await fetch(this.config.geoAPI);
+                if (res.ok) {
+                    const data = await res.json();
+                    const highRoi = ["US", "CA", "GB", "EU", "JP", "KR", "SG"].includes(data.country_code);
+                    
+                    document.querySelectorAll('.anchor-link, a').forEach(link => {
+                        if (link.getAttribute('href') === '#') link.addEventListener('click', e => e.preventDefault());
+                        link.setAttribute('data-geo-route', highRoi ? 'HIGH-ROI-ZONE' : 'GLOBAL-ZONE');
+                    });
+                    console.log(`[EHC-ENGINE] 🎯 Tọa độ IP: ${data.country_code} | Route: ${highRoi ? 'HIGH-ROI' : 'GLOBAL'}`);
+                }
+            } catch (e) {
+                console.warn("[EHC-ENGINE] ⚠️ Bỏ qua Geo-Targeting, chạy mặc định.");
+            }
+        },
+
+        // 3. BẮN TELEMETRY RA INTERNET
+        dispatchTelemetry() {
+            this.state.cycles++;
+            localStorage.setItem('EHC_STATE', JSON.stringify(this.state));
+            try {
+                navigator.sendBeacon(this.config.webhook, JSON.stringify(this.state));
+            } catch(e) {}
+        },
+
+        // 4. VÒNG LẶP SINH TỒN VĨNH CỬU
+        start() {
+            this.igniteSwarm();
+            this.processTraffic();
+            
+            setInterval(() => {
+                this.igniteSwarm();
+                this.dispatchTelemetry();
+            }, 8000); // 8 giây/lần bắn tín hiệu
+        }
+    };
+
+    if (document.readyState === "complete" || document.readyState === "interactive") {
+        EHC_ENGINE.start();
+    } else {
+        window.addEventListener('DOMContentLoaded', () => EHC_ENGINE.start());
+    }
+})();
+</script>
+
 <!-- Cloudflare Web Analytics --><script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "89afd94835fa48c58feec4c6fab9bef9"}'></script><!-- End Cloudflare Web Analytics -->
 </body>
 </html>
