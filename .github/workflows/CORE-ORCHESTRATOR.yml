@@ -5,11 +5,15 @@ on:
     branches:
       - main
       - master
-    # BỘ LỌC TỐI ƯU: Chỉ chạy khi có biến động ở các file logic/giao diện này
+    # CHỈ kích hoạt khi người dùng sửa đổi trực tiếp tệp giao diện tĩnh
     paths:
       - "index.html"
       - "landing_pages.html"
+    # TUYỆT ĐỐI KHÔNG kích hoạt nếu sự thay đổi đến từ các file cấu hình hoặc mã nguồn Python nội bộ
+    paths-ignore:
+      - ".github/workflows/**"
       - "Super Core Affiliate/**"
+      - "Internet-Connect-Auto/**"
   schedule:
     - cron: "0 */6 * * *"
   workflow_dispatch:
@@ -17,18 +21,14 @@ on:
 permissions:
   contents: write
 
-concurrency:
-  group: "core-orchestrator-lock"
-  cancel-in-progress: true
-
 jobs:
   execute-ehc-hydration:
     runs-on: ubuntu-latest
     steps:
-      - name: "1. Đóng Gói Phân Vùng Mã Nguồn (Checkout Entire History)"
+      - name: "1. Đóng Gói Phân Vùng Mã Nguồn (Checkout Repository)"
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # Lấy toàn bộ lịch sử để thực hiện rebase mượt mà
+          fetch-depth: 0
 
       - name: "2. Khởi Tạo Môi Trường Python Core SOTA"
         uses: actions/setup-python@v5
@@ -43,19 +43,20 @@ jobs:
       - name: "4. Thực Thi Kích Hoạt Chế Độ Super Smart Intelligent Mode"
         env:
           MCP_A2A_SECRET: ${{ secrets.MCP_A2A_TOKEN }}
+          TARGET_ENVIRONMENT: "GLOBAL_HIGH_INCOME_MARKET"
         run: |
           python "Super Core Affiliate/Super-Core-Affiliate.py"
 
       - name: "5. Kiểm Tra Tổng Thể An Toàn Bản Nguyên (Compliance Audit)"
         run: |
           if grep -q 'href="#"' index.html; then
-            echo "[CRITICAL-ERROR] Phát hiện ký tự nhảy trang '#' chưa được xử lý!"
+            echo "[CRITICAL-ERROR] Phát hiện ký tự nhảy trang '#' chưa được xử lý lý tính!"
             exit 1
           else
-            echo "[SUCCESS] Chuẩn cấu trúc HTML đạt mức dung sai an toàn tuyệt đối."
+            echo "[SUCCESS] Chuẩn kiểm định cấu trúc HTML đạt mức dung sai Super-Omega-Planck-128."
           fi
 
-      - name: "6. Đồng Bộ Đóng Băng Dữ Liệu Nội Bộ (Git Rebase & Push)"
+      - name: "6. Đồng Bộ Đóng Băng Và Triển Khai Hạ Tầng GitHub Pages"
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
