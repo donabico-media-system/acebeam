@@ -5,7 +5,7 @@ on:
     # Kích hoạt tự động chu kỳ chuẩn xác đúng 01 tiếng / lần (24/7)
     - cron: '0 * * * *'
   workflow_dispatch:
-    # Quyền kích hoạt Just-In-Time (JIT) cấp Level 0 từ Admin Chrome Web
+    # Quyền kích hoạt JIT khẩn cấp từ giao diện Chrome Web của Admin
 
 permissions:
   contents: write
@@ -28,14 +28,19 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: "Bước 03: Thực thi kịch bản gỡ bỏ Domain, tái thiết lập SEO Silo cho Bigtech"
+      - name: "Bước 03: Thực thi kịch bản mở cổng AI Matrix & Ping Bigtech Index"
         run: |
           python Internet-Connect-Auto/Internet-Connect-Auto.py
 
-      - name: "Bước 04: Xuất bản và bắn thẳng trang tĩnh ra Internet qua GitHub Pages CDN"
+      - name: "Bước 04: Cấu hình phân quyền Git nội bộ định danh Hệ Thống"
+        run: |
+          git config --global user.name "donabico-global-media"
+          git config --global user.email "donabico.media.system@gmail.com"
+
+      - name: "Bước 05: Đẩy trực tiếp index.html và robots.txt AI ra CDN toàn cầu"
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./
           publish_branch: gh-pages
-          force_orphan: false
+          force_orphan: true
