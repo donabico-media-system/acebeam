@@ -16,7 +16,6 @@ logger = logging.getLogger("EHC-SUPER-CORE")
 
 class MCPConfigSchema(pydantic.BaseModel):
     model_config = pydantic.ConfigDict(frozen=True, strict=True)
-    # Loại bỏ hoàn toàn domain ngoài, cấu hình mặc định chạy qua giao thức Native GitHub Sandbox API
     mcp_endpoint: str = "https://api.github.com/mcp/v1"
     a2a_secure_token: str
     intelligent_mode: bool = True
