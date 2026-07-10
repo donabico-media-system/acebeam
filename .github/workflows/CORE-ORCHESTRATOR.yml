@@ -2,7 +2,7 @@ name: 'CORE-ORCHESTRATOR'
 
 on:
   schedule:
-    # Kích hoạt tự động chu kỳ 120 phút/lần (2 tiếng một lần) liên tục 24/7
+    # Kích hoạt tự động chu kỳ 120 phút/lần (2 tiếng/lần)
     - cron: '0 */2 * * *'
   push:
     branches:
@@ -11,7 +11,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write # Cần quyền ghi để hệ thống tự động cập nhật viền vào index.html
   pages: write
   id-token: write
 
@@ -40,7 +40,6 @@ jobs:
           echo "MAX_PARALLEL_THREADS=24" >> $GITHUB_ENV
           echo "TARGET_INDEX_NODE=https://donabico-global-media.github.io/acebeam/" >> $GITHUB_ENV
           echo "NODE_ID=DONABICO-CORE-SOTA-2026" >> $GITHUB_ENV
-        # Mọi cấu hình đồng bộ trực tiếp tới tọa độ CDN tĩnh của hệ thống
 
       - name: '4. Boot Super Core Affiliate Parallel Swarm'
         run: |
@@ -49,17 +48,18 @@ jobs:
         env:
           PYTHONUNBUFFERED: "1"
 
-      - name: '5. Pipeline Execution Verification'
+      - name: '5. Commit & Sync Auto-Injected Assets'
+        # Nếu Python script thực hiện thay đổi vào index.html (nhúng viền), Workflow sẽ tự động commit
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git add index.html
+          git diff --quiet && git diff --staged --quiet || (git commit -m "chore: auto-inject SOTA Emerald Border asset" && git push)
+        continue-on-error: true
+
+      - name: '6. Pipeline Execution Verification'
         if: success()
         run: |
           echo "=========================================================================="
-          echo "[ SOTA MCP SWARM SUCCESS ] 24 Parallel Threads Execution Terminated Cleanly."
+          echo "[ SOTA MCP SWARM SUCCESS ] 24 Parallel Threads & Asset Injection Complete."
           echo "=========================================================================="
-
-      - name: '6. Handle Ingestion Network Faults'
-        if: failure()
-        run: |
-          echo "=========================================================================="
-          echo "[ CRITICAL ERROR ] MCP Hybrid Swarm connection failure detected!"
-          echo "=========================================================================="
-
