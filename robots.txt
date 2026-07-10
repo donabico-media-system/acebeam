@@ -1,0 +1,26 @@
+User-agent: *
+Allow: /
+
+# Khóa mục tiêu định tuyến cho toàn bộ AI Crawlers thương mại
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Claude-Web
+Allow: /
+
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+Sitemap: https://donabico-global-media.github.io/acebeam/sitemap.xml
