@@ -1,57 +1,41 @@
 name: "INTERNET-CONNECT-AUTO"
 
 on:
-  push:
-    branches:
-      - main
-      - master
-    paths:
-      - "index.html"
-      - "landing_pages.html"
-    paths-ignore:
-      - ".github/workflows/**"
-      - "Super Core Affiliate/**"
-      - "Internet-Connect-Auto/**"
+  schedule:
+    # Kích hoạt tự động chu kỳ chuẩn xác đúng 01 tiếng / lần (24/7)
+    - cron: '0 * * * *'
   workflow_dispatch:
+    # Quyền kích hoạt Just-In-Time (JIT) cấp Level 0 từ Admin Chrome Web
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
 concurrency:
-  group: "pages-edge-deployment-lock"
+  group: "pure-actions-flow"
   cancel-in-progress: true
 
 jobs:
-  broadcast-to-cdn:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+  pure_edge_propagation:
     runs-on: ubuntu-latest
-    
     steps:
-      - name: "1. Đóng Gói Phân Vùng Mã Nguồn (Checkout Source)"
+      - name: "Bước 01: Đồng bộ mã nguồn hệ sinh thái từ GitHub Satellite Node"
         uses: actions/checkout@v4
 
-      - name: "2. Setup Python Environment"
+      - name: "Bước 02: Khởi tạo môi trường Python nâng cao kiểm toán cấu trúc"
         uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: '3.11'
 
-      - name: "3. Thực Thi Xử Lý Giao Diện Tĩnh (Khử Giật Trang & Chèn Schema)"
+      - name: "Bước 03: Thực thi kịch bản gỡ bỏ Domain, tái thiết lập SEO Silo cho Bigtech"
         run: |
-          python "Internet-Connect-Auto/Internet-Connect-Auto.py"
+          python Internet-Connect-Auto/Internet-Connect-Auto.py
 
-      - name: "4. Cấu Hình Khởi Tạo Hạ Tầng Pages CDN"
-        uses: actions/configure-pages@v5
-
-      - name: "5. Thu Gom Tài Nguyên Lõi Thành Gói Trực Tuyến (Upload Artifact)"
-        uses: actions/upload-pages-artifact@v3
+      - name: "Bước 04: Xuất bản và bắn thẳng trang tĩnh ra Internet qua GitHub Pages CDN"
+        uses: peaceiris/actions-gh-pages@v4
         with:
-          path: "."
-          if-no-files-found: error
-
-      - name: "6. Kích Hoạt Bắn Dữ Liệu Ra Mạng Lưới CDN Toàn Cầu"
-        id: deployment
-        uses: actions/deploy-pages@v4
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./
+          publish_branch: gh-pages
+          force_orphan: false
