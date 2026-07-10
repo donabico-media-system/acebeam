@@ -1,64 +1,68 @@
-name: CORE-ORCHESTRATOR
+name: "CORE-ORCHESTRATOR"
 
 on:
+  push:
+    branches:
+      - main
+      - master
   schedule:
-    - cron: '30 * * * *' # Chạy tự động đều đặn mỗi giờ ra Internet
+    # Kích hoạt chu trình quét dọn, tối ưu cấu trúc đệ quy 6 tiếng một lần
+    - cron: "0 */6 * * *"
   workflow_dispatch:
 
-# NÂNG CẤP QUYỀN HẠN TỐI CAO: Cho phép đọc ghi trực tiếp và bẻ gãy xung đột
 permissions:
   contents: write
-  actions: write
 
 jobs:
-  orchestrate:
+  execute-ehc-hydration:
     runs-on: ubuntu-latest
     steps:
-      - name: 🛰️ CHECKOUT REPOSITORY SUBSTRATE
+      - name: "1. Đóng Gói Phân Vùng Mã Nguồn (Checkout Repository)"
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # Đọc toàn bộ lịch sử Git để chuẩn bị Rebase hòa trộn dữ liệu phẳng
+          fetch-depth: 1
 
-      - name: ⚡ SETUP PYTHON RUNTIME ENVIRONMENT
+      - name: "2. Khởi Tạo Môi Trường Python Core SOTA"
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: "3.11"
+          cache: "pip"
 
-      - name: ⚙️ INSTALL SOTA VALIDATION DEPENDENCIES
+      - name: "3. Cài Đặt Thư Viện Kiểm Duyệt Dung Sai Hệ Thống"
         run: |
           python -m pip install --upgrade pip
-          pip install pydantic lxml beautifulsoup4 httpx requests
+          pip install pydantic lxml torch --no-cache-dir
 
-      - name: 🧠 EXECUTE SUPER CORE MONOLITHIC LOGIC
-        run: |
-          if [ -d "Super Core Affiliate" ]; then
-            echo "[SUCCESS] Tìm thấy phân vùng lõi 'Super Core Affiliate'. Kích hoạt động cơ phản lực..."
-            python "Super Core Affiliate/Super-Core-Affiliate.py"
-          else
-            echo "[CRITICAL ERROR] Không tìm thấy thư mục vật lý 'Super Core Affiliate'."
-            exit 1
-          fi
+      - name: "4. Thực Thi Kích Hoạt Chế Độ Super Smart Intelligent Mode"
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          EXECUTION_MODE: "MONOLITHIC_DIRECT_INJECTION"
-
-      - name: 💾 COMMIT & PUSH DIRECT MATRIX CHANGES
+          MCP_A2A_SECRET: ${{ secrets.MCP_A2A_TOKEN }}
+          TARGET_ENVIRONMENT: "GLOBAL_HIGH_INCOME_MARKET"
         run: |
-          git config --local user.email "donabico.media.system@gmail.com"
-          git config --local user.name "DONABICO GLOBAL MEDIA SYSTEM Admin"
-          
-          # Đánh chặn thay đổi vật lý tại index.html
-          if [ -n "$(git status --porcelain index.html)" ]; then
-            git add index.html
-            git commit -m "⚡ [EATHESEN-MONOLITH] Auto-Injected Matrix Modules directly to index.html"
-            
-            echo "[GIT] Phát hiện thay đổi. Tiến hành kéo dữ liệu mới nhất và Rebase chống xung đột..."
-            # Lệnh then chốt: Tự động kéo commit từ Server về, xếp chồng thay đổi của máy ảo lên đầu nhánh
-            git pull origin main --rebase
-            
-            # Tiến hành đẩy mã nguồn sạch tuyệt đối lên Server
-            git push origin main
-            echo "[SUCCESS] Đã đồng bộ hóa và vượt qua xung đột (Bypass Rejected) thành công lên Internet!"
+          # Triển khai lớp logic đệ quy kết nối MCP A2A Hybrid
+          python "Super Core Affiliate/Super-Core-Affiliate.py"
+
+      - name: "5. Kiểm Tra Tổng Thể An Toàn Bản Nguyên (Compliance Audit)"
+        run: |
+          # Bộ lọc rà soát nghiêm ngặt: Đảm bảo triệt tiêu hoàn toàn mã nhảy trang '#' lỗi thời
+          if grep -q 'href="#"' index.html; then
+            echo "[CRITICAL-ERROR] Phát hiện ký tự nhảy trang '#' chưa được xử lý lý tính!"
+            exit 1
           else
-            echo "[INFO] Không có sự thay đổi cấu trúc nào được phát hiện trong chu kỳ này."
+            echo "[SUCCESS] Chuẩn kiểm định cấu trúc HTML đạt mức dung sai Super-Omega-Planck-128."
+          fi
+
+      - name: "6. Đồng Bộ Đóng Băng Và Triển Khai Hạ Tầng GitHub Pages"
+        run: |
+          # Thiết lập danh tính Native Action Bot bảo mật của hạ tầng GitHub, loại bỏ domain ngoài
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          
+          git add index.html
+          
+          # Kiểm tra biến động dữ liệu để tránh sinh lỗi commit trống (Empty Commit Error)
+          if git diff-index --quiet HEAD --; then
+            echo "Hệ thống tĩnh đã ở trạng thái tối ưu nhất. Không cần cập nhật."
+          else
+            git commit -m "chore(ehc): [V-STAMP 24] Đột phá cấu trúc đệ quy MCP A2A Hybrid"
+            git push origin HEAD
           fi
