@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 EATHESEN MASTER ECOSYSTEM - SUPER INTELLECTUAL HYBRID ENGINE
-SYSTEM EPOCH: 2026 // COMPLIANCE FILTER: SUPER-OMEGA-PLANCK-128
+SYSTEM EPOCH: 2026 // COMPLIANCE FILTER: PURE GITHUB EDGE CDN
 """
 
 import os
@@ -16,7 +16,8 @@ logger = logging.getLogger("EHC-SUPER-CORE")
 
 class MCPConfigSchema(pydantic.BaseModel):
     model_config = pydantic.ConfigDict(frozen=True, strict=True)
-    mcp_endpoint: str = "https://donabicomedia.net/mcp/v1"
+    # Loại bỏ hoàn toàn domain ngoài, cấu hình mặc định chạy qua giao thức Native GitHub Sandbox API
+    mcp_endpoint: str = "https://api.github.com/mcp/v1"
     a2a_secure_token: str
     intelligent_mode: bool = True
 
@@ -30,13 +31,14 @@ class SuperCoreAffiliate:
         html_content = html_content.replace('href="#"', 'href="javascript:void(0);"')
         html_content = html_content.replace("href='#'", "href='javascript:void(0);'")
         
+        # Tiêm thực thể JSON-LD Rich Snippet động dùng thuần hạ tầng tên miền GitHub Pages CDN
         schema_market_injection = """
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": "WebSite",
       "name": "DONABICO GLOBAL MEDIA SYSTEM",
-      "url": "https://donabicomedia.net"
+      "url": "https://donabico-global-media.github.io/acebeam"
     }
     </script>
         """
@@ -58,7 +60,7 @@ class SuperCoreAffiliate:
         with open(self.target_file, "w", encoding="utf-8") as f:
             f.write(optimized_html)
             
-        logger.info("[CORE-DEPLOYED] Đóng băng dữ liệu sạch thành công.")
+        logger.info("[CORE-DEPLOYED] Đóng băng dữ liệu thuần GitHub CDN thành công.")
 
 if __name__ == "__main__":
     orchestrator = SuperCoreAffiliate(target_file="index.html")
