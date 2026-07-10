@@ -26,7 +26,7 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-          cache: "pip"
+          # Đã loại bỏ dòng 'cache: pip' để triệt tiêu lỗi No file matched triệt để
 
       - name: "3. Cài Đặt Thư Viện Kiểm Duyệt Dung Sai Hệ Thống"
         run: |
