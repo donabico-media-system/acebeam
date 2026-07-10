@@ -5,22 +5,30 @@ on:
     branches:
       - main
       - master
+    # BỘ LỌC TỐI ƯU: Chỉ chạy khi có biến động ở các file logic/giao diện này
+    paths:
+      - "index.html"
+      - "landing_pages.html"
+      - "Super Core Affiliate/**"
   schedule:
-    # Kích hoạt chu trình quét dọn, tối ưu cấu trúc đệ quy 6 tiếng một lần
     - cron: "0 */6 * * *"
   workflow_dispatch:
 
 permissions:
   contents: write
 
+concurrency:
+  group: "core-orchestrator-lock"
+  cancel-in-progress: true
+
 jobs:
   execute-ehc-hydration:
     runs-on: ubuntu-latest
     steps:
-      - name: "1. Đóng Gói Phân Vùng Mã Nguồn (Checkout Repository)"
+      - name: "1. Đóng Gói Phân Vùng Mã Nguồn (Checkout Entire History)"
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # Đổi thành 0 để lấy toàn bộ lịch sử commit, giúp việc rebase mượt mà không lỗi
+          fetch-depth: 0 # Lấy toàn bộ lịch sử để thực hiện rebase mượt mà
 
       - name: "2. Khởi Tạo Môi Trường Python Core SOTA"
         uses: actions/setup-python@v5
@@ -35,37 +43,29 @@ jobs:
       - name: "4. Thực Thi Kích Hoạt Chế Độ Super Smart Intelligent Mode"
         env:
           MCP_A2A_SECRET: ${{ secrets.MCP_A2A_TOKEN }}
-          TARGET_ENVIRONMENT: "GLOBAL_HIGH_INCOME_MARKET"
         run: |
-          # Triển khai lớp logic đệ quy kết nối MCP A2A Hybrid
           python "Super Core Affiliate/Super-Core-Affiliate.py"
 
       - name: "5. Kiểm Tra Tổng Thể An Toàn Bản Nguyên (Compliance Audit)"
         run: |
-          # Bộ lọc rà soát nghiêm ngặt: Đảm bảo triệt tiêu hoàn toàn mã nhảy trang '#' lỗi thời
           if grep -q 'href="#"' index.html; then
-            echo "[CRITICAL-ERROR] Phát hiện ký tự nhảy trang '#' chưa được xử lý lý tính!"
+            echo "[CRITICAL-ERROR] Phát hiện ký tự nhảy trang '#' chưa được xử lý!"
             exit 1
           else
-            echo "[SUCCESS] Chuẩn kiểm định cấu trúc HTML đạt mức dung sai Super-Omega-Planck-128."
+            echo "[SUCCESS] Chuẩn cấu trúc HTML đạt mức dung sai an toàn tuyệt đối."
           fi
 
-      - name: "6. Đồng Bộ Đóng Băng Và Triển Khai Hạ Tầng GitHub Pages"
+      - name: "6. Đồng Bộ Đóng Băng Dữ Liệu Nội Bộ (Git Rebase & Push)"
         run: |
-          # Thiết lập danh tính Native Action Bot bảo mật của hạ tầng GitHub
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
           
           git add index.html
           
-          # Kiểm tra biến động dữ liệu để tránh sinh lỗi commit trống (Empty Commit Error)
           if git diff-index --quiet HEAD --; then
             echo "Hệ thống tĩnh đã ở trạng thái tối ưu nhất. Không cần cập nhật."
           else
             git commit -m "chore(ehc): [V-STAMP 24] Đột phá cấu trúc đệ quy MCP A2A Hybrid"
-            
-            # GIẢI PHÁP VÀNG: Cập nhật code mới nhất từ remote bằng rebase trước khi push để triệt tiêu lỗi rejected
             git pull origin ${{ github.ref_name }} --rebase
-            
             git push origin HEAD
           fi
