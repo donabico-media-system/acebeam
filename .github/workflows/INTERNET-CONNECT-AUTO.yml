@@ -1,46 +1,66 @@
-name: "INTERNET-CONNECT-AUTO"
+name: 'INTERNET-CONNECT-AUTO'
 
 on:
   schedule:
-    # Kích hoạt tự động chu kỳ chuẩn xác đúng 01 tiếng / lần (24/7)
-    - cron: '0 * * * *'
+    # Kích hoạt tự động chu kỳ kiểm tra mỗi 30 phút toàn vẹn hệ thống
+    - cron: '*/30 * * * *'
+  push:
+    branches:
+      - main
+      - master
   workflow_dispatch:
-    # Quyền kích hoạt JIT khẩn cấp từ giao diện Chrome Web của Admin
+    # Cho phép Admin kích hoạt kiểm tra thủ công từ trung tâm điều khiển GitHub
 
 permissions:
-  contents: write
+  contents: read
   pages: write
   id-token: write
 
 concurrency:
-  group: "pure-actions-flow"
+  group: "network-compliance-matrix"
   cancel-in-progress: true
 
 jobs:
-  pure_edge_propagation:
+  connectivity_matrix_validation:
+    name: 'Execute Network Ingestion Audit'
     runs-on: ubuntu-latest
+    timeout-minutes: 5
+
     steps:
-      - name: "Bước 01: Đồng bộ mã nguồn hệ sinh thái từ GitHub Satellite Node"
+      - name: '1. Checkout Repository Deployment Assets'
         uses: actions/checkout@v4
 
-      - name: "Bước 02: Khởi tạo môi trường Python nâng cao kiểm toán cấu trúc"
+      - name: '2. Deploy Python Runtime Environment'
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: '**/requirements.txt'
+        continue-on-error: false
 
-      - name: "Bước 03: Thực thi kịch bản mở cổng AI Matrix & Ping Bigtech Index"
+      - name: '3. Initialize System Environment Variables'
         run: |
-          python Internet-Connect-Auto/Internet-Connect-Auto.py
+          echo "NODE_ENVIRONMENT=GITHUB-PRODUCTION" >> $GITHUB_ENV
+          echo "ADTECH_COMPLIANCE_YEAR=2026" >> $GITHUB_ENV
 
-      - name: "Bước 04: Cấu hình phân quyền Git nội bộ định danh Hệ Thống"
+      - name: '4. Execute Core Connectivity & Resolution Core Script'
         run: |
-          git config --global user.name "donabico-global-media"
-          git config --global user.email "donabico.media.system@gmail.com"
+          chmod +x ./Internet-Connect-Auto/Internet-Connect-Auto.py
+          python ./Internet-Connect-Auto/Internet-Connect-Auto.py
+        env:
+          PYTHONUNBUFFERED: "1"
 
-      - name: "Bước 05: Đẩy trực tiếp index.html và robots.txt AI ra CDN toàn cầu"
-        uses: peaceiris/actions-gh-pages@v4
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./
-          publish_branch: gh-pages
-          force_orphan: true
+      - name: '5. Pipeline Execution Output Verification'
+        if: success()
+        run: |
+          echo "=========================================================================="
+          echo "[ ADTECH COMPLIANCE AUDIT PASSED ] All nodes verified at global standard."
+          echo "=========================================================================="
+
+      - name: '6. Handle System Connection Dropouts'
+        if: failure()
+        run: |
+          echo "=========================================================================="
+          echo "[ CRITICAL FAULT ] System layout connection degradation detected!"
+          echo "Verify status at destination: https://donabico-global-media.github.io/acebeam/"
+          echo "=========================================================================="
