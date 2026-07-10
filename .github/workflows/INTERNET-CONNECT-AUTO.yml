@@ -1,10 +1,17 @@
 name: "INTERNET-CONNECT-AUTO"
 
 on:
-  workflow_run:
-    workflows: ["CORE-ORCHESTRATOR"]
-    types:
-      - completed
+  push:
+    branches:
+      - main
+      - master
+    paths:
+      - "index.html"
+      - "landing_pages.html"
+    paths-ignore:
+      - ".github/workflows/**"
+      - "Super Core Affiliate/**"
+      - "Internet-Connect-Auto/**"
   workflow_dispatch:
 
 permissions:
@@ -23,21 +30,28 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     
-    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
-    
     steps:
-      - name: "1. Đóng Gói Phân Vùng index.html (Checkout Source)"
+      - name: "1. Đóng Gói Phân Vùng Mã Nguồn (Checkout Source)"
         uses: actions/checkout@v4
 
-      - name: "2. Cấu Hình Khởi Tạo Hạ Tầng Pages CDN"
+      - name: "2. Setup Python Environment"
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: "3. Thực Thi Xử Lý Giao Diện Tĩnh (Khử Giật Trang & Chèn Schema)"
+        run: |
+          python "Internet-Connect-Auto/Internet-Connect-Auto.py"
+
+      - name: "4. Cấu Hình Khởi Tạo Hạ Tầng Pages CDN"
         uses: actions/configure-pages@v5
 
-      - name: "3. Thu Gom Tài Nguyên Lõi Thành Gói Trực Tuyến (Upload Artifact)"
+      - name: "5. Thu Gom Tài Nguyên Lõi Thành Gói Trực Tuyến (Upload Artifact)"
         uses: actions/upload-pages-artifact@v3
         with:
           path: "."
           if-no-files-found: error
 
-      - name: "4. Kích Hoạt Bắn Dữ Liệu Ra Mạng Lưới CDN Toàn Cầu"
+      - name: "6. Kích Hoạt Bắn Dữ Liệu Ra Mạng Lưới CDN Toàn Cầu"
         id: deployment
         uses: actions/deploy-pages@v4
