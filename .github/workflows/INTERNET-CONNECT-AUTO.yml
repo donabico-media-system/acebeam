@@ -1,39 +1,49 @@
-name: 🌊 INTERNET CONNECT AUTO
+name: "INTERNET-CONNECT-AUTO"
 
 on:
+  # CƠ CHẾ KÍCH HOẠT TỰ ĐỘNG: Lắng nghe trạng thái của tệp lõi CORE-ORCHESTRATOR
+  workflow_run:
+    workflows: ["CORE-ORCHESTRATOR"]
+    types:
+      - completed
+  # Cho phép bạn chủ động bấm nút phát sóng thủ công trên giao diện GitHub Actions
   workflow_dispatch:
-  push:
-    paths:
-      - 'Internet-Connect-Auto/**'
-  schedule:
-    - cron: '0 * * * *'
+
+# Khóa cứng các quyền hạn độc quyền của hạ tầng Edge CDN Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Triệt tiêu các tiến trình deploy cũ đang chạy trùng lặp để tối ưu băng thông Edge Node
+concurrency:
+  group: "pages-edge-deployment-lock"
+  cancel-in-progress: true
 
 jobs:
-  autonomous-ocean-pulse:
+  broadcast-to-cdn:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
+    
+    # MÀNG LỌC BẢO VỆ: Chỉ phát sóng ra đại dương Internet nếu luồng CORE-ORCHESTRATOR trước đó chạy XANH (Thành công)
+    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
+    
     steps:
-      - name: 📥 Checkout repository
+      - name: "1. Đóng Gói Phân Vùng index.html (Checkout Source)"
         uses: actions/checkout@v4
 
-      - name: 🐍 Setup Python
-        uses: actions/setup-python@v5
+      - name: "2. Cấu Hình Khởi Tạo Hạ Tầng Pages CDN"
+        uses: actions/configure-pages@v5
+
+      - name: "3. Thu Gom Tài Nguyên Lõi Thành Gói Trực Tuyến (Upload Artifact)"
+        uses: actions/upload-pages-artifact@v3
         with:
-          python-version: '3.10'
+          # Chỉ bốc dỡ file index.html và Connection-Log.txt đã được dọn sạch ra CDN ngoại biên
+          path: "."
+          if-no-files-found: error
 
-      - name: 📦 Cài đặt thư viện (Bắt buộc)
-        run: |
-          python -m pip install --upgrade pip
-          pip install requests
-
-      - name: 🛰️ Launch system
-        run: python "Internet-Connect-Auto/Internet-Connect-Auto.py"
-
-      - name: 📝 Commit and Push Log
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add Connection-Log.txt
-          git commit -m "Auto: Update log $(date +'%Y-%m-%d %H:%M:%S')"
-          git push origin main --force
+      - name: "4. Kích Hoạt Bắn Dữ Liệu Ra Mạng Lưới CDN Toàn Cầu"
+        id: deployment
+        uses: actions/deploy-pages@v4
