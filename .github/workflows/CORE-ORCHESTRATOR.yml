@@ -1,0 +1,75 @@
+name: "CORE-ORCHESTRATOR"
+
+on:
+  push:
+    branches:
+      - main
+      - master
+    # CHẶN ĐỆ QUY: Chỉ kích hoạt luồng khi có thay đổi thủ công từ file HTML giao diện
+    paths:
+      - "index.html"
+      - "landing_pages.html"
+    # TUYỆT ĐỐI BỎ QUA: Không tự kích hoạt lại khi bot tự động cập nhật hoặc thay đổi script
+    paths-ignore:
+      - ".github/workflows/**"
+      - "Super Core Affiliate/**"
+      - "Internet-Connect-Auto/**"
+  schedule:
+    - cron: "0 */6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: "core-orchestrator-lock"
+  cancel-in-progress: true
+
+jobs:
+  execute-ehc-hydration:
+    runs-on: ubuntu-latest
+    steps:
+      - name: "1. Đóng Gói Phân Vùng Mã Nguồn (Checkout Source)"
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: "2. Khởi Tạo Môi Trường Python Lõi"
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: "3. Cài Đặt Thư Viện Phụ Thuộc Dung Sai Cao"
+        run: |
+          python -m pip install --upgrade pip
+          pip install pydantic lxml torch --no-cache-dir
+
+      - name: "4. Thực Thi Kịch Bản Xử Lý Giao Diện Lõi"
+        env:
+          MCP_A2A_SECRET: ${{ secrets.MCP_A2A_TOKEN }}
+        run: |
+          python "Super Core Affiliate/Super-Core-Affiliate.py"
+
+      - name: "5. Kiểm Định An Toàn Cấu Trúc Giao Diện (Compliance Audit)"
+        run: |
+          if grep -q 'href="#"' index.html; then
+            echo "[ERROR] Phát hiện ký tự nhảy trang '#' chưa được khử!"
+            exit 1
+          else
+            echo "[SUCCESS] HTML đạt chuẩn kiểm định, không có ký tự lỗi."
+          fi
+
+      - name: "6. Đồng Bộ Đóng Băng Dữ Sạch Lên Kho Lưu Trữ"
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          
+          git add index.html
+          
+          if git diff-index --quiet HEAD --; then
+            echo "Hệ thống tĩnh ở trạng thái tối ưu. Không có thay đổi nào cần push."
+          else
+            git commit -m "chore(ehc): optimize infrastructure core system pure edge cdn"
+            git pull origin ${{ github.ref_name }} --rebase
+            git push origin HEAD
+          fi
