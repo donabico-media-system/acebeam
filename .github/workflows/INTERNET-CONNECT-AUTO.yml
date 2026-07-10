@@ -1,21 +1,21 @@
 name: "INTERNET-CONNECT-AUTO"
 
 on:
-  # CƠ CHẾ KÍCH HOẠT TỰ ĐỘNG: Lắng nghe trạng thái của tệp lõi CORE-ORCHESTRATOR
+  # CƠ CHẾ KHÁNG XUNG ĐỘT: Chỉ tự động giật chốt khi CORE-ORCHESTRATOR đã hoàn thành xuất sắc và đóng băng Git an toàn
   workflow_run:
     workflows: ["CORE-ORCHESTRATOR"]
     types:
       - completed
-  # Cho phép bạn chủ động bấm nút phát sóng thủ công trên giao diện GitHub Actions
+  # Cho phép chủ động bấm nút kích hoạt phát sóng thủ công từ giao diện Actions
   workflow_dispatch:
 
-# Khóa cứng các quyền hạn độc quyền của hạ tầng Edge CDN Pages
+# Khóa cứng phân quyền độc quyền phục vụ hạ tầng Edge CDN Pages, cách ly hoàn toàn với Core
 permissions:
   contents: read
   pages: write
   id-token: write
 
-# Triệt tiêu các tiến trình deploy cũ đang chạy trùng lặp để tối ưu băng thông Edge Node
+# Duy trì duy nhất 1 tiến trình deploy tại một thời điểm để tối ưu hóa Edge Node
 concurrency:
   group: "pages-edge-deployment-lock"
   cancel-in-progress: true
@@ -27,7 +27,7 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     
-    # MÀNG LỌC BẢO VỆ: Chỉ phát sóng ra đại dương Internet nếu luồng CORE-ORCHESTRATOR trước đó chạy XANH (Thành công)
+    # BỘ LỌC CHẶN AN TOÀN: Tuyệt đối không bốc dỡ nếu Core trước đó bị lỗi hoặc chưa dọn sạch mã nhảy trang
     if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
     
     steps:
@@ -40,10 +40,10 @@ jobs:
       - name: "3. Thu Gom Tài Nguyên Lõi Thành Gói Trực Tuyến (Upload Artifact)"
         uses: actions/upload-pages-artifact@v3
         with:
-          # Chỉ bốc dỡ file index.html và Connection-Log.txt đã được dọn sạch ra CDN ngoại biên
+          # Chỉ thu gom file index.html tĩnh đã được Core tối ưu hoàn toàn sạch sẽ
           path: "."
           if-no-files-found: error
 
-      - name: "4. Kích Hoạt Bắn Dữ Liệu Ra Mạng Lưới CDN Toàn Cầu"
+      - name: "4. Kích Hoạt Bắn Dữ Liệu Ra Mạng Lưới CDN Toàn Cầu (Deploy to Pages CDN)"
         id: deployment
         uses: actions/deploy-pages@v4
