@@ -5,11 +5,11 @@ on:
     branches:
       - main
       - master
-    # CHỈ kích hoạt khi người dùng sửa đổi trực tiếp tệp giao diện tĩnh
+    # BỘ LỌC CHẶN VÒNG LẶP: Chỉ chạy khi sửa tệp giao diện
     paths:
       - "index.html"
       - "landing_pages.html"
-    # TUYỆT ĐỐI KHÔNG kích hoạt nếu sự thay đổi đến từ các file cấu hình hoặc mã nguồn Python nội bộ
+    # KHÔNG tự kích hoạt lại khi sửa đổi workflow hoặc script cấu hình
     paths-ignore:
       - ".github/workflows/**"
       - "Super Core Affiliate/**"
@@ -20,6 +20,10 @@ on:
 
 permissions:
   contents: write
+
+concurrency:
+  group: "core-orchestrator-lock"
+  cancel-in-progress: true
 
 jobs:
   execute-ehc-hydration:
@@ -56,7 +60,7 @@ jobs:
             echo "[SUCCESS] Chuẩn kiểm định cấu trúc HTML đạt mức dung sai Super-Omega-Planck-128."
           fi
 
-      - name: "6. Đồng Bộ Đóng Băng Và Triển Khai Hạ Tầng GitHub Pages"
+      - name: "6. Đồng Bộ Đóng Băng Dữ Liệu Sạch (Git Push)"
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -66,7 +70,7 @@ jobs:
           if git diff-index --quiet HEAD --; then
             echo "Hệ thống tĩnh đã ở trạng thái tối ưu nhất. Không cần cập nhật."
           else
-            git commit -m "chore(ehc): [V-STAMP 24] Đột phá cấu trúc đệ quy MCP A2A Hybrid"
+            git commit -m "chore(ehc): [V-STAMP 24] Tối ưu hóa cấu trúc đệ quy PURE GITHUB EDGE"
             git pull origin ${{ github.ref_name }} --rebase
             git push origin HEAD
           fi
