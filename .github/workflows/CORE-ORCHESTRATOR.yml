@@ -5,11 +5,11 @@ on:
     branches:
       - main
       - master
-    # BỘ LỌC CHẶN VÒNG LẶP: Chỉ chạy khi sửa tệp giao diện
+    # MÀNG LỌC QUYẾT ĐỊNH: Chỉ chạy khi BẠN chủ động sửa file giao diện tĩnh
     paths:
       - "index.html"
       - "landing_pages.html"
-    # KHÔNG tự kích hoạt lại khi sửa đổi workflow hoặc script cấu hình
+    # CHẶN ĐỆ QUY: Tuyệt đối không tự chạy lại khi bot tự động push hoặc sửa code hệ thống
     paths-ignore:
       - ".github/workflows/**"
       - "Super Core Affiliate/**"
