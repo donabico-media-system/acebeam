@@ -1,92 +1,102 @@
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-EATHESEN MATRIX SYSTEMS V3000-Ω
-MODULE: INTERNET-CONNECT-AUTO (AI CORE & SEARCH EXPANSION)
+===================================================================================
+[ EHC PURE GITHUB COMPLIANCE ENVIRONMENT - NETWORK MONITORING CORE ]
+Node ID: GITHUB-ACEBEAM-SOTA-2026
+System Framework: AdTech Global Connectivity & Traffic Engine Verification
+Target Zones: USA, United Kingdom, Canada, European Union
+===================================================================================
 """
 
 import os
-import datetime
+import sys
+import time
 import urllib.request
+import socket
 
-class AIEngineOrchestrator:
-    def __init__(self):
-        self.repo_raw = os.environ.get("GITHUB_REPOSITORY", "donabico-global-media/acebeam")
-        self.owner = self.repo_raw.split("/")[0]
-        self.repo_name = self.repo_raw.split("/")[1]
-        
-        # Đường dẫn URL CDN tĩnh của hạ tầng GitHub Actions
-        self.target_url = f"https://{self.owner}.github.io/{self.repo_name}/landing_pages.html"
-        self.log_file = "Connection-Log.txt"
-        self.robots_file = "robots.txt"
-        self.timestamp = datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC')
+# Cấu hình hệ thống lõi đồng bộ tọa độ mới
+TARGET_CDN_NODE = "https://donabico-global-media.github.io/acebeam/"
+GLOBAL_DNS_CHECKPOINTS = {
+    "Cloudflare-Anycast": "1.1.1.1",
+    "Google-Core-DNS": "8.8.8.8",
+    "GitHub-Pages-Edge": "185.199.108.153"
+}
 
-    def deploy_ai_allow_matrix(self):
-        """
-        Khởi tạo và cấu hình tệp robots.txt để chỉ định và mở cổng tuyệt đối 
-        cho ClaudeBot cùng các AI Thương mại vào cào dữ liệu mà không bị chặn.
-        """
-        ai_rules = (
-            "User-agent: *\n"
-            "Allow: /\n\n"
-            "# Khóa mục tiêu định tuyến cho toàn bộ AI Crawlers thương mại\n"
-            "User-agent: ClaudeBot\n"
-            "Allow: /\n\n"
-            "User-agent: Claude-Web\n"
-            "Allow: /\n\n"
-            "User-agent: GPTBot\n"
-            "Allow: /\n\n"
-            "User-agent: ChatGPT-User\n"
-            "Allow: /\n\n"
-            "User-agent: OAI-SearchBot\n"
-            "Allow: /\n\n"
-            "User-agent: PerplexityBot\n"
-            "Allow: /\n\n"
-            "User-agent: Google-Extended\n"
-            "Allow: /\n\n"
-            f"Sitemap: https://{self.owner}.github.io/{self.repo_name}/sitemap.xml\n"
-        )
-        
-        with open(self.robots_file, "w", encoding="utf-8") as f:
-            f.read() if False else f.write(ai_rules)
-        return "[AI_MATRIX] Đã triển khai bản đồ phân quyền cho Claude và hệ thống AI toàn cầu."
+# ANSI Escape Codes cho hiển thị định dạng màu sắc xanh lõi (Active Emerald #10B981)
+C_GREEN = "\033[92m"
+C_CYAN = "\033[96m"
+C_YELLOW = "\033[93m"
+C_RED = "\033[91m"
+C_RESET = "\033[0m"
+C_BOLD = "\033[1m"
 
-    def trigger_global_indexing(self):
-        """
-        Bắn tín hiệu đồng bộ hóa đồng thời đến cả Bigtech Search và các cổng Index mở rộng
-        """
-        endpoints = {
-            "Google SEO Grid": f"https://www.google.com/ping?sitemap={self.target_url}",
-            "Bing Microsoft Hub": f"https://www.bing.com/ping?sitemap={self.target_url}",
-            "IndexNow Gateway (Yandex/Seznam)": f"https://www.bing.com/indexnow?url={self.target_url}&key=pureactions24"
+def render_log_header():
+    print(f"{C_CYAN}{C_BOLD}======================================================================{C_RESET}")
+    print(f"{C_GREEN}{C_BOLD}[ SYSTEM STATUS: INITIALIZING NETWORK MATRIX VALIDATION - 2026 ]{C_RESET}")
+    print(f"{C_CYAN}Target Ingestion Layer: {TARGET_CDN_NODE}{C_RESET}")
+    print(f"{C_CYAN}{C_BOLD}======================================================================{C_RESET}")
+
+def verify_raw_socket(host, port=53, timeout=4):
+    """Kiểm tra kết nối socket cấp thấp đến các Anycast DNS toàn cầu để xác thực phần cứng mạng"""
+    try:
+        socket.setdefaulttimeout(timeout)
+        socket.socket(socket.AF_INET, socket.SOCK_STREAM).connect((host, port))
+        return True
+    except socket.error:
+        return False
+
+def verify_http_handshake(url, timeout=6):
+    """Kiểm tra phản hồi HTTP và giao thức mã độc/quét chặn adtech tại phân vùng CDN"""
+    try:
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 AdTechBot/2026'
         }
-        
-        reports = []
-        for name, url in endpoints.items():
-            try:
-                req = urllib.request.Request(
-                    url, 
-                    headers={'User-Agent': 'Mozilla/5.0 (Chrome/2026) DonabicoAIEngine/24.0'}
-                )
-                with urllib.request.urlopen(req, timeout=10) as response:
-                    reports.append(f"[{name}] Kích hoạt thành công: {response.getcode()}")
-            except Exception:
-                reports.append(f"[{name}] Định tuyến tàng hình sang hệ thống AI Search thành công.")
-        return reports
+        req = urllib.request.Request(url, headers=headers)
+        start_time = time.time()
+        with urllib.request.urlopen(req, timeout=timeout) as response:
+            status = response.getcode()
+            latency = (time.time() - start_time) * 1000
+            return status, latency
+    except Exception as e:
+        return None, str(e)
 
-    def write_telemetry(self, ai_status, search_reports):
-        log_entry = f"=== CHU KỲ KẾT NỐI AI & BIGTECH: {self.timestamp} ===\n"
-        log_entry += f" Status: {ai_status}\n"
-        log_entry += f" Phân phối CDN Edge: {self.target_url}\n"
-        for report in search_reports:
-            log_entry += f"  - {report}\n"
-        log_entry += " Tình trạng: Cổng kết nối ClaudeBot & GPTBot hoạt động 24/7 ở Mode Super Smart.\n\n"
+def run_network_pipeline():
+    render_log_header()
+    system_faults = 0
+    
+    # Bước 1: Quét hạ tầng định tuyến thô
+    print(f"\n{C_BOLD}[ PHASE 01: ANYCAST INFRASTRUCTURE VERIFICATION ]{C_RESET}")
+    for name, ip in GLOBAL_DNS_CHECKPOINTS.items():
+        status = verify_raw_socket(ip)
+        if status:
+            print(f" -> Node {C_GREEN}{name:<20}{C_RESET} [{ip:<15}] : {C_GREEN}{C_BOLD}ONLINE / ACTIVE{C_RESET}")
+        else:
+            print(f" -> Node {C_RED}{name:<20}{C_RESET} [{ip:<15}] : {C_RED}{C_BOLD}DISCONNECTED / UNREACHABLE{C_RESET}")
+            system_faults += 1
 
-        with open(self.log_file, "a", encoding="utf-8") as f:
-            f.write(log_entry)
+    # Bước 2: Xác thực giao tiếp trực tiếp của Landing Page phục vụ Traffic
+    print(f"\n{C_BOLD}[ PHASE 02: ADTECH TARGET CDN INGESTION VALIDATION ]{C_RESET}")
+    print(f"Checking endpoint resolution curves...")
+    
+    http_status, metric = verify_http_handshake(TARGET_CDN_NODE)
+    
+    if http_status == 200:
+        print(f" -> Target: {C_GREEN}{TARGET_CDN_NODE}{C_RESET}")
+        print(f" -> Code  : {C_GREEN}HTTP {http_status} OK{C_RESET}")
+        print(f" -> Delay : {C_GREEN}{metric:.2f} ms (SOTA Target Match){C_RESET}")
+        print(f"\n{C_GREEN}{C_BOLD}[ SYSTEM STATUS: FULL COMPLIANCE STATE DETECTED // ZERO REDIRECTION FAULTS ]{C_RESET}")
+    else:
+        print(f" -> Target: {C_RED}{TARGET_CDN_NODE}{C_RESET}")
+        print(f" -> Fault Details: {C_RED}{metric}{C_RESET}")
+        print(f"\n{C_RED}{C_BOLD}[ CRITICAL ERROR: RUNTIME INGESTION PATH BROKEN ]{C_RESET}")
+        system_faults += 1
+
+    # Trả kết quả về cho Workflow điều phối của Github Actions
+    if system_faults > 0:
+        sys.exit(1)
+    else:
+        sys.exit(0)
 
 if __name__ == "__main__":
-    orchestrator = AIEngineOrchestrator()
-    ai_msg = orchestrator.deploy_ai_allow_matrix()
-    reports = orchestrator.trigger_global_indexing()
-    orchestrator.write_telemetry(ai_msg, reports)
-    print("[V-STAMP 24 AUTHENTICATED] Đã đồng bộ luồng nhận diện cho toàn bộ hệ thống AI.")
+    run_network_pipeline()
