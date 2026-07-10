@@ -5,7 +5,7 @@
 [ EHC PURE GITHUB COMPLIANCE ENVIRONMENT - NETWORK MONITORING CORE ]
 Node ID: GITHUB-ACEBEAM-SOTA-2026
 System Framework: AdTech Global Connectivity & Traffic Engine Verification
-Target Zones: USA, United Kingdom, Canada, European Union
+Fix Core: Dynamic Port Mapping Framework for Web-Edge IPs
 ===================================================================================
 """
 
@@ -17,11 +17,13 @@ import socket
 
 # Cấu hình hệ thống lõi đồng bộ tọa độ mới
 TARGET_CDN_NODE = "https://donabico-global-media.github.io/acebeam/"
-GLOBAL_DNS_CHECKPOINTS = {
-    "Cloudflare-Anycast": "1.1.1.1",
-    "Google-Core-DNS": "8.8.8.8",
-    "GitHub-Pages-Edge": "185.199.108.153"
-}
+
+# Định cấu hình trạm quét kèm Cổng kết nối phù hợp với thực tế hạ tầng
+GLOBAL_CHECKPOINTS = [
+    {"name": "Cloudflare-Anycast", "ip": "1.1.1.1", "port": 53},
+    {"name": "Google-Core-DNS", "ip": "8.8.8.8", "port": 53},
+    {"name": "GitHub-Pages-Edge", "ip": "185.199.108.153", "port": 443} # Đổi sang cổng 443 HTTPS Bảo mật
+]
 
 # ANSI Escape Codes cho hiển thị định dạng màu sắc xanh lõi (Active Emerald #10B981)
 C_GREEN = "\033[92m"
@@ -37,11 +39,13 @@ def render_log_header():
     print(f"{C_CYAN}Target Ingestion Layer: {TARGET_CDN_NODE}{C_RESET}")
     print(f"{C_CYAN}{C_BOLD}======================================================================{C_RESET}")
 
-def verify_raw_socket(host, port=53, timeout=4):
-    """Kiểm tra kết nối socket cấp thấp đến các Anycast DNS toàn cầu để xác thực phần cứng mạng"""
+def verify_raw_socket(host, port, timeout=4):
+    """Kiểm tra kết nối socket cấp thấp tùy biến cổng theo đặc tính hạ tầng từng Node"""
     try:
         socket.setdefaulttimeout(timeout)
-        socket.socket(socket.AF_INET, socket.SOCK_STREAM).connect((host, port))
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.connect((host, port))
+        s.close()
         return True
     except socket.error:
         return False
@@ -65,14 +69,14 @@ def run_network_pipeline():
     render_log_header()
     system_faults = 0
     
-    # Bước 1: Quét hạ tầng định tuyến thô
+    # Bước 1: Quét hạ tầng định tuyến thô thông qua Cổng kết nối ánh xạ riêng biệt
     print(f"\n{C_BOLD}[ PHASE 01: ANYCAST INFRASTRUCTURE VERIFICATION ]{C_RESET}")
-    for name, ip in GLOBAL_DNS_CHECKPOINTS.items():
-        status = verify_raw_socket(ip)
+    for node in GLOBAL_CHECKPOINTS:
+        status = verify_raw_socket(node["ip"], node["port"])
         if status:
-            print(f" -> Node {C_GREEN}{name:<20}{C_RESET} [{ip:<15}] : {C_GREEN}{C_BOLD}ONLINE / ACTIVE{C_RESET}")
+            print(f" -> Node {C_GREEN}{node['name']:<20}{C_RESET} [{node['ip']:<15}:{node['port']}] : {C_GREEN}{C_BOLD}ONLINE / ACTIVE{C_RESET}")
         else:
-            print(f" -> Node {C_RED}{name:<20}{C_RESET} [{ip:<15}] : {C_RED}{C_BOLD}DISCONNECTED / UNREACHABLE{C_RESET}")
+            print(f" -> Node {C_RED}{node['name']:<20}{C_RESET} [{node['ip']:<15}:{node['port']}] : {C_RED}{C_BOLD}DISCONNECTED / UNREACHABLE{C_RESET}")
             system_faults += 1
 
     # Bước 2: Xác thực giao tiếp trực tiếp của Landing Page phục vụ Traffic
