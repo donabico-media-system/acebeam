@@ -1,7 +1,6 @@
 name: "INTERNET-CONNECT-AUTO"
 
 on:
-  # KHÁNG TRÙNG LẶP: Không bắt sự kiện push tự do, chỉ lắng nghe duy nhất trạng thái hoàn thành của Core chính
   workflow_run:
     workflows: ["CORE-ORCHESTRATOR"]
     types:
@@ -24,7 +23,6 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     
-    # ĐIỀU KIỆN CHẶN: Chỉ thực thi nếu CORE-ORCHESTRATOR chạy THÀNH CÔNG (XANH)
     if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
     
     steps:
