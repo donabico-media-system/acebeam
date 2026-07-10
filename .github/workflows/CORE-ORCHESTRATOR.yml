@@ -71,4 +71,3 @@ jobs:
             git pull origin ${{ github.ref_name }} --rebase
             git push origin HEAD
           fi
- 
