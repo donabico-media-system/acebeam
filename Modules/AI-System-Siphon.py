@@ -5,7 +5,7 @@
 DONABICO GLOBAL MEDIA SYSTEM - DYNAMIC MULTI-BRAND AI SIPHON ENGINE
 Module: Modules/AI-System-Siphon.py
 Function: Universal Ingestion Blueprint (Auto-Detects Brand Metadata)
-Fix: Path Fault & Git Sync Automation
+Fix: Path Fault, Flexible YAML Extension & Multi-File Git Sync Automation
 ==============================================================================
 """
 
@@ -25,10 +25,25 @@ logging.basicConfig(
 )
 
 class UniversalAISiphon:
-    def __init__(self, config_name: str = "AI-SYSTEM-SIPHON"):
+    def __init__(self):
         # Định vị thư mục gốc của repository (thư mục cha của thư mục Modules)
         self.root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-        self.config_path = os.path.join(self.root_dir, config_name)
+        
+        # Tự động quét tìm file cấu hình (Ưu tiên file có đuôi .yml trước, sau đó tới không đuôi)
+        self.config_filename = "AI-SYSTEM-SIPHON"
+        possible_paths = [
+            os.path.join(self.root_dir, "AI-SYSTEM-SIPHON.yml"),
+            os.path.join(self.root_dir, "AI-SYSTEM-SIPHON")
+        ]
+        
+        self.config_path = possible_paths[1] # Mặc định
+        for path in possible_paths:
+            if os.path.exists(path):
+                self.config_path = path
+                self.config_filename = os.path.basename(path)
+                break
+
+        logging.info(f"Đã nhận diện file cấu hình tại: {self.config_path}")
         
         self.config = self.load_config()
         self.target_bots = self.extract_all_bots()
@@ -126,7 +141,7 @@ class UniversalAISiphon:
                 f.write(updated_content)
             logging.info("Đã nhúng thành công khối dữ liệu SOTA AI Siphon Thích Ứng!")
             
-            # Thực thi đẩy Git lên kho
+            # Thực thi đẩy Git lên kho (Đã sửa lỗi để add cả file cấu hình)
             self.execute_git_sync()
             
             if meta["canonical"]:
@@ -159,21 +174,28 @@ class UniversalAISiphon:
             logging.warning(f"Bỏ qua phản hồi lỗi IndexNow (Môi trường Local): {e}")
 
     def execute_git_sync(self):
-        """Chạy lệnh Git trực tiếp từ thư mục gốc của Repo để tránh lỗi lệch đường dẫn."""
+        """Chạy lệnh Git trực tiếp từ thư mục gốc của Repo để commit index.html và file cấu hình."""
         try:
-            # Kiểm tra thay đổi của index.html
-            status = subprocess.run(["git", "status", "--porcelain", self.landing_page_path], cwd=self.root_dir, capture_output=True, text=True)
+            # Thiết lập cấu hình git mặc định phòng trường hợp môi trường chưa nhận diện danh tính
+            [span_3](start_span)subprocess.run(["git", "config", "user.name", "github-actions[bot]"], cwd=self.root_dir, check=True)[span_3](end_span)
+            [span_4](start_span)subprocess.run(["git", "config", "user.email", "github-actions[bot]@users.noreply.github.com"], cwd=self.root_dir, check=True)[span_4](end_span)
+
+            # Kiểm tra xem có bất kỳ thay đổi nào của index.html hoặc file cấu hình không
+            status = subprocess.run(["git", "status", "--porcelain"], cwd=self.root_dir, capture_output=True, text=True)
             if not status.stdout.strip():
-                logging.info("Nội dung index.html không đổi. Bỏ qua Git Commit.")
+                logging.info("Không phát hiện thay đổi nào trong repository. Bỏ qua Git Commit.")
                 return
 
-            # Thực hiện commit trực tiếp tại root_dir
-            subprocess.run(["git", "add", "index.html"], cwd=self.root_dir, check=True)
-            subprocess.run(["git", "commit", "-m", "chore: dynamic sota ai system siphon activation"], cwd=self.root_dir, check=True)
-            subprocess.run(["git", "push"], cwd=self.root_dir, check=True)
-            logging.info(">>> [GIT SYNC THÀNH CÔNG] Đã tự động cập nhật và đẩy mã lên GitHub!")
+            # [span_5](start_span)Add cả file index.html và file cấu hình (dù có đuôi .yml hay không đuôi)[span_5](end_span)
+            [span_6](start_span)subprocess.run(["git", "add", "index.html"], cwd=self.root_dir, check=True)[span_6](end_span)
+            subprocess.run(["git", "add", self.config_filename], cwd=self.root_dir, check=True)
+            
+            # Commit và Push đồng thời
+            [span_7](start_span)subprocess.run(["git", "commit", "-m", f"chore: dynamic sota ai system siphon activation ({self.config_filename})"], cwd=self.root_dir, check=True)[span_7](end_span)
+            [span_8](start_span)subprocess.run(["git", "push"], cwd=self.root_dir, check=True)[span_8](end_span)
+            logging.info(">>> [GIT SYNC THÀNH CÔNG] Đã tự động cập nhật và đẩy mã lên GitHub thành công!")
         except Exception as e:
-            logging.error(f"Git CLI không thể commit (Kiểm tra lại cấu hình quyền Git Local): {e}")
+            logging.error(f"Git CLI không thể commit (Kiểm tra lại quyền ghi/môi trường Git): {e}")
 
 if __name__ == "__main__":
     siphon = UniversalAISiphon()
