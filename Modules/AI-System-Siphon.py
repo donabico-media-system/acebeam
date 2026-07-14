@@ -5,6 +5,7 @@
 DONABICO GLOBAL MEDIA SYSTEM - DYNAMIC MULTI-BRAND AI SIPHON ENGINE
 Module: Modules/AI-System-Siphon.py
 Function: Universal Ingestion Blueprint (Auto-Detects Brand Metadata)
+Fix: Path Fault & Git Sync Automation
 ==============================================================================
 """
 
@@ -24,14 +25,20 @@ logging.basicConfig(
 )
 
 class UniversalAISiphon:
-    def __init__(self, config_path: str = "AI-SYSTEM-SIPHON"):
-        self.config_path = config_path
+    def __init__(self, config_name: str = "AI-SYSTEM-SIPHON"):
+        # Định vị thư mục gốc của repository (thư mục cha của thư mục Modules)
+        self.root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+        self.config_path = os.path.join(self.root_dir, config_name)
+        
         self.config = self.load_config()
         self.target_bots = self.extract_all_bots()
-        self.landing_page = self.config.get("target_environment", {}).get("landing_page", "index.html")
+        
+        # Đảm bảo đường dẫn index.html luôn trỏ về thư mục gốc
+        landing_file = self.config.get("target_environment", {}).get("landing_page", "index.html")
+        self.landing_page_path = os.path.join(self.root_dir, landing_file)
 
     def load_config(self) -> Dict[str, Any]:
-        """Nạp file cấu hình hệ thống."""
+        """Nạp file cấu hình hệ thống từ thư mục gốc."""
         if not os.path.exists(self.config_path):
             logging.error(f"Cấu hình gốc không tồn tại tại '{self.config_path}'.")
             return {"system": {"active": True}, "target_ai_bots": {"openai": ["GPTBot"]}}
@@ -46,26 +53,23 @@ class UniversalAISiphon:
         return flat_list
 
     def extract_html_metadata(self, html_content: str) -> Dict[str, str]:
-        """SOTA Feature: Tự động bóc tách dữ liệu thương hiệu hiện tại của file HTML."""
+        """Tự động bóc tách dữ liệu thương hiệu hiện tại của file HTML."""
         metadata = {
             "title": "Global Premium Assets Showcase",
             "description": "High-output professional industrial components and certified ecosystem assets.",
             "canonical": ""
         }
         
-        # Trích xuất Title định danh
         title_match = re.search(r'<title>(.*?)</title>', html_content, re.IGNORECASE)
         if title_match:
             metadata["title"] = title_match.group(1).strip()
             
-        # Trích xuất Description để lấy từ khóa gốc của kho thương hiệu
         desc_match = re.search(r'<meta\s+name=["\']description["\']\s+content=["\'](.*?)["\']', html_content, re.IGNORECASE)
         if not desc_match:
             desc_match = re.search(r'<meta\s+content=["\'](.*?)["\']\s+name=["\']description["\']', html_content, re.IGNORECASE)
         if desc_match:
             metadata["description"] = desc_match.group(1).strip()
 
-        # Trích xuất Canonical URL làm gốc neo mạng lưới link
         canonical_match = re.search(r'<link\s+rel=["\']canonical["\']\s+href=["\'](.*?)["\']', html_content, re.IGNORECASE)
         if canonical_match:
             metadata["canonical"] = canonical_match.group(1).strip()
@@ -101,42 +105,36 @@ class UniversalAISiphon:
 
     def inject_and_sync(self):
         """Xử lý file index.html, tự động ghi dữ liệu động và đẩy đồng bộ hóa Git CLI."""
-        if not os.path.exists(self.landing_page):
-            logging.error(f"Không tìm thấy file {self.landing_page}!")
+        if not os.path.exists(self.landing_page_path):
+            logging.error(f"Không tìm thấy file index.html tại: {self.landing_page_path}")
             return
 
-        with open(self.landing_page, "r", encoding="utf-8") as f:
+        with open(self.landing_page_path, "r", encoding="utf-8") as f:
             content = f.read()
 
-        # Làm sạch các bẫy cũ tránh tạo rác DOM
         if "AI_BOT_INGESTION_TUNNEL_START" in content:
             content = re.sub(r'.*?', '', content, flags=re.DOTALL)
 
-        # Phân tích từ khóa động từ chính file index.html
         meta = self.extract_html_metadata(content)
-        logging.info(f"Phân tích kho thành công -> Tiêu đề nhận diện: '{meta['title']}'")
+        logging.info(f"Hệ thống nhận diện thương hiệu thành công -> '{meta['title']}'")
 
-        # Tạo mã bẫy tương ứng riêng cho thương hiệu đó
         siphon_payload = self.generate_dynamic_payload(meta)
         
         if "</body>" in content:
             updated_content = content.replace("</body>", f"{siphon_payload}\n</body>")
-            with open(self.landing_page, "w", encoding="utf-8") as f:
+            with open(self.landing_page_path, "w", encoding="utf-8") as f:
                 f.write(updated_content)
             logging.info("Đã nhúng thành công khối dữ liệu SOTA AI Siphon Thích Ứng!")
             
-            # Tự động Git Sync cục bộ
+            # Thực thi đẩy Git lên kho
             self.execute_git_sync()
             
-            # Gửi API IndexNow dựa trên URL Canonical của thương hiệu đó
             if meta["canonical"]:
                 self.ping_index_now(meta["canonical"])
         else:
-            logging.warning("Không tìm thấy thẻ </body>.")
+            logging.warning("Không tìm thấy thẻ </body> trong file HTML.")
 
     def ping_index_now(self, canonical_url: str):
-        """Gửi tín hiệu ép nạp chỉ mục tức thời cho domain thương hiệu hiện tại."""
-        # Trích xuất host từ URL canonical
         host_match = re.search(r'https?://([^/]+)', canonical_url)
         if not host_match:
             return
@@ -156,23 +154,26 @@ class UniversalAISiphon:
             )
             with urllib.request.urlopen(req) as response:
                 if response.status in [200, 202]:
-                    logging.info(f"API IndexNow phản hồi thành công cho domain động: {canonical_url}")
+                    logging.info(f"API IndexNow đã ép nạp thành công: {canonical_url}")
         except Exception as e:
-            logging.warning(f"Bỏ qua lỗi Ping IndexNow (Có thể do thiết lập local): {e}")
+            logging.warning(f"Bỏ qua phản hồi lỗi IndexNow (Môi trường Local): {e}")
 
     def execute_git_sync(self):
+        """Chạy lệnh Git trực tiếp từ thư mục gốc của Repo để tránh lỗi lệch đường dẫn."""
         try:
-            status = subprocess.run(["git", "status", "--porcelain", self.landing_page], capture_output=True, text=True)
+            # Kiểm tra thay đổi của index.html
+            status = subprocess.run(["git", "status", "--porcelain", self.landing_page_path], cwd=self.root_dir, capture_output=True, text=True)
             if not status.stdout.strip():
-                logging.info("Nội dung không đổi. Bỏ qua Git Commit.")
+                logging.info("Nội dung index.html không đổi. Bỏ qua Git Commit.")
                 return
 
-            subprocess.run(["git", "add", self.landing_page], check=True)
-            subprocess.run(["git", "commit", "-m", "chore: dynamic sota ai system siphon activation"], check=True)
-            subprocess.run(["git", "push"], check=True)
-            logging.info(">>> [GIT SYNC THÀNH CÔNG] Đã cập nhật kho lưu trữ thương hiệu!")
+            # Thực hiện commit trực tiếp tại root_dir
+            subprocess.run(["git", "add", "index.html"], cwd=self.root_dir, check=True)
+            subprocess.run(["git", "commit", "-m", "chore: dynamic sota ai system siphon activation"], cwd=self.root_dir, check=True)
+            subprocess.run(["git", "push"], cwd=self.root_dir, check=True)
+            logging.info(">>> [GIT SYNC THÀNH CÔNG] Đã tự động cập nhật và đẩy mã lên GitHub!")
         except Exception as e:
-            logging.error(f"Git CLI Sync gặp lỗi hoặc chưa được thiết lập môi trường quyền: {e}")
+            logging.error(f"Git CLI không thể commit (Kiểm tra lại cấu hình quyền Git Local): {e}")
 
 if __name__ == "__main__":
     siphon = UniversalAISiphon()
