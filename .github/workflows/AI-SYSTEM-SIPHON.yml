@@ -1,45 +1,52 @@
 # ==============================================================================
-# DONABICO GLOBAL MEDIA SYSTEM - AI-SYSTEM-SIPHON UNIVERSAL MATRIX
-# FILE NAME: AI-SYSTEM-SIPHON.yml
-# DESIGN: REPLICABLE BLUEPRINT FOR MULTI-BRAND ECOSYSTEMS (SOTA 2026)
+# DONABICO GLOBAL MEDIA SYSTEM - AI-SYSTEM-SIPHON WORKFLOW (SOTA 2026)
+# FILE PATH: .github/workflows/AI-SYSTEM-SIPHON.yml
+# DESIGN: AUTOMATIC SWARM FOR MULTI-BRAND ECOSYSTEMS
 # ==============================================================================
 
-system:
-  node_id: "DONABICO-SIPHON-UNIVERSAL-NODE-2026"
-  active: true
-  visuals:
-    indicator_color: "#10B981"          # Viền xanh Emerald đại diện hệ thống hoạt động
-    active_border: "border-active-green"
-    log_verbosity: "INFO"
+name: 'AI-SYSTEM-SIPHON-ORCHESTRATOR'
 
-target_environment:
-  landing_page: "index.html"            # File đích để nhúng bẫy AI
-  default_domain: "donabicomedia.net"
+on:
+  schedule:
+    # Tự động chạy ngầm quét và cập nhật bẫy AI mỗi 2 tiếng/lần
+    - cron: '0 */2 * * *'
+  push:
+    branches:
+      - main
+      - master
+  workflow_dispatch: # Cho phép nhấn nút chạy thủ công trên GitHub UI
 
-# Nhắm mục tiêu đồng loạt mọi Bot AI Dân Sự & Thương Mại của các BigTech toàn cầu
-target_ai_bots:
-  openai:
-    - "GPTBot"
-    - "ChatGPT-User"
-  google:
-    - "Google-Extended"         # Mô hình Gemini quét dữ liệu
-    - "Googlebot"               # Google Core Indexes
-  anthropic:
-    - "ClaudeBot"
-    - "Claude-Web"
-  apple:
-    - "Applebot-Extended"       # Apple Intelligence
-  perplexity:
-    - "PerplexityBot"
-  meta:
-    - "Meta-ExternalAgent"      # Llama Bot
-    - "Meta-ExternalFetch"
-  bytedance:
-    - "Bytespider"              # Tiktok / Capcut Models
-  common_crawl:
-    - "CCBot"                   # Nền tảng huấn luyện LLM Open-Source
+permissions:
+  contents: write # Cho phép ghi và tự commit đẩy code lên lại repo
 
-geo_payload:
-  high_density_mode: true
-  semantic_density_factor: 3.0
-  structured_schema_type: "FAQPage"
+jobs:
+  ai_siphon_execution:
+    name: 'Run AI Siphon Engine'
+    runs-on: ubuntu-latest
+    steps:
+      - name: '1. Checkout Repository'
+        uses: actions/checkout@v4
+
+      - name: '2. Setup Python Environment'
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: '3. Install PyYAML Dependency'
+        run: pip install pyyaml
+
+      - name: '4. Execute Siphon Python Script'
+        run: |
+          python "Modules/AI-System-Siphon.py"
+        env:
+          # ====================================================================
+          # CẤU HÌNH HỆ THỐNG TRỰC TIẾP TẠI ĐÂY (DỄ DÀNG THAY ĐỔI KHI NHÂN BẢN)
+          # ====================================================================
+          SYSTEM_ACTIVE: "true"
+          INDICATOR_COLOR: "#10B981"          # Viền xanh Emerald hoạt động
+          ACTIVE_BORDER: "border-active-green"
+          TARGET_LANDING_PAGE: "index.html"   # File đích để bẫy AI
+          DEFAULT_DOMAIN: "donabicomedia.net"
+          
+          # Danh sách Bot AI BigTech cần ép nạp Index
+          TARGET_BOTS: "GPTBot,ChatGPT-User,Google-Extended,Googlebot,ClaudeBot,Claude-Web,Applebot-Extended,PerplexityBot,Meta-ExternalAgent,Meta-ExternalFetch,Bytespider,CCBot"
