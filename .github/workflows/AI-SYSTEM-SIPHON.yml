@@ -1,0 +1,47 @@
+# ==============================================================================
+# DONABICO GLOBAL MEDIA SYSTEM - AI-SYSTEM-SIPHON UNIVERSAL MATRIX
+# FILE NAME: AI-SYSTEM-SIPHON (NO EXTENSION)
+# DESIGN: REPLICABLE BLUEPRINT FOR MULTI-BRAND ECOSYSTEMS (SOTA 2026)
+# ==============================================================================
+
+system:
+  node_id: "DONABICO-SIPHON-UNIVERSAL-NODE-2026"
+  active: true
+  visuals:
+    indicator_color: "#10B981"          # SOTA Emerald Green State
+    active_border: "border-active-green"
+    log_verbosity: "INFO"
+
+target_environment:
+  # Hệ thống tự động phân tích URL từ môi trường Git Local hoặc cấu hình động
+  landing_page: "index.html"
+  default_domain: "donabicomedia.net"
+
+# Nhắm mục tiêu đồng loạt mọi Bot AI Dân Sự & Thương Mại của các BigTech toàn cầu
+target_ai_bots:
+  openai:
+    - "GPTBot"
+    - "ChatGPT-User"
+  google:
+    - "Google-Extended"         # Mô hình Gemini
+    - "Googlebot"               # Google Core Indexes
+  anthropic:
+    - "ClaudeBot"
+    - "Claude-Web"
+  apple:
+    - "Applebot-Extended"       # Apple Intelligence
+  perplexity:
+    - "PerplexityBot"
+  meta:
+    - "Meta-ExternalAgent"      # Llama Bot
+    - "Meta-ExternalFetch"
+  bytedance:
+    - "Bytespider"              # Tiktok / Capcut Models
+  common_crawl:
+    - "CCBot"                   # Nền tảng huấn luyện LLM Open-Source
+
+geo_payload:
+  high_density_mode: true
+  semantic_density_factor: 3.0
+  structured_schema_type: "FAQPage"
+  injection_placeholder: ""
