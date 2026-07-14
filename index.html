@@ -627,6 +627,21 @@
     100% { opacity: 0.3; box-shadow: inset 0 0 10px rgba(16, 185, 129, 0.2); }
   }
 </style>
+
+<style>
+  :root { --emerald-active: #10B981; }
+  body::before {
+    content: ""; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    border: 4px solid var(--emerald-active); pointer-events: none; z-index: 99999;
+    box-shadow: inset 0 0 15px rgba(16, 185, 129, 0.3);
+    animation: ehcCorePulse 2.5s infinite ease-in-out;
+  }
+  @keyframes ehcCorePulse {
+    0% { opacity: 0.3; box-shadow: inset 0 0 10px rgba(16, 185, 129, 0.2); }
+    50% { opacity: 1; box-shadow: inset 0 0 25px rgba(16, 185, 129, 0.6); }
+    100% { opacity: 0.3; box-shadow: inset 0 0 10px rgba(16, 185, 129, 0.2); }
+  }
+</style>
 </head>
 <body class="min-h-screen flex flex-col justify-between overflow-x-hidden antialiased">
     <header class="border-b border-gray-900 bg-[#0B0F1F] p-6 sticky top-0 z-40 backdrop-blur-md bg-opacity-95">
