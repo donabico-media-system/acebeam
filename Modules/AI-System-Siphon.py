@@ -26,45 +26,57 @@ logging.basicConfig(
 
 class UniversalAISiphon:
     def __init__(self):
-        # Định vị thư mục gốc của repository (thư mục cha của thư mục Modules)
+        # ĐỊNH VỊ GỐC TUYỆT ĐỐI: Đi ngược 2 cấp từ thư mục chứa file script này
         self.root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
         
-        # Tự động quét tìm file cấu hình (Ưu tiên file có đuôi .yml trước, sau đó tới không đuôi)
-        self.config_filename = "AI-SYSTEM-SIPHON"
+        # Chỉ quét file cấu hình tại thư mục gốc
         possible_paths = [
             os.path.join(self.root_dir, "AI-SYSTEM-SIPHON.yml"),
             os.path.join(self.root_dir, "AI-SYSTEM-SIPHON")
         ]
         
-        self.config_path = possible_paths[1] # Mặc định
+        self.config_path = None
+        self.config_filename = "AI-SYSTEM-SIPHON.yml"
+        
         for path in possible_paths:
             if os.path.exists(path):
                 self.config_path = path
                 self.config_filename = os.path.basename(path)
                 break
+                
+        if not self.config_path:
+            # Nếu không tìm thấy ở gốc, tạo đường dẫn mặc định ở gốc để ghi nhận lỗi trực quan
+            self.config_path = os.path.join(self.root_dir, "AI-SYSTEM-SIPHON.yml")
+            self.config_filename = "AI-SYSTEM-SIPHON.yml"
+            logging.warning(f"Không tìm thấy file cấu hình tại gốc. Hệ thống sẽ tự tạo mặc định tại: {self.config_path}")
 
-        logging.info(f"Đã nhận diện file cấu hình tại: {self.config_path}")
+        logging.info(f"Đường dẫn cấu hình xác định: {self.config_path}")
         
         self.config = self.load_config()
         self.target_bots = self.extract_all_bots()
         
-        # Đảm bảo đường dẫn index.html luôn trỏ về thư mục gốc
         landing_file = self.config.get("target_environment", {}).get("landing_page", "index.html")
         self.landing_page_path = os.path.join(self.root_dir, landing_file)
 
     def load_config(self) -> Dict[str, Any]:
         """Nạp file cấu hình hệ thống từ thư mục gốc."""
         if not os.path.exists(self.config_path):
-            logging.error(f"Cấu hình gốc không tồn tại tại '{self.config_path}'.")
+            logging.error(f"Cấu hình gốc không tồn tại tại '{self.config_path}'. Trả về cấu hình dự phòng.")
             return {"system": {"active": True}, "target_ai_bots": {"openai": ["GPTBot"]}}
-        with open(self.config_path, "r", encoding="utf-8") as file:
-            return yaml.safe_load(file)
+        try:
+            with open(self.config_path, "r", encoding="utf-8") as file:
+                return yaml.safe_load(file) or {}
+        except Exception as e:
+            logging.error(f"Lỗi đọc file cấu hình: {e}")
+            return {"system": {"active": True}, "target_ai_bots": {"openai": ["GPTBot"]}}
 
     def extract_all_bots(self) -> List[str]:
         bot_groups = self.config.get("target_ai_bots", {})
         flat_list = []
-        for brand, agents in bot_groups.items():
-            flat_list.extend(agents)
+        if isinstance(bot_groups, dict):
+            for brand, agents in bot_groups.items():
+                if isinstance(agents, list):
+                    flat_list.extend(agents)
         return flat_list
 
     def extract_html_metadata(self, html_content: str) -> Dict[str, str]:
@@ -141,7 +153,7 @@ class UniversalAISiphon:
                 f.write(updated_content)
             logging.info("Đã nhúng thành công khối dữ liệu SOTA AI Siphon Thích Ứng!")
             
-            # Thực thi đẩy Git lên kho (Đã sửa lỗi để add cả file cấu hình)
+            # Thực thi đẩy Git lên kho
             self.execute_git_sync()
             
             if meta["canonical"]:
@@ -177,22 +189,25 @@ class UniversalAISiphon:
         """Chạy lệnh Git trực tiếp từ thư mục gốc của Repo để commit index.html và file cấu hình."""
         try:
             # Thiết lập cấu hình git mặc định phòng trường hợp môi trường chưa nhận diện danh tính
-            [span_3](start_span)subprocess.run(["git", "config", "user.name", "github-actions[bot]"], cwd=self.root_dir, check=True)[span_3](end_span)
-            [span_4](start_span)subprocess.run(["git", "config", "user.email", "github-actions[bot]@users.noreply.github.com"], cwd=self.root_dir, check=True)[span_4](end_span)
+            subprocess.run(["git", "config", "user.name", "github-actions[bot]"], cwd=self.root_dir, check=True)
+            subprocess.run(["git", "config", "user.email", "github-actions[bot]@users.noreply.github.com"], cwd=self.root_dir, check=True)
 
-            # Kiểm tra xem có bất kỳ thay đổi nào của index.html hoặc file cấu hình không
+            # Chỉ commit nếu thực sự có thay đổi
             status = subprocess.run(["git", "status", "--porcelain"], cwd=self.root_dir, capture_output=True, text=True)
             if not status.stdout.strip():
                 logging.info("Không phát hiện thay đổi nào trong repository. Bỏ qua Git Commit.")
                 return
 
-            # [span_5](start_span)Add cả file index.html và file cấu hình (dù có đuôi .yml hay không đuôi)[span_5](end_span)
-            [span_6](start_span)subprocess.run(["git", "add", "index.html"], cwd=self.root_dir, check=True)[span_6](end_span)
-            subprocess.run(["git", "add", self.config_filename], cwd=self.root_dir, check=True)
+            # Add cả file index.html và file cấu hình động từ thư mục gốc
+            subprocess.run(["git", "add", "index.html"], cwd=self.root_dir, check=True)
+            
+            # Chỉ add file cấu hình nếu nó tồn tại vật lý ở gốc
+            if os.path.exists(os.path.join(self.root_dir, self.config_filename)):
+                subprocess.run(["git", "add", self.config_filename], cwd=self.root_dir, check=True)
             
             # Commit và Push đồng thời
-            [span_7](start_span)subprocess.run(["git", "commit", "-m", f"chore: dynamic sota ai system siphon activation ({self.config_filename})"], cwd=self.root_dir, check=True)[span_7](end_span)
-            [span_8](start_span)subprocess.run(["git", "push"], cwd=self.root_dir, check=True)[span_8](end_span)
+            subprocess.run(["git", "commit", "-m", f"chore: dynamic sota ai system siphon activation ({self.config_filename})"], cwd=self.root_dir, check=True)
+            subprocess.run(["git", "push"], cwd=self.root_dir, check=True)
             logging.info(">>> [GIT SYNC THÀNH CÔNG] Đã tự động cập nhật và đẩy mã lên GitHub thành công!")
         except Exception as e:
             logging.error(f"Git CLI không thể commit (Kiểm tra lại quyền ghi/môi trường Git): {e}")
