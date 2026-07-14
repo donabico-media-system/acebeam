@@ -5,7 +5,7 @@
 DONABICO GLOBAL MEDIA SYSTEM - DYNAMIC MULTI-BRAND AI SIPHON ENGINE
 Module: Modules/AI-System-Siphon.py
 Function: Universal Ingestion Blueprint (Auto-Detects Brand Metadata)
-Fix: Environment Variables Sync & Dynamic Multi-File Git Automation
+Fix: Environment Variables Sync, Path Fault Prevention & Git Rebase Push SOTA
 ==============================================================================
 """
 
@@ -19,6 +19,7 @@ import urllib.request
 import urllib.error
 from typing import Dict, Any, List
 
+# Cấu hình logging hệ thống trực quan
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s [%(levelname)s] [AI-SIPHON] %(message)s'
@@ -29,7 +30,7 @@ class UniversalAISiphon:
         # ĐỊNH VỊ GỐC TUYỆT ĐỐI: Đi ngược 2 cấp từ thư mục chứa file script này
         self.root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
         
-        # Đọc cấu hình trực tiếp từ biến môi trường của Workflow GitHub
+        # Đọc cấu hình trực tiếp từ biến môi trường được cấp bởi Workflow GitHub Actions
         self.system_active = os.getenv("SYSTEM_ACTIVE", "true").lower() == "true"
         self.indicator_color = os.getenv("INDICATOR_COLOR", "#10B981")
         self.active_border = os.getenv("ACTIVE_BORDER", "border-active-green")
@@ -37,12 +38,24 @@ class UniversalAISiphon:
         landing_file = os.getenv("TARGET_LANDING_PAGE", "index.html")
         self.landing_page_path = os.path.join(self.root_dir, landing_file)
         
+        # Nhận diện tên file cấu hình của Workflow để đưa vào log / git add nếu cần
+        self.config_filename = "AI-SYSTEM-SIPHON.yml"
+        
         # Xử lý danh sách Bots từ biến môi trường dạng chuỗi tách bằng dấu phẩy
-        bots_str = os.getenv("TARGET_BOTS", "GPTBot,Google-Extended,ClaudeBot")
+        bots_str = os.getenv(
+            "TARGET_BOTS", 
+            "GPTBot,ChatGPT-User,Google-Extended,Googlebot,ClaudeBot,Claude-Web,Applebot-Extended,PerplexityBot,Meta-ExternalAgent,Meta-ExternalFetch,Bytespider,CCBot"
+        )
         self.target_bots = [b.strip() for b in bots_str.split(",") if b.strip()]
 
+        logging.info(f"=== ĐÃ KHỞI CHẠY HỆ THỐNG AI-SIPHON SOTA ===")
+        logging.info(f"-> Thư mục gốc Repo: {self.root_dir}")
+        logging.info(f"-> File đích nhắm tới: {self.landing_page_path}")
+        logging.info(f"-> Trạng thái hoạt động: {self.system_active}")
+        logging.info(f"-> Số lượng Bot AI nạp danh sách: {len(self.target_bots)}")
+
     def extract_html_metadata(self, html_content: str) -> Dict[str, str]:
-        """Tự động bóc tách dữ liệu thương hiệu hiện tại của file HTML."""
+        """Tự động bóc tách dữ liệu thương hiệu hiện tại của file HTML để tạo bẫy thích ứng."""
         metadata = {
             "title": "Global Premium Assets Showcase",
             "description": "High-output professional industrial components and certified ecosystem assets.",
@@ -95,16 +108,17 @@ class UniversalAISiphon:
     def inject_and_sync(self):
         """Xử lý file index.html, tự động ghi dữ liệu động và đẩy đồng bộ hóa Git CLI."""
         if not self.system_active:
-            logging.info("Hệ thống AI Siphon đang ở trạng thái tắt (INACTIVE).")
+            logging.info("Hệ thống AI Siphon đang ở trạng thái tắt (INACTIVE) trong môi trường.")
             return
 
         if not os.path.exists(self.landing_page_path):
-            logging.error(f"Không tìm thấy file index.html tại: {self.landing_page_path}")
+            logging.error(f"Không tìm thấy file HTML đích tại: {self.landing_page_path}")
             return
 
         with open(self.landing_page_path, "r", encoding="utf-8") as f:
             content = f.read()
 
+        # Dọn sạch bẫy AI cũ nếu có để tránh ghi đè trùng lặp
         if "AI_BOT_INGESTION_TUNNEL_START" in content:
             content = re.sub(r'.*?', '', content, flags=re.DOTALL)
 
@@ -119,15 +133,16 @@ class UniversalAISiphon:
                 f.write(updated_content)
             logging.info("Đã nhúng thành công khối dữ liệu SOTA AI Siphon Thích Ứng!")
             
-            # Thực thi đẩy Git lên kho
+            # Thực thi đẩy Git đồng bộ (Có cơ chế Rebase chống lỗi trùng lặp)
             self.execute_git_sync()
             
             if meta["canonical"]:
                 self.ping_index_now(meta["canonical"])
         else:
-            logging.warning("Không tìm thấy thẻ </body> trong file HTML.")
+            logging.warning("Không tìm thấy thẻ </body> trong file HTML để nhúng payload.")
 
     def ping_index_now(self, canonical_url: str):
+        """Ép nạp lập tức URL trang đích lên IndexNow."""
         host_match = re.search(r'https?://([^/]+)', canonical_url)
         if not host_match:
             return
@@ -149,30 +164,36 @@ class UniversalAISiphon:
                 if response.status in [200, 202]:
                     logging.info(f"API IndexNow đã ép nạp thành công: {canonical_url}")
         except Exception as e:
-            logging.warning(f"Bỏ qua phản hồi lỗi IndexNow (Môi trường Local): {e}")
+            logging.warning(f"Bỏ qua phản hồi lỗi IndexNow (Môi trường Local/Mạng): {e}")
 
     def execute_git_sync(self):
-        """Chạy lệnh Git trực tiếp từ thư mục gốc của Repo để commit index.html."""
+        """Chạy lệnh Git trực tiếp từ gốc Repo. Tự động kéo Rebase chống xung đột trước khi đẩy code."""
         try:
-            # Thiết lập cấu hình git mặc định phòng trường hợp môi trường chưa nhận diện danh tính
+            # 1. Thiết lập cấu hình git danh tính cục bộ đề phòng môi trường chạy ảo bị trống
             subprocess.run(["git", "config", "user.name", "github-actions[bot]"], cwd=self.root_dir, check=True)
             subprocess.run(["git", "config", "user.email", "github-actions[bot]@users.noreply.github.com"], cwd=self.root_dir, check=True)
 
-            # Chỉ commit nếu thực sự có thay đổi trên file index.html
+            # 2. Kiểm tra xem file index.html có thực sự thay đổi không
             status = subprocess.run(["git", "status", "--porcelain", "index.html"], cwd=self.root_dir, capture_output=True, text=True)
             if not status.stdout.strip():
-                logging.info("Không phát hiện thay đổi nào trên index.html. Bỏ qua Git Commit.")
+                logging.info("Không phát hiện thay đổi nào trên index.html. Bỏ qua commit.")
                 return
 
-            # Add file index.html từ thư mục gốc
+            # 3. Add file thay đổi vào hàng đợi chuẩn bị commit
             subprocess.run(["git", "add", "index.html"], cwd=self.root_dir, check=True)
             
-            # Commit và Push đồng thời
+            # 4. Commit cục bộ trên máy ảo
             subprocess.run(["git", "commit", "-m", "chore: dynamic sota ai system siphon activation via workflow"], cwd=self.root_dir, check=True)
-            subprocess.run(["git", "push"], cwd=self.root_dir, check=True)
-            logging.info(">>> [GIT SYNC THÀNH CÔNG] Đã tự động cập nhật và đẩy mã lên GitHub thành công!")
+            
+            # 5. GIẢI QUYẾT XUNG ĐỘT (SOTA): Thực hiện Pull Rebase kéo thay đổi của Core-Orchestrator về trước
+            logging.info("Đang đồng bộ dữ liệu song hành từ remote (git pull --rebase)...")
+            subprocess.run(["git", "pull", "--rebase", "origin", "main"], cwd=self.root_dir, check=True)
+            
+            # 6. Đẩy mã nguồn đã được đồng bộ lên nhánh main an toàn
+            subprocess.run(["git", "push", "origin", "main"], cwd=self.root_dir, check=True)
+            logging.info(">>> [GIT SYNC THÀNH CÔNG] Đồng bộ và giải quyết xung đột song hành hoàn tất!")
         except Exception as e:
-            logging.error(f"Git CLI không thể commit (Kiểm tra lại quyền ghi/môi trường Git): {e}")
+            logging.error(f"Git CLI không thể hoàn thành đồng bộ: {e}")
 
 if __name__ == "__main__":
     siphon = UniversalAISiphon()
