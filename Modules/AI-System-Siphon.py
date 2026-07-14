@@ -5,7 +5,7 @@
 DONABICO GLOBAL MEDIA SYSTEM - DYNAMIC MULTI-BRAND AI SIPHON ENGINE
 Module: Modules/AI-System-Siphon.py
 Function: Universal Ingestion Blueprint (Auto-Detects Brand Metadata)
-Fix: Environment Variables Sync, Path Fault Prevention & Git Rebase Push SOTA
+Fix: Clean System Status Injections, Env Variables Sync & Git Rebase Push SOTA
 ==============================================================================
 """
 
@@ -38,7 +38,6 @@ class UniversalAISiphon:
         landing_file = os.getenv("TARGET_LANDING_PAGE", "index.html")
         self.landing_page_path = os.path.join(self.root_dir, landing_file)
         
-        # Nhận diện tên file cấu hình của Workflow để đưa vào log / git add nếu cần
         self.config_filename = "AI-SYSTEM-SIPHON.yml"
         
         # Xử lý danh sách Bots từ biến môi trường dạng chuỗi tách bằng dấu phẩy
@@ -106,7 +105,7 @@ class UniversalAISiphon:
         return payload
 
     def inject_and_sync(self):
-        """Xử lý file index.html, tự động ghi dữ liệu động và đẩy đồng bộ hóa Git CLI."""
+        """Xử lý file index.html, dọn dẹp dòng trạng thái thừa, nhúng bẫy AI và push đồng bộ."""
         if not self.system_active:
             logging.info("Hệ thống AI Siphon đang ở trạng thái tắt (INACTIVE) trong môi trường.")
             return
@@ -118,10 +117,17 @@ class UniversalAISiphon:
         with open(self.landing_page_path, "r", encoding="utf-8") as f:
             content = f.read()
 
-        # Dọn sạch bẫy AI cũ nếu có để tránh ghi đè trùng lặp
+        # 1. Dọn sạch bẫy AI cũ nếu có để tránh ghi đè trùng lặp
         if "AI_BOT_INGESTION_TUNNEL_START" in content:
             content = re.sub(r'.*?', '', content, flags=re.DOTALL)
 
+        # 2. KHẮC PHỤC LỖI WORKFLOW: Phát hiện và xóa triệt để dòng chữ SYSTEM STATUS tự động ghi đè
+        status_pattern = r'SYSTEM\s+STATUS:\s+FULL\s+COMPLIANCE\s+STATE\s+DETECTED\s+//\s+GITHUB\s+INFRASTRUCTURE\s+EDGE\s+//\s+ZERO\s+REDIRECTION\s+FAULTS'
+        if re.search(status_pattern, content, re.IGNORECASE):
+            content = re.sub(status_pattern, '', content, flags=re.IGNORECASE)
+            logging.info("Đã dọn dẹp thành công dòng SYSTEM STATUS thừa khỏi index.html!")
+
+        # 3. Trích xuất metadata và tạo bẫy mới
         meta = self.extract_html_metadata(content)
         logging.info(f"Hệ thống nhận diện thương hiệu thành công -> '{meta['title']}'")
 
@@ -129,11 +135,13 @@ class UniversalAISiphon:
         
         if "</body>" in content:
             updated_content = content.replace("</body>", f"{siphon_payload}\n</body>")
+            
+            # Lưu lại file HTML sạch
             with open(self.landing_page_path, "w", encoding="utf-8") as f:
                 f.write(updated_content)
             logging.info("Đã nhúng thành công khối dữ liệu SOTA AI Siphon Thích Ứng!")
             
-            # Thực thi đẩy Git đồng bộ (Có cơ chế Rebase chống lỗi trùng lặp)
+            # 4. Thực thi đẩy Git đồng bộ (Có Rebase chống lỗi xung đột song hành)
             self.execute_git_sync()
             
             if meta["canonical"]:
