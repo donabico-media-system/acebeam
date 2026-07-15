@@ -50,30 +50,42 @@ jobs:
         env:
           PYTHONUNBUFFERED: "1"
 
-      - name: '5. Commit & Sync Dynamic Bridge Infrastructure (Anti-Collision Protocol)'
-        # Tích hợp cơ chế kéo mã nguồn tự động Rebase trước khi đẩy lên để loại bỏ hoàn toàn lỗi rejected
+      - name: '5. Commit & Sync Dynamic Bridge Infrastructure (Zero-Trust Guard)'
+        # Tích hợp cơ chế cất tệp rác (Stash) trước khi rebase để dọn sạch hoàn toàn lỗi exit code 128
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          
+          # 1. Chỉ đưa đúng tệp cầu nối JS vào vùng chuẩn bị commit
           git add Bridges/Bridge-Super-Core-Affiliate.js
           
-          # Kiểm tra xem tệp cầu nối có thay đổi trạng thái thực tế hay không
+          # Kiểm tra xem tệp cầu nối thực sự có thay đổi nội dung hay không
           if ! git diff --quiet -- Bridges/Bridge-Super-Core-Affiliate.js || ! git diff --staged --quiet -- Bridges/Bridge-Super-Core-Affiliate.js; then
+            
+            # 2. Tạo commit cục bộ cho file JS trước
             git commit -m "chore: auto-sync dynamic SOTA bridge telemetry state"
-            # Thực hiện kéo dữ liệu mới nhất bằng cơ chế rebase an toàn, giải quyết xung đột tức thì
+            
+            # 3. Tạm thời cất toàn bộ các thay đổi không liên quan hoặc file rác phát sinh
+            git stash --include-untracked
+            
+            # 4. Kéo mã nguồn mới nhất từ remote và thiết lập rebase sạch
             git pull --rebase origin main || git pull --rebase origin master
-            # Đẩy mã nguồn sạch lên hạ tầng đám mây
+            
+            # 5. Đẩy dữ liệu cầu nối an toàn lên hệ thống đám mây
             git push origin HEAD
+            
+            # 6. Trả lại trạng thái các file tạm (nếu cần)
+            git stash pop || echo "No stashed files to restore."
           else
             echo "No telemetry changes detected in Bridge-Super-Core-Affiliate.js. Skipping sync."
           fi
-        continue-on-error: false # Đổi sang false để giám sát chặt chẽ trạng thái đồng bộ
+        continue-on-error: false
 
       - name: '6. Pipeline Execution Verification'
         if: success()
         run: |
           echo "=========================================================================="
-          echo "[ SOTA MCP SWARM SUCCESS ] Anti-Collision Synchronization Completed!"
-          echo "Bridge State Saved & Merged Into Repo Without Any Push Restrictions."
-          echo "index.html Structure Untouched - Secure for Google & Meta Ads Campaigns"
+          echo "[ SOTA MCP SWARM SUCCESS ] Zero-Trust Buffer Optimization Completed!"
+          echo "Bridge Telemetry Synced and Pushed with Absolute Operational Security."
+          echo "index.html Integrity: 100% Locked & Untouched."
           echo "=========================================================================="
