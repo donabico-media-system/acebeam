@@ -2,10 +2,10 @@
 # -*- coding: utf-8 -*-
 """
 ===================================================================================
-[ DONABICO GLOBAL MEDIA SYSTEM - SUPER CORE AFFILIATE ENGINE V3 ]
+[ DONABICO GLOBAL MEDIA SYSTEM - SUPER CORE AFFILIATE ENGINE V3.1 ]
 Node ID: DONABICO-CORE-SOTA-2026
 Protocol Framework: MCP A2A Google Hybrid Protocol & BigTech Broadcast Matrix
-Execution Mode: Auto-Generate Bridge & Global BigTech Indexing Ping Swarm
+Execution Mode: Auto-Generate Bridge & Global BigTech Indexing Ping Swarm (FIXED)
 ===================================================================================
 """
 
@@ -40,7 +40,7 @@ BIGTECH_PING_ENDPOINTS = {
 def test_single_thread(thread_id):
     """Mô phỏng truy cập song song thu thập chỉ số phản hồi của Node"""
     start_time = time.time()
-    req_headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AdTechBot/1.0'}
+    req_headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AdTechBot/1.0 (Compliance Matrix)'}
     try:
         req = urllib.request.Request(TARGET_INDEX_NODE, headers=req_headers)
         with urllib.request.urlopen(req, timeout=10) as response:
@@ -51,11 +51,9 @@ def test_single_thread(thread_id):
 def broadcast_to_bigtech(engine_name, endpoint_url):
     """Gửi gói tin ép buộc lập chỉ mục đến các siêu máy chủ BigTech"""
     start_time = time.time()
-    # Tạo đường dẫn sitemap ảo hoặc URL đích để cấu trúc hóa dữ liệu quét cho Bot
     encoded_url = urllib.parse.quote(TARGET_INDEX_NODE)
     
     if "IndexNow" in engine_name:
-        # Cấu hình IndexNow Protocol cho Bing/Yahoo (Sử dụng key mặc định của Donabico)
         final_api_call = endpoint_url.format(url=encoded_url, key="dnbc2026sotamatrixkey")
     else:
         final_api_call = f"{endpoint_url}{encoded_url}"
@@ -79,7 +77,8 @@ def main():
     print(f"{C_BOLD}[ PHASE 01: BRIDGE GENERATION & ECOSYSTEM PROTECTION ]{C_RESET}")
     bridge_dir = "Bridges"
     bridge_path = os.path.join(bridge_dir, "Bridge-Super-Core-Affiliate.js")
-    if not os.path.exists(bridge_dir): os.makedirs(bridge_dir)
+    if not os.path.exists(bridge_dir): 
+        os.makedirs(bridge_dir)
 
     current_timestamp = time.strftime("%Y-%m-%d %H:%M:%S UTC", time.gmtime())
     js_bridge_content = f"""// [EATHESEN ECOSYSTEM - CORE ADTECH BRIDGE INTERFACE]
@@ -98,29 +97,35 @@ const DNBC_CORE_CONFIG = {{
     }}
 }})();"""
     
-    with open(bridge_path, "w", encoding="utf-8") as f: f.write(js_bridge_content)
+    with open(bridge_path, "w", encoding="utf-8") as f: 
+        f.write(js_bridge_content)
     print(f" -> {C_GREEN}SUCCESS{C_RESET}: Updated bridge interface file at `{bridge_path}`")
 
     # PHASE 2: Chạy 24 luồng kiểm tra trạng thái CDN cục bộ
     print(f"\n{C_BOLD}[ PHASE 02: SWARM METRIC ACQUISITION (24 WORKERS) ]{C_RESET}")
     with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
         futures = {executor.submit(test_single_thread, i): i for i in range(1, MAX_WORKERS + 1)}
-        for future in as_completed(futures): pass # Tiến trình chạy ngầm cực nhanh
+        for future in as_completed(futures): 
+            pass 
 
-    # PHASE 3: BẮN TÍN HIỆU RA ĐẠI DƯƠNG INTERNET (BIGTECH BROADCAST MATIX)
+    # PHASE 3: BẮN TÍN HIỆU RA ĐẠI DƯƠNG INTERNET (VÁ LỖI SYNTAX THREAD)
     print(f"\n{C_BOLD}[ PHASE 03: BIGTECH CDN OUTBOUND BROADCAST SWARM ]{C_RESET}")
     with ThreadPoolExecutor(max_workers=5) as broadcaster_executor:
-        broadcast_futures = [
-            broadcaster_executor.submit(broadcast_to_bigtech(name, url)) 
+        # Sửa lỗi: Truyền tham chiếu hàm và đối số tách biệt để tránh lỗi 'dict' object is not callable
+        broadcast_futures = {
+            broadcaster_executor.submit(broadcast_to_bigtech, name, url): name 
             for name, url in BIGTECH_PING_ENDPOINTS.items()
-        ]
+        }
         
-        for res in broadcast_futures:
-            data = res.result()
-            if "BROADCAST_SUCCESS" in data["status"]:
-                print(f" -> {C_GREEN}[CONNECTED]{C_RESET} Signal Pushed to {C_CYAN}{data['engine']}{C_RESET} | HTTP {data['code']} | Response: {C_GREEN}{data['latency']:.2f} ms{C_RESET}")
-            else:
-                print(f" -> {C_RED}[REJECTED]{C_RESET} {data['engine']} failed to ingest payload.")
+        for future in as_completed(broadcast_futures):
+            try:
+                data = future.result()
+                if data and "BROADCAST_SUCCESS" in data["status"]:
+                    print(f" -> {C_GREEN}[CONNECTED]{C_RESET} Signal Pushed to {C_CYAN}{data['engine']}{C_RESET} | HTTP {data['code']} | Response: {C_GREEN}{data['latency']:.2f} ms{C_RESET}")
+                else:
+                    print(f" -> {C_RED}[REJECTED]{C_RESET} {data.get('engine', 'Unknown Engine')} failed to ingest payload.")
+            except Exception as e:
+                print(f" -> {C_RED}[CRITICAL FAULT]{C_RESET} Broadcaster Thread Error: {str(e)}")
 
     print(f"\n{C_GREEN}{C_BOLD}[ SUCCESS ] GLOBAL BROADCAST SYNC COMPLETED WITH ZERO FAULT PROFILES.{C_RESET}\n")
 
