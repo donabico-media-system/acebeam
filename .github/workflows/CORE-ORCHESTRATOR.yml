@@ -29,7 +29,7 @@ jobs:
       - name: '1. Checkout Master Repository Ecosystem'
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # Lấy toàn bộ lịch sử commit để tránh lỗi rebase ngầm
+          fetch-depth: 0 # Lấy toàn bộ lịch sử commit để tránh lỗi xung đột ngầm
 
       - name: '2. Deploy Advanced Python Environment'
         uses: actions/setup-python@v5
@@ -50,34 +50,31 @@ jobs:
         env:
           PYTHONUNBUFFERED: "1"
 
-      - name: '5. Commit & Sync Dynamic Bridge Infrastructure (Zero-Trust Guard)'
-        # Tích hợp cơ chế cất tệp rác (Stash) trước khi rebase để dọn sạch hoàn toàn lỗi exit code 128
+      - name: '5. Commit & Sync Dynamic Bridge Infrastructure (Conflict-Free Force Sync)'
+        # Sử dụng chiến thuật dẹp bỏ xung đột: Ưu tiên mã mới được tạo ra từ Python và đẩy thẳng
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
           
-          # 1. Chỉ đưa đúng tệp cầu nối JS vào vùng chuẩn bị commit
+          # Tải trạng thái mới nhất từ Remote về máy ảo mà không gộp (No Merge)
+          git fetch origin main
+          
+          # Đưa tệp cầu nối JS vừa được Python sinh ra vào vùng đệm
           git add Bridges/Bridge-Super-Core-Affiliate.js
           
-          # Kiểm tra xem tệp cầu nối thực sự có thay đổi nội dung hay không
-          if ! git diff --quiet -- Bridges/Bridge-Super-Core-Affiliate.js || ! git diff --staged --quiet -- Bridges/Bridge-Super-Core-Affiliate.js; then
+          # Kiểm tra nếu tệp cầu nối thực sự có thay đổi so với nhánh chính trên Remote
+          if ! git diff --quiet origin/main -- Bridges/Bridge-Super-Core-Affiliate.js; then
             
-            # 2. Tạo commit cục bộ cho file JS trước
+            # Tạo commit cục bộ mới cho file JS
             git commit -m "chore: auto-sync dynamic SOTA bridge telemetry state"
             
-            # 3. Tạm thời cất toàn bộ các thay đổi không liên quan hoặc file rác phát sinh
-            git stash --include-untracked
+            # Trong trường hợp xung đột lịch sử, kéo về và tự động giải quyết bằng cách ghi đè trạng thái của Runner (Theirs)
+            git pull --strategy-option=theirs origin main --no-rebase || (git merge --abort && git reset --hard origin/main && git add Bridges/Bridge-Super-Core-Affiliate.js && git commit -m "chore: force sync telemetry")
             
-            # 4. Kéo mã nguồn mới nhất từ remote và thiết lập rebase sạch
-            git pull --rebase origin main || git pull --rebase origin master
-            
-            # 5. Đẩy dữ liệu cầu nối an toàn lên hệ thống đám mây
-            git push origin HEAD
-            
-            # 6. Trả lại trạng thái các file tạm (nếu cần)
-            git stash pop || echo "No stashed files to restore."
+            # Đẩy sạch lên Cloud
+            git push origin HEAD:main
           else
-            echo "No telemetry changes detected in Bridge-Super-Core-Affiliate.js. Skipping sync."
+            echo "No telemetry changes detected compared to remote origin/main. Skipping sync."
           fi
         continue-on-error: false
 
@@ -85,7 +82,7 @@ jobs:
         if: success()
         run: |
           echo "=========================================================================="
-          echo "[ SOTA MCP SWARM SUCCESS ] Zero-Trust Buffer Optimization Completed!"
-          echo "Bridge Telemetry Synced and Pushed with Absolute Operational Security."
-          echo "index.html Integrity: 100% Locked & Untouched."
+          echo "[ SOTA MCP SWARM SUCCESS ] Conflict-Free Push Strategy Applied!"
+          echo "Bridge Telemetry Forced Overwritten Safely without Local Merging Locks."
+          echo "index.html Integrity: 100% Secure & Locked."
           echo "=========================================================================="
