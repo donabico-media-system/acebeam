@@ -1,16 +1,1 @@
 
-      - name: '4. Execute Siphon Python Script'
-        run: |
-          python "Modules/AI-System-Siphon.py"
-        env:
-          # ====================================================================
-          # CẤU HÌNH HỆ THỐNG TRỰC TIẾP TẠI ĐÂY (DỄ DÀNG THAY ĐỔI KHI NHÂN BẢN)
-          # ====================================================================
-          SYSTEM_ACTIVE: "true"
-          INDICATOR_COLOR: "#10B981"          # Viền xanh Emerald hoạt động
-          ACTIVE_BORDER: "border-active-green"
-          TARGET_LANDING_PAGE: "index.html"   # File đích để bẫy AI
-          DEFAULT_DOMAIN: "donabicomedia.net"
-          
-          # Danh sách Bot AI BigTech cần ép nạp Index
-          TARGET_BOTS: "GPTBot,ChatGPT-User,Google-Extended,Googlebot,ClaudeBot,Claude-Web,Applebot-Extended,PerplexityBot,Meta-ExternalAgent,Meta-ExternalFetch,Bytespider,CCBot"
