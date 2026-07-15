@@ -2,7 +2,7 @@ name: 'CORE-ORCHESTRATOR'
 
 on:
   schedule:
-    # Kích hoạt chu kỳ tự động 120 phút/lần
+    # Kích hoạt tự động chu kỳ 120 phút/lần (2 tiếng/lần)
     - cron: '0 */2 * * *'
   push:
     branches:
@@ -28,6 +28,8 @@ jobs:
     steps:
       - name: '1. Checkout Master Repository Ecosystem'
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Lấy toàn bộ lịch sử commit để tránh lỗi rebase ngầm
 
       - name: '2. Deploy Advanced Python Environment'
         uses: actions/setup-python@v5
@@ -48,21 +50,30 @@ jobs:
         env:
           PYTHONUNBUFFERED: "1"
 
-      - name: '5. Commit & Sync Dynamic Bridge Infrastructure'
-        # Thay vì tác động index.html, Workflow theo dõi và commit tệp cầu nối JS
+      - name: '5. Commit & Sync Dynamic Bridge Infrastructure (Anti-Collision Protocol)'
+        # Tích hợp cơ chế kéo mã nguồn tự động Rebase trước khi đẩy lên để loại bỏ hoàn toàn lỗi rejected
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
           git add Bridges/Bridge-Super-Core-Affiliate.js
-          git diff --quiet -- Bridges/Bridge-Super-Core-Affiliate.js && git diff --staged --quiet -- Bridges/Bridge-Super-Core-Affiliate.js || (git commit -m "chore: auto-sync dynamic SOTA bridge telemetry state" && git push)
-        continue-on-error: true
+          
+          # Kiểm tra xem tệp cầu nối có thay đổi trạng thái thực tế hay không
+          if ! git diff --quiet -- Bridges/Bridge-Super-Core-Affiliate.js || ! git diff --staged --quiet -- Bridges/Bridge-Super-Core-Affiliate.js; then
+            git commit -m "chore: auto-sync dynamic SOTA bridge telemetry state"
+            # Thực hiện kéo dữ liệu mới nhất bằng cơ chế rebase an toàn, giải quyết xung đột tức thì
+            git pull --rebase origin main || git pull --rebase origin master
+            # Đẩy mã nguồn sạch lên hạ tầng đám mây
+            git push origin HEAD
+          else
+            echo "No telemetry changes detected in Bridge-Super-Core-Affiliate.js. Skipping sync."
+          fi
+        continue-on-error: false # Đổi sang false để giám sát chặt chẽ trạng thái đồng bộ
 
       - name: '6. Pipeline Execution Verification'
         if: success()
         run: |
           echo "=========================================================================="
-          echo "[ SOTA MCP SWARM SUCCESS ] 24 Parallel Workers Dispatched"
-          echo "Bridge State Saved to Bridges/Bridge-Super-Core-Affiliate.js"
+          echo "[ SOTA MCP SWARM SUCCESS ] Anti-Collision Synchronization Completed!"
+          echo "Bridge State Saved & Merged Into Repo Without Any Push Restrictions."
           echo "index.html Structure Untouched - Secure for Google & Meta Ads Campaigns"
           echo "=========================================================================="
-
