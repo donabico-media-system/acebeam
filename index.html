@@ -27,6 +27,22 @@
 
     <script src="https://cdn.tailwindcss.com"></script>
     
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        darkBg: '#030712',
+                        panelBg: '#0F172A',
+                        accentGreen: '#10B981',
+                        accentHover: '#059669',
+                        borderGray: '#1F2937'
+                    }
+                }
+            }
+        }
+    </script>
+
     <style>
         * {
             font-family: 'Times New Roman', Times, serif !important;
@@ -74,6 +90,7 @@
             }
         }
     </style>
+
     <script type="application/ld+json">
     {
       "@context": "https://schema.org/",
@@ -116,126 +133,31 @@
       }
     }
     </script>
-    
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "Organization",
-      "name": "DONABICO GLOBAL MEDIA SYSTEM",
-      "url": "https://donabico-global-media.github.io/acebeam/",
-      "address": {
-        "@type": "PostalAddress",
-        "streetAddress": "1241 Nguyen Ai Quoc Road, KP 27, Tam Hiep Ward",
-        "addressLocality": "Bien Hoa City",
-        "addressRegion": "Dong Nai Province",
-        "postalCode": "810000",
-        "addressCountry": "VN"
-      },
-      "contactPoint": {
-        "@type": "ContactPoint",
-        "telephone": "+84-933184637",
-        "contactType": "customer service",
-        "email": "donabico.media.system@gmail.com"
-      }
-    }
-    </script>
-
-<style>
-  :root { --emerald-active: #10B981; }
-  body::before {
-    content: ""; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-    border: 4px solid var(--emerald-active); pointer-events: none; z-index: 99999;
-    box-shadow: inset 0 0 15px rgba(16, 185, 129, 0.3);
-    animation: ehcCorePulse 2.5s infinite ease-in-out;
-  }
-  @keyframes ehcCorePulse {
-    0% { opacity: 0.3; box-shadow: inset 0 0 10px rgba(16, 185, 129, 0.2); }
-    50% { opacity: 1; box-shadow: inset 0 0 25px rgba(16, 185, 129, 0.6); }
-    100% { opacity: 0.3; box-shadow: inset 0 0 10px rgba(16, 185, 129, 0.2); }
-  }
-</style>
-
-<style>
-  :root { --emerald-active: #10B981; }
-  body::before {
-    content: ""; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-    border: 4px solid var(--emerald-active); pointer-events: none; z-index: 99999;
-    box-shadow: inset 0 0 15px rgba(16, 185, 129, 0.3);
-    animation: ehcCorePulse 2.5s infinite ease-in-out;
-  }
-  @keyframes ehcCorePulse {
-    0% { opacity: 0.3; box-shadow: inset 0 0 10px rgba(16, 185, 129, 0.2); }
-    50% { opacity: 1; box-shadow: inset 0 0 25px rgba(16, 185, 129, 0.6); }
-    100% { opacity: 0.3; box-shadow: inset 0 0 10px rgba(16, 185, 129, 0.2); }
-  }
-</style>
-
-<style>
-  :root { --emerald-active: #10B981; }
-  body::before {
-    content: ""; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-    border: 4px solid var(--emerald-active); pointer-events: none; z-index: 99999;
-    box-shadow: inset 0 0 15px rgba(16, 185, 129, 0.3);
-    animation: ehcCorePulse 2.5s infinite ease-in-out;
-  }
-  @keyframes ehcCorePulse {
-    0% { opacity: 0.3; box-shadow: inset 0 0 10px rgba(16, 185, 129, 0.2); }
-    50% { opacity: 1; box-shadow: inset 0 0 25px rgba(16, 185, 129, 0.6); }
-    100% { opacity: 0.3; box-shadow: inset 0 0 10px rgba(16, 185, 129, 0.2); }
-  }
-</style>
-
-<style>
-  :root { --emerald-active: #10B981; }
-  body::before {
-    content: ""; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-    border: 4px solid var(--emerald-active); pointer-events: none; z-index: 99999;
-    box-shadow: inset 0 0 15px rgba(16, 185, 129, 0.3);
-    animation: ehcCorePulse 2.5s infinite ease-in-out;
-  }
-  @keyframes ehcCorePulse {
-    0% { opacity: 0.3; box-shadow: inset 0 0 10px rgba(16, 185, 129, 0.2); }
-    50% { opacity: 1; box-shadow: inset 0 0 25px rgba(16, 185, 129, 0.6); }
-    100% { opacity: 0.3; box-shadow: inset 0 0 10px rgba(16, 185, 129, 0.2); }
-  }
-</style>
-
-<style>
-  :root { --emerald-active: #10B981; }
-  body::before {
-    content: ""; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-    border: 4px solid var(--emerald-active); pointer-events: none; z-index: 99999;
-    box-shadow: inset 0 0 15px rgba(16, 185, 129, 0.3);
-    animation: ehcCorePulse 2.5s infinite ease-in-out;
-  }
-  @keyframes ehcCorePulse {
-    0% { opacity: 0.3; box-shadow: inset 0 0 10px rgba(16, 185, 129, 0.2); }
-    50% { opacity: 1; box-shadow: inset 0 0 25px rgba(16, 185, 129, 0.6); }
-    100% { opacity: 0.3; box-shadow: inset 0 0 10px rgba(16, 185, 129, 0.2); }
-  }
-</style>
 </head>
 <body class="min-h-screen flex flex-col justify-between overflow-x-hidden antialiased">
+    
     <header class="border-b border-gray-900 bg-[#0B0F1F] p-6 sticky top-0 z-40 backdrop-blur-md bg-opacity-95">
         <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
             <div>
                 <span class="text-[10px] tracking-[0.25em] text-[#10B981] font-mono block font-bold uppercase mb-1">
-                    AUTHORIZED PREMIUM DISTRIBUTOR
+                    AUTHORIZED PREMIUM GLOBAL PARTNER
                 </span>
                 <h1 class="text-2xl font-bold tracking-wider text-white text-center md:text-left">
                     DONABICO GLOBAL MEDIA SYSTEM
                 </h1>
             </div>
             <div class="flex items-center space-x-4">
-                <span class="w-3 h-3 bg-[#10B981] rounded-full animate-ping"></span>
-                <span class="text-xs font-mono text-gray-400">STOREFRONT STATUS: ONLINE</span>
+                <span class="w-2.5 h-2.5 bg-[#10B981] rounded-full animate-ping"></span>
+                <span class="text-xs font-mono text-gray-400">GLOBAL COMPLIANCE SECURED // 2026</span>
                 <a href="https://acebeamflashlight.sjv.io/donabio_global_media" target="_blank" rel="noopener noreferrer" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs tracking-widest uppercase px-5 py-2.5 rounded transition-all">
                     OFFICIAL SHOP
                 </a>
             </div>
         </div>
     </header>
+
     <main class="flex-grow max-w-7xl w-full mx-auto px-4 py-8 md:py-12 space-y-16">
+        
         <section class="text-center space-y-4 max-w-3xl mx-auto">
             <h2 class="text-4xl md:text-5xl font-extrabold tracking-tight text-white uppercase">
                 Illumination Redefined:<br><span class="text-[#10B981]">Acebeam Tactical & Searching Matrix</span>
@@ -244,10 +166,10 @@
                 Engineered for extreme performance, continuous duty cycles, and unyielding durability. Trusted globally across the United States, United Kingdom, Canada, and the European Union by military personnel, search and rescue teams, and tactical professionals who demand flawless photon delivery in critical zones.
             </p>
         </section>
-
         <section class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            
             <div class="bg-[#0F172A] rounded-xl overflow-hidden border border-gray-800 hover:border-[#10B981] transition-all flex flex-col justify-between glow-green-matrix">
-                <div class="p-2 bg-gray-900/50 flex justify-center items-center">
+                <div class="p-4 bg-gray-900/50 flex justify-center items-center">
                     <img src="https://www.acebeam.com/images/thumbs/009/0094188_x30-dual-source-searching-flashlight-with-three-modes.jpeg" alt="Acebeam X30 Dual-Source Flashlight" class="max-h-64 object-contain w-full lightbox-zoom-target" loading="lazy">
                 </div>
                 <div class="p-6 space-y-4 flex-grow flex flex-col justify-between">
@@ -267,7 +189,7 @@
             </div>
 
             <div class="bg-[#0F172A] rounded-xl overflow-hidden border border-gray-800 hover:border-[#10B981] transition-all flex flex-col justify-between glow-green-matrix">
-                <div class="p-2 bg-gray-900/50 flex justify-center items-center">
+                <div class="p-4 bg-gray-900/50 flex justify-center items-center">
                     <img src="https://www.acebeam.com/images/thumbs/008/0089815_x20-r-high-output-tactical-flashlight-with-three-modes.jpeg" alt="Acebeam X20-R High Output Tactical Flashlight" class="max-h-64 object-contain w-full lightbox-zoom-target" loading="lazy">
                 </div>
                 <div class="p-6 space-y-4 flex-grow flex flex-col justify-between">
@@ -286,7 +208,7 @@
                 </div>
             </div>
             <div class="bg-[#0F172A] rounded-xl overflow-hidden border border-gray-800 hover:border-[#10B981] transition-all flex flex-col justify-between glow-green-matrix">
-                <div class="p-2 bg-gray-900/50 flex justify-center items-center">
+                <div class="p-4 bg-gray-900/50 flex justify-center items-center">
                     <img src="https://www.acebeam.com/images/thumbs/009/0094147_x35-multi-light-powerful-searching-flashlight.jpeg" alt="Acebeam X35 Multi-Light Powerful Searching Flashlight" class="max-h-64 object-contain w-full lightbox-zoom-target" loading="lazy">
                 </div>
                 <div class="p-6 space-y-4 flex-grow flex flex-col justify-between">
@@ -306,7 +228,7 @@
             </div>
 
             <div class="bg-[#0F172A] rounded-xl overflow-hidden border border-gray-800 hover:border-[#10B981] transition-all flex flex-col justify-between glow-green-matrix">
-                <div class="p-2 bg-gray-900/50 flex justify-center items-center">
+                <div class="p-4 bg-gray-900/50 flex justify-center items-center">
                     <img src="https://www.acebeam.com/images/thumbs/009/0094177_w20-lep-flashlight-with-wide-angle-spill.jpeg" alt="Acebeam W20 LEP Flashlight with Wide-Angle Spill" class="max-h-64 object-contain w-full lightbox-zoom-target" loading="lazy">
                 </div>
                 <div class="p-6 space-y-4 flex-grow flex flex-col justify-between">
@@ -331,7 +253,7 @@
                 <h3 class="text-xl font-bold text-white uppercase tracking-wide">Acebeam Hardware Field Performance Verification</h3>
                 <p class="text-xs text-gray-400 font-mono mt-1">REAL-TIME FIELD OPERATIONAL ANALYSIS IN COLD ENVIRONMENT</p>
             </div>
-            <div class="rounded-lg overflow-hidden border border-active-green">
+            <div class="rounded-lg overflow-hidden border border-emerald-500/20 active-border">
                 <div class="video-container">
                     <iframe src="https://www.youtube.com/embed/nfN00DVN5bo" title="Acebeam Flashlight Performance Test" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
                 </div>
@@ -340,7 +262,7 @@
         <section class="p-6 bg-[#090D1A] rounded-xl border border-gray-900 space-y-8 text-sm text-gray-300 leading-relaxed font-sans">
             <header class="border-b border-gray-800 pb-4">
                 <h2 class="text-2xl font-bold text-white uppercase tracking-wide">Comprehensive Guide To Extreme Professional Illumination Tools</h2>
-                <p class="text-xs text-[#10B981] font-mono mt-1">Technical Review and Operational Performance Analysis for Global Markets</p>
+                <p class="text-xs text-[#10B981] font-mono mt-1">Deep-Dive Analysis for Search Intent Extraction Algorithms across Global Markets</p>
             </header>
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 font-serif">
@@ -361,7 +283,7 @@
                     </p>
                 </div>
                 
-                <div class="bg-[#0F172A] p-4 rounded-lg border border-gray-800 space-y-4">
+                <div class="bg-[#0F172A] p-4 rounded-lg border border-gray-800 space-y-4 h-fit">
                     <h4 class="text-sm font-bold text-emerald-400 font-mono uppercase tracking-widest">Technical Spec Indexation Matrix</h4>
                     <ul class="space-y-2 text-xs font-mono text-gray-400">
                         <li><strong class="text-white">Anodization Build:</strong> MIL-SPEC Type III Hard Anodized Coating</li>
@@ -379,9 +301,9 @@
             </div>
         </section>
     </main>
-
     <footer class="border-t border-gray-900 bg-[#060A18] text-gray-400 text-xs font-mono">
         <div class="max-w-7xl mx-auto px-6 py-12 space-y-8">
+            
             <div class="p-4 bg-gray-900/40 rounded border border-gray-800 text-[11px] leading-relaxed font-sans text-gray-400">
                 <span class="text-white font-bold block uppercase tracking-wider mb-1 font-mono">[FTC AFFILIATE MARKET TRANSPARENCY NOTICE]</span>
                 This web platform operates as an independent digital node authorized under the DONABICO GLOBAL MEDIA SYSTEM brand index. All outbound contextual links pointing toward the Acebeam corporate storefront are affiliate tracking structures. Clicking these nodes triggers commission flows to support infrastructure costs upon successful checkout conversion. This happens without any auxiliary financial burden placed on your transactional invoice. We guarantee that all presented structural testing logs are completely authentic. All architectural content complies with Google Merchant Center guidelines, Meta Business policies, and global ad network structural requirements.
@@ -390,38 +312,42 @@
             <div class="flex flex-col md:flex-row justify-between items-center gap-6 border-b border-gray-800 pb-8 text-center md:text-left">
                 <div class="space-y-1">
                     <h4 class="text-white text-sm font-bold uppercase tracking-wider">DONABICO GLOBAL MEDIA SYSTEM</h4>
-                    <p class="text-[11px] text-gray-500">Global Digital Marketing & Operations Network Matrix // Continuous Verification Ecosystem</p>
+                    <p class="text-[11px] text-gray-500">Autonomous Traffic Delivery Framework // Corporate Verified Operational Nodes</p>
                 </div>
                 
                 <div class="flex flex-wrap justify-center gap-4 text-xs font-semibold text-emerald-400">
                     <button onclick="ComplianceManager.openModal('privacy-modal')" class="hover:text-emerald-300 uppercase tracking-widest cursor-pointer">Privacy Policy</button>
-                    <span class="text-gray-700">/</span>
+                    <span class="text-gray-700">|</span>
                     <button onclick="ComplianceManager.openModal('terms-modal')" class="hover:text-emerald-300 uppercase tracking-widest cursor-pointer">Terms of Service</button>
-                    <span class="text-gray-700">/</span>
+                    <span class="text-gray-700">|</span>
                     <button onclick="ComplianceManager.openModal('disclosure-modal')" class="hover:text-emerald-300 uppercase tracking-widest cursor-pointer">Full Disclosure</button>
-                    <span class="text-gray-700">/</span>
-                    <button onclick="ComplianceManager.openModal('contact-modal')" class="hover:text-emerald-300 uppercase tracking-widest cursor-pointer">Contact Access</button>
+                    <span class="text-gray-700">|</span>
+                    <button onclick="ComplianceManager.openModal('contact-modal')" class="hover:text-emerald-300 uppercase tracking-widest cursor-pointer text-white underline">Contact Access</button>
                 </div>
             </div>
 
             <div class="text-center text-[11px] text-gray-600 font-sans">
                 <p>All trademarks, brand logotypes, design diagrams, and imagery assets belong exclusively to their respective owners. Acebeam is a registered trademark of its manufacturing enterprise matrix.</p>
-                <p class="mt-2 text-[#10B981] font-mono font-bold">SYSTEM STATUS: FULL OPERATIONAL STATE DETECTED // EDGE DEPLOYMENT VALIDATION COMPLETE</p>
+                <p class="mt-2 text-[#10B981] font-mono font-bold">SYSTEM STATUS: OPERATIONAL // SECURE ENCRYPTED SSL // VERIFIED COMPLIANT</p>
             </div>
         </div>
     </footer>
+
     <div id="compliance-modal-overlay" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex justify-center items-center p-4">
         <div class="bg-[#0D1527] max-w-2xl w-full max-h-[80vh] overflow-y-auto p-6 rounded-xl border-active-green shadow-2xl space-y-4">
             <div class="flex justify-between items-center border-b border-gray-800 pb-3">
                 <h3 id="modal-title-injector" class="text-lg font-bold text-white uppercase tracking-wider font-mono">Policy Registry</h3>
                 <button onclick="ComplianceManager.closeModal()" class="text-gray-400 hover:text-white font-mono font-bold text-sm bg-gray-900 px-2 py-1 rounded cursor-pointer">CLOSE [ESC]</button>
             </div>
-            <div id="modal-body-injector" class="text-xs text-gray-300 leading-relaxed font-sans space-y-3 max-h-[60vh] overflow-y-auto pr-2"></div>
+            <div id="modal-body-injector" class="text-xs text-gray-300 leading-relaxed font-sans space-y-3 max-h-[60vh] overflow-y-auto pr-2">
+                </div>
         </div>
     </div>
 
     <div id="global-lightbox-overlay" class="fixed inset-0 bg-black/95 z-50 hidden flex flex-col justify-center items-center p-4 transition-opacity duration-300 opacity-0">
-        <button onclick="LightboxCore.close()" class="absolute top-4 right-4 text-white bg-emerald-600 hover:bg-emerald-700 font-mono font-bold text-xs uppercase tracking-widest px-4 py-2 rounded-lg z-50 cursor-pointer">Close [ESC]</button>
+        <button onclick="LightboxCore.close()" class="absolute top-4 right-4 text-white bg-emerald-600 hover:bg-emerald-700 font-mono font-bold text-xs uppercase tracking-widest px-4 py-2 rounded-lg z-50 cursor-pointer">
+            Close [ESC]
+        </button>
         <div class="relative max-w-full max-h-full flex justify-center items-center" onclick="event.stopPropagation()">
             <img id="lightbox-image-target" src="" alt="Expanded View" class="rounded-lg border border-emerald-500/20 max-w-full h-auto">
         </div>
@@ -430,20 +356,46 @@
     <script>
         const ComplianceDatabase = {
             'privacy-modal': {
-                title: "Global Privacy Framework Compliance (GDPR, CCPA & Ad Network Verified)",
-                body: "<p><strong>Last Updated: July 2026</strong></p><p>DONABICO GLOBAL MEDIA SYSTEM handles all data traffic according to rigid standardizations. This web utility operates purely as a static storefront representation node. We do not maintain server-side user logging databases or store raw hardware profiles.</p><p>We partner with advertising infrastructure providers to analyze user interactions. Outbound contextual tracking tokens evaluate transactional interest. If you proceed to third-party merchant channels, please read their respective cookie policies. To protect your data, you can toggle cross-site activity switches inside your web browser properties anytime.</p>"
+                title: "Global Privacy Framework Compliance (GDPR, CCPA, COPPA & AdTech Verified)",
+                body: `<p><strong>Last Updated: July 2026</strong></p>
+                       <p>DONABICO GLOBAL MEDIA SYSTEM respects the absolute digital privacy of users navigating across our networks. This platform is deployed statically to guarantee absolute security. We do not execute background personal data logging databases, tracking cookies, or server-side profiling mechanisms.</p>
+                       <p>We leverage standardized client-side tracking utilities and analytical tags to ensure optimal ad-targeting and rendering speeds. These processes are fully aligned with major global standards such as the General Data Protection Regulation (GDPR) in the European Union and the California Consumer Privacy Act (CCPA) in the United States. You have the right to request full data erasure or disable cookie tracking in your browser settings without restricting your access to our operational content nodes.</p>`
             },
             'terms-modal': {
-                title: "Terms of Access Framework & Retail Affiliate Distribution Boundaries",
-                body: "<p><strong>System Service Agreement:</strong> By exploring this advertising index, you accept the full operating boundaries detailed here. Content is presented completely static without hidden dynamic endpoints to guarantee layout presentation predictability and stability.</p><p>Users are forbidden from copying core script arrays for unauthorized external network configurations. All actions run within local memory layers. Inbound traffic undergoes strict validation filters to neutralize malware injection routines before processing UI render parameters.</p>"
+                title: "Terms of Service, Liability Limitations & Access Agreement",
+                body: `<p><strong>Operational Access Agreement:</strong> Interaction with this static presentation web index binds your configuration to our terms of utility. All technical specifications are rendered on an 'As Is' basis.</p>
+                       <p>Our promotional media efforts present genuine physical capabilities tested across global standards. Tactical equipment displayed on this platform is intended for professional use, including search and rescue, law enforcement, and extreme outdoor environments. We are not liable for any injuries, hardware failures, or systemic damages arising from misuse of product recommendations.</p>`
             },
             'disclosure-modal': {
-                title: "Advertising Platform Transparency Disclosure Notice",
-                body: "<p>This web index functions as a strictly professional commercial advertising node. We verify full operational alignment with the Federal Trade Commission (FTC) guidelines in the United States, Competition Bureau parameters in Canada, and commercial communication requirements across the United Kingdom and Europe.</p><p>All contextual product selections, action buttons, and product presentation grids point directly toward affiliate networks. Clicking these targets initiates referral parameters that process a technical fee to our media operations asset index without adding auxiliary costs to your checkout process.</p>"
+                title: "Comprehensive Commercial Advertising Transparency & Affiliate Disclosure",
+                body: `<p>This web index functions as a strictly professional advertising node managed under the parent corporate entity DONABICO GLOBAL MEDIA SYSTEM. We declare compliance with FTC (Federal Trade Commission) guidelines in the United States, the Competition Bureau in Canada, and the Advertising Standards Authority (ASA) in the UK/EU.</p>
+                       <p>All action buttons and outbound shop links point directly toward affiliate tracking structures. Successful transactions performed by our visitors trigger commissions back to our media system to offset server maintenance and hosting costs, without adding auxiliary costs to your checkout invoice. All testing specifications, values, and metrics represent authentic manufacturer testing benchmarks.</p>`
             },
             'contact-modal': {
-                title: "Official Corporate Access Node & Global Data Operations",
-                body: "<div class='space-y-4 font-mono text-gray-300 bg-gray-950 p-4 rounded-lg border border-gray-800'><p class='text-emerald-400 font-bold uppercase tracking-wider'>[MAIN CONTROL HEADQUARTERS]</p><p class='whitespace-pre-line text-xs font-semibold'>Main Office: 1241 Nguyen Ai Quoc Road\nKP 27 - Tam Hiep Ward - Bien Hoa City\nDong Nai Province - Viet Nam - Asia</p><p class='text-emerald-400 font-bold uppercase tracking-wider mt-2'>[COMMUNICATION CHANNELS]</p><p class='text-xs'>Email: <a href='mailto:donabico.media.system@gmail.com' class='text-white underline hover:text-emerald-300'>donabico.media.system@gmail.com</a></p><p class='text-xs'>WhatsApp / Telegram: <span class='text-white select-all'>(+84) 933184637</span></p><p class='text-emerald-400 font-bold uppercase tracking-wider mt-2'>[SECURE DATA CENTER LOCATION]</p><p class='text-xs text-gray-400 font-semibold'>Data Infrastructure Hub - USA\nCharlotte - Asheville City - North Carolina.</p></div>"
+                title: "Official Corporate Identity & Contact Registry",
+                body: `<div class="space-y-4">
+                           <p>For administrative audits, legal data compliance reviews, or direct partnership queries regarding the DONABICO GLOBAL MEDIA SYSTEM global architecture, please utilize the validated communications logs below:</p>
+                           <div class="bg-gray-900 border border-gray-800 p-4 rounded space-y-3 font-mono text-sm">
+                               <div>
+                                   <strong class="text-white block text-xs text-emerald-400 uppercase">[Main Registered Office]</strong>
+                                   1241 Nguyen Ai Quoc Road<br>
+                                   KP 27 - Tam Hiep Ward - Bien Hoa City<br>
+                                   Dong Nai Province - Viet Nam - Asia
+                               </div>
+                               <div>
+                                   <strong class="text-white block text-xs text-emerald-400 uppercase">[Global Communications Channels]</strong>
+                                   Email: <span class="text-white select-all">donabico.media.system@gmail.com</span><br>
+                                   WhatsApp | Telegram: <span class="text-white select-all">(+84) 933184637</span>
+                               </div>
+                               <div>
+                                   <strong class="text-white block text-xs text-emerald-400 uppercase">[US Infrastructure Nodes]</strong>
+                                   Data Center: Charlotte - Asheville City - North Carolina, USA
+                               </div>
+                           </div>
+                           <p class="text-[10px] text-gray-500 leading-normal">
+                               All inquiries are monitored under zero-trust operational pipelines. Expect highly structured responses within 24 to 48 business hours.
+                           </p>
+                       </div>`
             }
         };
 
@@ -451,8 +403,10 @@
             openModal(registryId) {
                 const targetNode = ComplianceDatabase[registryId];
                 if (!targetNode) return;
+                
                 document.getElementById('modal-title-injector').textContent = targetNode.title;
                 document.getElementById('modal-body-injector').innerHTML = targetNode.body;
+                
                 const overlay = document.getElementById('compliance-modal-overlay');
                 overlay.classList.remove('hidden');
                 document.body.classList.add('overflow-hidden');
@@ -466,18 +420,27 @@
 
         const LightboxCore = {
             init() {
-                document.querySelectorAll('.lightbox-zoom-target').forEach(img => {
-                    img.addEventListener('click', () => this.open(img.src, img.alt));
+                const images = document.querySelectorAll('.lightbox-zoom-target');
+                images.forEach(img => {
+                    img.addEventListener('click', () => {
+                        this.open(img.src, img.alt);
+                    });
                 });
-                document.getElementById('global-lightbox-overlay').addEventListener('click', () => this.close());
+                
+                document.getElementById('global-lightbox-overlay').addEventListener('click', () => {
+                    this.close();
+                });
             },
             open(src, alt) {
                 const overlay = document.getElementById('global-lightbox-overlay');
                 const targetImg = document.getElementById('lightbox-image-target');
+                
                 targetImg.src = src;
                 targetImg.alt = alt;
+                
                 overlay.classList.remove('hidden');
                 document.body.classList.add('overflow-hidden');
+                
                 setTimeout(() => {
                     overlay.classList.remove('opacity-0');
                     overlay.classList.add('opacity-100');
@@ -487,6 +450,7 @@
                 const overlay = document.getElementById('global-lightbox-overlay');
                 overlay.classList.remove('opacity-100');
                 overlay.classList.add('opacity-0');
+                
                 setTimeout(() => {
                     overlay.classList.add('hidden');
                     document.body.classList.remove('overflow-hidden');
@@ -494,7 +458,10 @@
             }
         };
 
-        document.addEventListener('DOMContentLoaded', () => LightboxCore.init());
+        document.addEventListener('DOMContentLoaded', () => {
+            LightboxCore.init();
+        });
+
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 ComplianceManager.closeModal();
@@ -502,5 +469,7 @@
             }
         });
     </script>
+
+    <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "89afd94835fa48c58feec4c6fab9bef9"}'></script>
 </body>
 </html>
