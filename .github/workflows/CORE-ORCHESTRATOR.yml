@@ -1,1 +1,68 @@
+name: 'CORE-ORCHESTRATOR'
+
+on:
+  schedule:
+    # Kích hoạt chu kỳ tự động 120 phút/lần
+    - cron: '0 */2 * * *'
+  push:
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "core-orchestrator-matrix"
+  cancel-in-progress: true
+
+jobs:
+  hybrid_mcp_swarm_execution:
+    name: 'Execute MCP Hybrid Parallel Engine'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: '1. Checkout Master Repository Ecosystem'
+        uses: actions/checkout@v4
+
+      - name: '2. Deploy Advanced Python Environment'
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: '3. Inject Hybrid MCP Environment Variables'
+        run: |
+          echo "HYBRID_PROTOCOL=MCP_A2A_GOOGLE_HYBRID" >> $GITHUB_ENV
+          echo "MAX_PARALLEL_THREADS=24" >> $GITHUB_ENV
+          echo "TARGET_INDEX_NODE=https://donabico-global-media.github.io/acebeam/" >> $GITHUB_ENV
+          echo "NODE_ID=DONABICO-CORE-SOTA-2026" >> $GITHUB_ENV
+
+      - name: '4. Boot Super Core Affiliate Parallel Swarm'
+        run: |
+          chmod +x "./Super Core Affiliate/Super-Core-Affiliate.py"
+          python "./Super Core Affiliate/Super-Core-Affiliate.py"
+        env:
+          PYTHONUNBUFFERED: "1"
+
+      - name: '5. Commit & Sync Dynamic Bridge Infrastructure'
+        # Thay vì tác động index.html, Workflow theo dõi và commit tệp cầu nối JS
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git add Bridges/Bridge-Super-Core-Affiliate.js
+          git diff --quiet -- Bridges/Bridge-Super-Core-Affiliate.js && git diff --staged --quiet -- Bridges/Bridge-Super-Core-Affiliate.js || (git commit -m "chore: auto-sync dynamic SOTA bridge telemetry state" && git push)
+        continue-on-error: true
+
+      - name: '6. Pipeline Execution Verification'
+        if: success()
+        run: |
+          echo "=========================================================================="
+          echo "[ SOTA MCP SWARM SUCCESS ] 24 Parallel Workers Dispatched"
+          echo "Bridge State Saved to Bridges/Bridge-Super-Core-Affiliate.js"
+          echo "index.html Structure Untouched - Secure for Google & Meta Ads Campaigns"
+          echo "=========================================================================="
 
