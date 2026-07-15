@@ -2,8 +2,7 @@ name: 'CORE-ORCHESTRATOR'
 
 on:
   schedule:
-    # Kích hoạt tự động chu kỳ 120 phút/lần (2 tiếng/lần)
-    - cron: '0 */2 * * *'
+    - cron: '0 */2 * * *' # Chạy tự động đều đặn mỗi 2 tiếng để giữ tần suất quét liên tục trên BigTech
   push:
     branches:
       - main
@@ -29,7 +28,7 @@ jobs:
       - name: '1. Checkout Master Repository Ecosystem'
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # Lấy toàn bộ lịch sử commit để tránh lỗi xung đột ngầm
+          fetch-depth: 0
 
       - name: '2. Deploy Advanced Python Environment'
         uses: actions/setup-python@v5
@@ -43,7 +42,7 @@ jobs:
           echo "TARGET_INDEX_NODE=https://donabico-global-media.github.io/acebeam/" >> $GITHUB_ENV
           echo "NODE_ID=DONABICO-CORE-SOTA-2026" >> $GITHUB_ENV
 
-      - name: '4. Boot Super Core Affiliate Parallel Swarm'
+      - name: '4. Boot Super Core Affiliate Parallel Swarm & BigTech Broadcaster'
         run: |
           chmod +x "./Super Core Affiliate/Super-Core-Affiliate.py"
           python "./Super Core Affiliate/Super-Core-Affiliate.py"
@@ -51,30 +50,18 @@ jobs:
           PYTHONUNBUFFERED: "1"
 
       - name: '5. Commit & Sync Dynamic Bridge Infrastructure (Conflict-Free Force Sync)'
-        # Sử dụng chiến thuật dẹp bỏ xung đột: Ưu tiên mã mới được tạo ra từ Python và đẩy thẳng
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-          
-          # Tải trạng thái mới nhất từ Remote về máy ảo mà không gộp (No Merge)
           git fetch origin main
-          
-          # Đưa tệp cầu nối JS vừa được Python sinh ra vào vùng đệm
           git add Bridges/Bridge-Super-Core-Affiliate.js
           
-          # Kiểm tra nếu tệp cầu nối thực sự có thay đổi so với nhánh chính trên Remote
           if ! git diff --quiet origin/main -- Bridges/Bridge-Super-Core-Affiliate.js; then
-            
-            # Tạo commit cục bộ mới cho file JS
             git commit -m "chore: auto-sync dynamic SOTA bridge telemetry state"
-            
-            # Trong trường hợp xung đột lịch sử, kéo về và tự động giải quyết bằng cách ghi đè trạng thái của Runner (Theirs)
             git pull --strategy-option=theirs origin main --no-rebase || (git merge --abort && git reset --hard origin/main && git add Bridges/Bridge-Super-Core-Affiliate.js && git commit -m "chore: force sync telemetry")
-            
-            # Đẩy sạch lên Cloud
             git push origin HEAD:main
           else
-            echo "No telemetry changes detected compared to remote origin/main. Skipping sync."
+            echo "No telemetry changes detected. Skipping repository push."
           fi
         continue-on-error: false
 
@@ -82,7 +69,6 @@ jobs:
         if: success()
         run: |
           echo "=========================================================================="
-          echo "[ SOTA MCP SWARM SUCCESS ] Conflict-Free Push Strategy Applied!"
-          echo "Bridge Telemetry Forced Overwritten Safely without Local Merging Locks."
-          echo "index.html Integrity: 100% Secure & Locked."
+          echo "[ SOTA BROADCAST SUCCESS ] Signal Dispatched to Google/Bing Networks."
+          echo "index.html Structure Secured // BigTech Crawlers Forced Ingestion Built."
           echo "=========================================================================="
