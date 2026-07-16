@@ -3,10 +3,10 @@
  * [V-STAMP 24 AUTHENTICATED] | ID: acebeam
  */
 (function() {
-    const ESEB_TIMESTAMP = 1784210748;
+    const ESEB_TIMESTAMP = 1784211121;
     const CONFIG = {
         brandId: "acebeam",
-        targetLink: "https://donabicomedia.net/acebeam",
+        targetLink: "#",
         isActive: true
     };
 
@@ -20,7 +20,7 @@
             return;
         }
 
-        if (!CONFIG.isActive) return;
+        if (!CONFIG.isActive || CONFIG.targetLink.startsWith("#INSERT")) return;
 
         // Tự động gán link phân phối vào các nút hành động có mỏ neo '#affiliate-action'
         const actionButtons = document.querySelectorAll('a[href="#affiliate-action"]');
