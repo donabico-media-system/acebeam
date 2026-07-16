@@ -1,0 +1,10 @@
+{
+    "default": {
+        "affiliate_link": "https://donabicomedia.net/fallback",
+        "active": true
+    },
+    "acebeam": {
+        "affiliate_link": "https://donabicomedia.net/acebeam",
+        "active": true
+    }
+}
