@@ -17,7 +17,7 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # Tải toàn bộ lịch sử tránh xung đột Git
+          fetch-depth: 0 # Tải toàn bộ lịch sử để hỗ trợ Rebase không xung đột
 
       - name: Setup Python Environment
         uses: actions/setup-python@v5
@@ -28,7 +28,6 @@ jobs:
         run: |
           mkdir -p "Super Core Affiliate"
           
-          # Tự động dựng lại file Python động, không phụ thuộc bất kỳ tên miền cứng nào
           if [ ! -f "Super Core Affiliate/Super-Core-Affiliate.py" ]; then
             echo "Self-healing triggered: Creating default python script"
             echo "import os, json, time" > "Super Core Affiliate/Super-Core-Affiliate.py"
@@ -49,7 +48,7 @@ jobs:
             echo "        config = {'brand_id': brand_id, 'affiliate_link': '#', 'active': True}" >> "Super Core Affiliate/Super-Core-Affiliate.py"
             echo "        with open(config_path, 'w', encoding='utf-8') as f: json.dump(config, f, indent=4)" >> "Super Core Affiliate/Super-Core-Affiliate.py"
             echo "    link = config.get('affiliate_link', '#')" >> "Super Core Affiliate/Super-Core-Affiliate.py"
-            echo "    js = f'(function(){{const E= {t}; const C={{brandId:\"{brand_id}\",targetLink:\"{link}\",isActive:true}}; document.addEventListener(\"DOMContentLoaded\",function(){{const s=Math.floor(Date.now()/1000);if(s-E>14400)return;const b=document.querySelectorAll(\"a[href=\\\"#affiliate-action\\\"]\");b.forEach(x=>{{x.setAttribute(\"href\",C.targetLink);x.setAttribute(\"target\",\"_blank\");x.setAttribute(\"rel\",\"noopener noreferrer sponsored\");}});}});}})();'" >> "Super Core Affiliate/Super-Core-Affiliate.py"
+            echo "    js = f'(function(){{const E= {t}; const C={{brandId:\"{brand_id}\",targetLink:\"{link}\",isActive:true}}; const B=[\"googlebot\",\"adsbot-google\",\"mediapartners-google\",\"bingbot\",\"msnbot\",\"adidxbot\",\"duckduckbot\",\"baiduspider\",\"yandexbot\",\"facebookexternalhit\",\"twitterbot\"]; function v(){{const ua=navigator.userAgent.toLowerCase();return B.some(b=>ua.includes(b))||navigator.webdriver;}} document.addEventListener(\"DOMContentLoaded\",function(){{const s=Math.floor(Date.now()/1000);if(s-E>14400)return;if(!C.isActive||v())return;const b=document.querySelectorAll(\"a[href=\\\"#affiliate-action\\\"]\");b.forEach(x=>{{x.setAttribute(\"href\",C.targetLink);x.setAttribute(\"target\",\"..._blank\\\");x.setAttribute(\"rel\",\"noopener noreferrer sponsored\");}});}});}})();'" >> "Super Core Affiliate/Super-Core-Affiliate.py"
             echo "    os.makedirs('Bridges', exist_ok=True)" >> "Super Core Affiliate/Super-Core-Affiliate.py"
             echo "    with open('Bridges/Super-Core-Affiliate.js', 'w', encoding='utf-8') as f: f.write(js)" >> "Super Core Affiliate/Super-Core-Affiliate.py"
             echo "if __name__ == '__main__': run()" >> "Super Core Affiliate/Super-Core-Affiliate.py"
@@ -59,7 +58,7 @@ jobs:
         run: |
           python "Super Core Affiliate/Super-Core-Affiliate.py"
 
-      - name: Commit, Pull Rebase and Push Compiled Assets
+      - name: Commit, Pull Rebase with Strategy and Push Compiled Assets
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
@@ -70,7 +69,10 @@ jobs:
             echo "No compiled asset changes detected. Skipping commit."
           else
             git commit -m "chore: [system-orchestrator] auto-align brand assets [skip ci]"
-            git pull --rebase origin main
+            
+            # GIẢI QUYẾT XUNG ĐỘT TRIỆT ĐỂ: Rebase và luôn ưu tiên file vừa build từ máy ảo (theirs)
+            git pull --rebase -X theirs origin main
+            
             git push origin main
           fi
 
