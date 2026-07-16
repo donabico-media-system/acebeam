@@ -22,108 +22,54 @@ concurrency:
 jobs:
   execute_and_sync:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
 
     steps:
-      - name: '1. Checkout mã nguồn'
+      - name: '1. Tải cấu trúc mã nguồn Shallow'
         uses: actions/checkout@v4
         with:
           fetch-depth: 1
 
-      - name: '2. Cấu hình Python'
+      - name: '2. Khởi tạo môi trường Python SOTA'
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
-      - name: '3. Khởi tạo hạ tầng tĩnh chuẩn chỉ'
-        shell: python
+      - name: '3. Tiêm biến môi trường tự động phát hiện tên Repo'
         run: |
-          import os
-          import time
+          REPO_NAME=$(echo "${{ github.repository }}" | cut -d'/' -f2)
+          echo "HYBRID_PROTOCOL=MCP_A2A_GOOGLE_HYBRID" >> $GITHUB_ENV
+          echo "MAX_PARALLEL_THREADS=24" >> $GITHUB_ENV
+          echo "TARGET_INDEX_NODE=https://${{ github.repository_owner }}.github.io/${REPO_NAME}/" >> $GITHUB_ENV
+          echo "NODE_ID=DONABICO-CORE-SOTA-${REPO_NAME^^}-2026" >> $GITHUB_ENV
 
-          # Tự động cấu hình thông tin dựa trên repo hiện tại
-          repo = os.getenv("GITHUB_REPOSITORY", "donabico-global-media/acebeam").split("/")[-1]
-          owner = os.getenv("GITHUB_REPOSITORY_OWNER", "donabico-global-media")
-          target_node = f"https://{owner}.github.io/{repo}/"
-          node_id = f"DONABICO-CORE-SOTA-{repo.upper()}-2026"
-          current_date = time.strftime("%Y-%m-%d", time.gmtime())
-          current_timestamp = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+      - name: '4. Kích hoạt Động cơ phân tán dữ liệu liên kết'
+        run: |
+          if [ -f "./Super Core Affiliate/Super-Core-Affiliate.py" ]; then
+            python "./Super Core Affiliate/Super-Core-Affiliate.py"
+          elif [ -f "./Super Affiliate/Super-Core-Affiliate.py" ]; then
+            python "./Super Affiliate/Super-Core-Affiliate.py"
+          else
+            python "./Super-Core-Affiliate.py"
+          fi
 
-          # Sinh nội dung Landing Page (Times New Roman, Responsive, Emerald Border Active)
-          landing = f'''<!DOCTYPE html>
-          <html lang="en">
-          <head>
-              <meta charset="UTF-8">
-              <meta name="viewport" content="width=device-width, initial-scale=1.0">
-              <title>DONABICO GLOBAL MEDIA SYSTEM</title>
-              <style>
-                  body {{
-                      font-family: 'Times New Roman', Times, serif;
-                      background-color: #0d1117;
-                      color: #c9d1d9;
-                      margin: 0;
-                      padding: 20px;
-                      display: flex;
-                      justify-content: center;
-                      align-items: center;
-                      min-height: 100vh;
-                  }}
-                  body::before {{
-                      content: "";
-                      position: fixed;
-                      top: 0; left: 0; right: 0; bottom: 0;
-                      border: 4px solid #10B981;
-                      pointer-events: none;
-                      z-index: 99999;
-                  }}
-                  .container {{
-                      max-width: 800px;
-                      width: 100%;
-                      background: #161b22;
-                      border: 1px solid #30363d;
-                      border-radius: 6px;
-                      padding: 40px;
-                      box-sizing: border-box;
-                  }}
-                  h1 {{ color: #10B981; font-size: 2.5rem; margin-top: 0; }}
-                  p {{ font-size: 1.2rem; line-height: 1.6; }}
-                  @media (max-width: 768px) {{
-                      h1 {{ font-size: 1.8rem; }}
-                      p {{ font-size: 1rem; }}
-                  }}
-              </style>
-          </head>
-          <body>
-              <div class="container">
-                  <h1>DONABICO GLOBAL MEDIA SYSTEM</h1>
-                  <p>Trạng thái nút mạng tự trị: <strong>{node_id}</strong> hoạt động tối ưu.</p>
-              </div>
-          </body>
-          </html>'''
-
-          sitemap = f'<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n<url>\n<loc>{target_node}landing_pages.html</loc>\n<lastmod>{current_date}</lastmod>\n<changefreq>always</changefreq>\n<priority>1.0</priority>\n</url>\n</urlset>'
-          
-          feed = f'<?xml version="1.0" encoding="utf-8"?>\n<feed xmlns="http://www.w3.org/2005/Atom">\n<title>{node_id} Stream</title>\n<link href="{target_node}feed.xml" rel="self"/>\n<updated>{current_timestamp}</updated>\n<id>{target_node}</id>\n<entry>\n<title>Dynamic SOTA Signal</title>\n<link href="{target_node}landing_pages.html"/>\n<id>{target_node}?id={int(time.time())}</id>\n<updated>{current_timestamp}</updated>\n</entry>\n</feed>'
-
-          with open("landing_pages.html", "w", encoding="utf-8") as f: f.write(landing)
-          with open("sitemap.xml", "w", encoding="utf-8") as f: f.write(sitemap)
-          with open("feed.xml", "w", encoding="utf-8") as f: f.write(feed)
-          print("[SUCCESS] Sinh tài nguyên hoàn tất.")
-
-      - name: '4. Cưỡng bức đồng bộ Git đẩy đè dữ liệu'
+      - name: '5. Đẩy dữ liệu bằng cơ chế Direct Refspec Force Matrix'
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
           
-          # Tự động lấy tên nhánh đang chạy thực tế, loại bỏ cấu hình cứng
-          BRANCH_NAME=${{ github.ref_name }}
+          CURRENT_BRANCH=${{ github.ref_name }}
           
-          git add landing_pages.html sitemap.xml feed.xml
+          # Đóng gói toàn bộ tài nguyên phục vụ CDN biên vào staging
+          git add landing_pages.html sitemap.xml feed.xml || git add -A
           
-          # Thực hiện commit bất kể có thay đổi hay không để tránh lỗi trống staging
-          git commit -m "chore: state deployment matrix sync [skip ci]" --allow-empty
-          
-          # Lệnh tối thượng: Ép đẩy đè thẳng lên nhánh hiện tại, bỏ qua mọi xung đột lịch sử
-          git push origin HEAD:$BRANCH_NAME --force
+          if ! git diff --cached --quiet; then
+            git commit -m "chore: dynamic global sync infrastructure state [skip ci]"
+            # Lệnh cốt lõi: Đẩy thẳng mã băm cục bộ đè lên Server, bypass mọi xung đột của bot khác chạy song song
+            git push origin HEAD:$CURRENT_BRANCH --force
+            echo "[SUCCESS] GitHub Pages CDN Edge synchronized immutably."
+          else
+            echo "No structural changes detected. Moving forward."
+          fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
