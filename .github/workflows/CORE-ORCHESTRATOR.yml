@@ -17,7 +17,7 @@ permissions:
 
 concurrency:
   group: "core-orchestrator-matrix"
-  cancel-in-progress: false # Không hủy luồng để xếp hàng xử lý dữ liệu chuẩn
+  cancel-in-progress: true
 
 jobs:
   execute_and_sync:
@@ -25,11 +25,10 @@ jobs:
     timeout-minutes: 5
 
     steps:
-      - name: '1. Tải toàn bộ lịch sử mã nguồn (Chống lệch pha)'
+      - name: '1. Tải mã nguồn shallow (Tối ưu tốc độ luồng)'
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
-          persist-credentials: true
+          fetch-depth: 1
 
       - name: '2. Khởi tạo môi trường Python'
         uses: actions/setup-python@v5
@@ -54,32 +53,25 @@ jobs:
             python "./Super-Core-Affiliate.py"
           fi
 
-      - name: '5. Cơ chế Đẩy Dữ Liệu Miễn Nhiễm Lỗi Xung Đột'
+      - name: '5. Đẩy dữ liệu bằng cơ chế Direct Refspec (Bypass Mọi Xung Đột Bot)'
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
           
           CURRENT_BRANCH=${{ github.ref_name }}
-          git checkout $CURRENT_BRANCH
           
-          # Gom tất cả tài nguyên vừa sinh (Sitemap, RSS Feed, Bridges)
+          # Gom toàn bộ file tĩnh mới sinh vào cây chỉ mục nội bộ
           git add -A
           
-          # Chỉ xử lý nếu có biến động dữ liệu thực tế
           if ! git diff --cached --quiet; then
             git commit -m "chore: auto-sync dynamic SOTA bridge telemetry state [skip ci]"
             
-            # GIẢI PHÁP LÕI: Lấy dữ liệu mới nhất vừa phát sinh từ các Workflow khác về để gộp
-            git fetch origin $CURRENT_BRANCH
-            
-            # Ép gộp ưu tiên giữ nguyên file vừa sinh mà không xung đột lịch sử commit
-            git merge origin/$CURRENT_BRANCH --strategy-option=ours --allow-unrelated-histories -m "chore: merge remote state changes"
-            
-            # Đẩy dữ liệu lên an toàn
-            git push origin HEAD:$CURRENT_BRANCH
-            echo "Đẩy dữ liệu lên GitHub Pages CDN hoàn tất với dung sai 0."
+            # GIẢI PHÁP LÕI TRỰC TIẾP: Đẩy thẳng gói tin từ HEAD local đè lên nhánh của Server
+            # Không pull, không merge, không cần khớp lịch sử với Bot khác
+            git push origin HEAD:$CURRENT_BRANCH --force
+            echo "Đã cưỡng bức cập nhật CDN biên thành công."
           else
-            echo "Không phát hiện thay đổi cấu trúc dữ liệu biên. Bỏ qua push."
+            echo "Không có biến động dữ liệu. Bỏ qua push."
           fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
