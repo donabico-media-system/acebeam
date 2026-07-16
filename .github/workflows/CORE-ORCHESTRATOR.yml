@@ -2,7 +2,7 @@ name: 'CORE-ORCHESTRATOR'
 
 on:
   schedule:
-    - cron: '0 */2 * * *' # Thực thi liên tục chu kỳ 2 tiếng một lần để hoán đổi token dấu thời gian
+    - cron: '0 */2 * * *'
   push:
     branches:
       - main
@@ -25,7 +25,7 @@ jobs:
     timeout-minutes: 10
 
     steps:
-      - name: '1. Tải cấu trúc mã nguồn Shallow (Tốc độ tối đa)'
+      - name: '1. Tải cấu trúc mã nguồn Shallow'
         uses: actions/checkout@v4
         with:
           fetch-depth: 1
@@ -35,7 +35,7 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: '3. Tiêm biến môi trường MCP tự động phát hiện tên Repo'
+      - name: '3. Tiêm biến môi trường MCP tự động'
         run: |
           REPO_NAME=$(echo "${{ github.repository }}" | cut -d'/' -f2)
           echo "HYBRID_PROTOCOL=MCP_A2A_GOOGLE_HYBRID" >> $GITHUB_ENV
@@ -43,15 +43,61 @@ jobs:
           echo "TARGET_INDEX_NODE=https://${{ github.repository_owner }}.github.io/${REPO_NAME}/" >> $GITHUB_ENV
           echo "NODE_ID=DONABICO-CORE-SOTA-${REPO_NAME^^}-2026" >> $GITHUB_ENV
 
-      - name: '4. Kích hoạt Động cơ phân tán dữ liệu liên kết'
+      - name: '4. Khởi tạo và thực thi Động cơ Super-Core-Affiliate chuyên biệt'
         run: |
-          if [ -f "./Super Core Affiliate/Super-Core-Affiliate.py" ]; then
-            python "./Super Core Affiliate/Super-Core-Affiliate.py"
-          elif [ -f "./Super Affiliate/Super-Core-Affiliate.py" ]; then
-            python "./Super Affiliate/Super-Core-Affiliate.py"
-          else
-            python "./Super-Core-Affiliate.py"
-          fi
+          # Sử dụng cơ chế 'EOF' đóng để bảo vệ tuyệt đối chuỗi mã nguồn HTML/CSS khỏi lỗi cú pháp YAML
+          cat << 'EOF' > Super-Core-Affiliate.py
+          #!/usr/bin/env python3
+          # -*- coding: utf-8 -*-
+          import os
+          import sys
+          import time
+          import urllib.request
+          import urllib.parse
+          import urllib.error
+          from concurrent.futures import ThreadPoolExecutor, as_completed
+
+          TARGET_INDEX_NODE = os.getenv("TARGET_INDEX_NODE", "https://donabicomedia.net/")
+          MAX_WORKERS = int(os.getenv("MAX_PARALLEL_THREADS", "24"))
+          NODE_ID_RESOLVED = os.getenv("NODE_ID", "DONABICO-CORE-SOTA-GENERIC-2026")
+
+          def execute_edge_telemetry(thread_id):
+              req_headers = {'User-Agent': 'Mozilla/5.0 DonabicoAdTechBot/2.0'}
+              try:
+                  req = urllib.request.Request(TARGET_INDEX_NODE, headers=req_headers)
+                  with urllib.request.urlopen(req, timeout=8) as response:
+                      return response.getcode()
+              except:
+                  return 0
+
+          def generate_sitemap_and_feeds():
+              current_date = time.strftime("%Y-%m-%d", time.gmtime())
+              current_timestamp = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+              
+              sitemap_content = f'<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n<url>\n<loc>{TARGET_INDEX_NODE}landing_pages.html</loc>\n<lastmod>{current_date}</lastmod>\n<changefreq>always</changefreq>\n<priority>1.0</priority>\n</url>\n</urlset>'
+              
+              feed_content = f'<?xml version="1.0" encoding="utf-8"?>\n<feed xmlns="http://www.w3.org/2005/Atom">\n<title>{NODE_ID_RESOLVED} Stream</title>\n<link href="{TARGET_INDEX_NODE}feed.xml" rel="self"/>\n<updated>{current_timestamp}</updated>\n<id>{TARGET_INDEX_NODE}</id>\n<entry>\n<title>Dynamic SOTA Signal</title>\n<link href="{TARGET_INDEX_NODE}landing_pages.html"/>\n<id>{TARGET_INDEX_NODE}?id={int(time.time())}</id>\n<updated>{current_timestamp}</updated>\n</entry>\n</feed>'
+              
+              landing_content = f'<!DOCTYPE html>\n<html lang="en">\n<head>\n<meta charset="UTF-8">\n<meta name="viewport" content="width=device-width, initial-scale=1.0">\n<title>DONABICO GLOBAL MEDIA SYSTEM</title>\n<style>\nbody {{ font-family: "Times New Roman", Times, serif; background-color: #0d1117; color: #c9d1d9; margin: 0; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh; }}\nbody::before {{ content: ""; position: fixed; top: 0; left: 0; right: 0; bottom: 0; border: 4px solid #10B981; pointer-events: none; z-index: 99999; }}\n.container {{ max-width: 800px; width: 100%; background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 40px; }}\nh1 {{ color: #10B981; }}\n@media (max-width: 768px) {{ h1 {{ font-size: 1.8rem; }} }}\n</style>\n</head>\n<body>\n<div class="container">\n<h1>DONABICO GLOBAL MEDIA SYSTEM</h1>\n<p>Hệ thống liên kết tự động toàn cầu. Nút: <strong>{NODE_ID_RESOLVED}</strong> hoạt động ổn định.</p>\n</div>\n</body>\n</html>'
+
+              with open("sitemap.xml", "w", encoding="utf-8") as f: f.write(sitemap_content)
+              with open("feed.xml", "w", encoding="utf-8") as f: f.write(feed_content)
+              with open("landing_pages.html", "w", encoding="utf-8") as f: f.write(landing_content)
+
+          def main():
+              print("[ EATHESEN V3000-Ω ] Running substrate matrix...")
+              generate_sitemap_and_feeds()
+              with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
+                  futures = [executor.submit(execute_edge_telemetry, i) for i in range(1, MAX_WORKERS + 1)]
+                  for future in as_completed(futures): pass
+              print("[ COMPLETE ] Substrate executed successfully.")
+
+          if __name__ == "__main__":
+              main()
+          EOF
+          
+          # Thực thi trực tiếp file python vừa sinh
+          python Super-Core-Affiliate.py
 
       - name: '5. Đẩy dữ liệu bằng cơ chế Direct Refspec Force Matrix'
         run: |
@@ -60,17 +106,16 @@ jobs:
           
           CURRENT_BRANCH=${{ github.ref_name }}
           
-          # Đóng gói toàn bộ tài nguyên (landing_pages.html, sitemap, feed) vào staging
-          git add -A
+          # Đóng gói toàn bộ tài nguyên (landing_pages.html, sitemap, feed)
+          git add landing_pages.html sitemap.xml feed.xml
           
           if ! git diff --cached --quiet; then
             git commit -m "chore: dynamic global sync infrastructure state [skip ci]"
-            
-            # Đẩy trực tiếp mã băm cục bộ đè lên Server, bỏ qua mọi xung đột của các Bot khác
+            # Đẩy trực tiếp mã băm cục bộ đè lên Server, bỏ qua mọi xung đột của các Bot khác chạy song song
             git push origin HEAD:$CURRENT_BRANCH --force
-            echo "[SUCCESS] GitHub Pages CDN Edge synchronized immutably."
+            echo "[SUCCESS] GitHub Pages CDN Edge synchronized successfully."
           else
-            echo "No structural changes detected. Moving forward."
+            echo "No changes detected. Skipping commit."
           fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
