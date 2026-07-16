@@ -35,7 +35,7 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: '3. Tiêm biến môi trường tự động phát hiện tên Repo'
+      - name: '3. Thiết lập biến môi trường tự động phát hiện tên Repo'
         run: |
           REPO_NAME=$(echo "${{ github.repository }}" | cut -d'/' -f2)
           echo "HYBRID_PROTOCOL=MCP_A2A_GOOGLE_HYBRID" >> $GITHUB_ENV
@@ -60,12 +60,12 @@ jobs:
           
           CURRENT_BRANCH=${{ github.ref_name }}
           
-          # Đóng gói toàn bộ tài nguyên phục vụ CDN biên vào staging
+          # Đóng gói toàn bộ tài nguyên CDN biên vào khu vực chờ đẩy
           git add landing_pages.html sitemap.xml feed.xml || git add -A
           
           if ! git diff --cached --quiet; then
             git commit -m "chore: dynamic global sync infrastructure state [skip ci]"
-            # Lệnh cốt lõi: Đẩy thẳng mã băm cục bộ đè lên Server, bypass mọi xung đột của bot khác chạy song song
+            # Ép đẩy gói tin HEAD local đè thẳng lên nhánh của Server để triệt tiêu mọi chặn nhánh từ Bot khác
             git push origin HEAD:$CURRENT_BRANCH --force
             echo "[SUCCESS] GitHub Pages CDN Edge synchronized immutably."
           else
