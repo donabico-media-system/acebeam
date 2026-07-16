@@ -2,103 +2,55 @@ name: 'CORE-ORCHESTRATOR'
 
 on:
   schedule:
-    - cron: '0 */2 * * *' # Chạy tự động đều đặn mỗi 2 tiếng
+    - cron: '0 */2 * * *' # Tự động chạy định kỳ mỗi 2 tiếng
   push:
     branches:
       - main
       - master
   workflow_dispatch:
 
+# Cấp đặc quyền ghi trực tiếp vào nội dung kho lưu trữ
 permissions:
   contents: write
-  pages: write
-  id-token: write
-
-concurrency:
-  group: "core-orchestrator-matrix"
-  cancel-in-progress: true
+  workflows: write
 
 jobs:
-  hybrid_mcp_swarm_execution:
-    name: 'Execute MCP Hybrid Parallel Engine'
+  execute_and_sync:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 5
 
     steps:
-      - name: '1. Checkout Master Repository Ecosystem'
+      - name: '1. Tải mã nguồn từ Repository'
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: '2. Deploy Advanced Python Environment'
+      - name: '2. Khởi tạo môi trường Python'
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
-      - name: '3. Inject Hybrid MCP Environment Variables (Dynamic Multi-Repo Detection)'
+      - name: '3. Thiết lập biến môi trường tự động'
         run: |
           REPO_NAME=$(echo "${{ github.repository }}" | cut -d'/' -f2)
-          TARGET_URL="https://${{ github.repository_owner }}.github.io/${REPO_NAME}/"
-          NODE_IDENTIFIER="DONABICO-CORE-SOTA-${REPO_NAME^^}-2026"
-          
           echo "HYBRID_PROTOCOL=MCP_A2A_GOOGLE_HYBRID" >> $GITHUB_ENV
           echo "MAX_PARALLEL_THREADS=24" >> $GITHUB_ENV
-          echo "TARGET_INDEX_NODE=${TARGET_URL}" >> $GITHUB_ENV
-          echo "NODE_ID=${NODE_IDENTIFIER}" >> $GITHUB_ENV
+          echo "TARGET_INDEX_NODE=https://${{ github.repository_owner }}.github.io/${REPO_NAME}/" >> $GITHUB_ENV
+          echo "NODE_ID=DONABICO-CORE-SOTA-${REPO_NAME^^}-2026" >> $GITHUB_ENV
 
-      - name: '4. Boot Super Core Affiliate Parallel Swarm & BigTech Broadcaster'
+      - name: '4. Thực thi tập lệnh Core Engine'
         run: |
           if [ -f "./Super Core Affiliate/Super-Core-Affiliate.py" ]; then
-            chmod +x "./Super Core Affiliate/Super-Core-Affiliate.py"
             python "./Super Core Affiliate/Super-Core-Affiliate.py"
           elif [ -f "./Super Affiliate/Super-Core-Affiliate.py" ]; then
-            chmod +x "./Super Affiliate/Super-Core-Affiliate.py"
             python "./Super Affiliate/Super-Core-Affiliate.py"
           else
-            chmod +x "./Super-Core-Affiliate.py"
             python "./Super-Core-Affiliate.py"
           fi
-        env:
-          PYTHONUNBUFFERED: "1"
 
-      - name: '5. Force Commit & Push All Infrastructure Changes (Conflict-Free Force Matrix)'
-        run: |
-          # 1. Thiết lập cấu hình định danh Bot
-          git config --global user.name 'github-actions[bot]'
-          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-          
-          # 2. Định tuyến chính xác về nhánh đang chạy để tránh lỗi Detached HEAD
-          CURRENT_BRANCH=${{ github.ref_name }}
-          git checkout $CURRENT_BRANCH
-          
-          # 3. Thu hoạch toàn bộ thay đổi cấu trúc tệp tin (.js, .py, .yml)
-          git add -A
-          
-          # 4. Kiểm tra xem có gì thay đổi để Commit hay không
-          if ! git diff --cached --quiet; then
-            git commit -m "chore: dynamic global sync infrastructure state [skip ci]"
-            
-            # 5. Xử lý xung đột lịch sử bằng cách kéo mã nguồn mới nhất về và nén lại (Rebase)
-            git pull origin $CURRENT_BRANCH --rebase --strategy-option=theirs
-            
-            # 6. Thiết lập URL đẩy mã nguồn chứa Token bảo mật để bypass quyền ghi
-            git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
-            
-            # 7. ÉP ĐẨY CƯỠNG BỨC HOÀN TOÀN TRÊN ĐA KHO THƯƠNG HIỆU
-            git push origin $CURRENT_BRANCH --force
-            echo "Ecosystem telemetry state synchronized and forced successfully."
-          else
-            echo "No structural changes detected. Moving forward."
-          fi
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        continue-on-error: false
-
-      - name: '6. Pipeline Execution Verification'
-        if: success()
-        run: |
-          echo "=========================================================================="
-          echo "[ SOTA BROADCAST SUCCESS ] Signal Dispatched via Pure IndexNow Network."
-          echo "All Core Matrix Components Synced and Forced-Push Secured."
-          echo "=========================================================================="
+      - name: '5. Tự động Commit và Push mọi thay đổi'
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore: auto-sync dynamic SOTA bridge telemetry state [skip ci]"
+          skip_dirty_check: false
+          skip_fetch: false
