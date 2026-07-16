@@ -8,7 +8,7 @@ import time
 
 def get_brand_context():
     """
-    Tự động bóc tách Brand ID trực tiếp từ tên Repository hiện tại của GitHub.
+    Tự động bóc tách Brand ID từ tên Repo.
     Ví dụ: 'KHO-2-8000kicks' -> '8000kicks', 'acebeam' -> 'acebeam'
     """
     repo_name = os.getenv('GITHUB_REPOSITORY', 'default/unknown-brand')
@@ -18,61 +18,49 @@ def get_brand_context():
 
 def load_global_config(brand_id):
     """
-    Cơ chế nạp cấu hình tự động hóa toàn cầu (Zero-Hardcoding).
-    Tự động sinh link phân phối động dạng: https://donabicomedia.net/[brand_id]
+    Đọc cấu hình riêng biệt của kho hiện tại.
+    Mỗi kho sẽ tự quản lý một file JSON cấu hình độc lập.
     """
     config_path = "Protocols/eseb_global_config.json"
     
-    # Định dạng cấu trúc tự sinh cho thương hiệu mới
-    dynamic_template = {
-        "affiliate_link": f"https://donabicomedia.net/{brand_id}",
+    # Mẫu cấu hình mặc định (Yêu cầu điền link thật của thương hiệu này)
+    default_config = {
+        "brand_id": brand_id,
+        "affiliate_link": "#INSERT_YOUR_AFFILIATE_LINK_HERE",
         "active": True
     }
     
-    # Khởi tạo bản đồ rỗng ban đầu nếu tệp cấu hình chưa tồn tại
-    configs = {}
-    
-    # Đảm bảo thư mục Protocols được tạo sẵn
+    # Tạo thư mục Protocols nếu chưa tồn tại
     os.makedirs(os.path.dirname(config_path) or '.', exist_ok=True)
     
-    # Đọc cấu hình hiện tại nếu có
     if os.path.exists(config_path):
         try:
             with open(config_path, 'r', encoding='utf-8') as f:
-                configs = json.load(f)
+                config = json.load(f)
         except Exception as e:
             print(f"[WARN] Lỗi đọc file cấu hình, tiến hành khởi tạo mới: {e}")
-            configs = {}
-
-    # Đảm bảo luôn có cấu hình default dự phòng toàn hệ thống
-    if "default" not in configs:
-        configs["default"] = {
-            "affiliate_link": "https://donabicomedia.net/fallback",
-            "active": True
-        }
-
-    # ĐỘT PHÁ TỰ ĐỘNG: Nếu Brand mới chưa từng có trong danh sách, hệ thống tự động đăng ký
-    if brand_id not in configs:
-        configs[brand_id] = dynamic_template
+            config = default_config
+    else:
+        config = default_config
         try:
             with open(config_path, 'w', encoding='utf-8') as f:
-                json.dump(configs, f, indent=4, ensure_ascii=False)
-            print(f"[REGISTER] Đã tự sinh cấu hình thương hiệu mới: '{brand_id}' -> Link: {dynamic_template['affiliate_link']}")
+                json.dump(config, f, indent=4, ensure_ascii=False)
+            print(f"[REGISTER] Đã tạo file cấu hình mẫu cho kho thương hiệu '{brand_id}'.")
         except Exception as e:
             print(f"[WARN] Không thể ghi đè file cấu hình: {e}")
             
-    return configs.get(brand_id, configs.get("default"))
+    return config
 
 def generate_edge_bridge():
-    """Biên dịch và kết xuất file JavaScript ngụy trang độc lập tại biên CDN"""
+    """Biên dịch và kết xuất file JavaScript độc lập tại biên CDN"""
     brand_id = get_brand_context()
     brand_config = load_global_config(brand_id)
     
-    target_link = brand_config.get("affiliate_link")
+    target_link = brand_config.get("affiliate_link", "#")
     is_active = brand_config.get("active", True)
     current_timestamp = int(time.time())
     
-    # Đoạn mã JS IIFE nén gọn, giữ nguyên vẹn cấu trúc giao diện tĩnh index.html
+    # Bản mã JS động tối ưu hóa, bảo toàn 100% giao diện index.html gốc
     js_payload = f"""/**
  * EATHESEN MATRIX - SUPER CORE AFFILIATE BRIDGE (V5.0)
  * [V-STAMP 24 AUTHENTICATED] | ID: {brand_id}
@@ -95,7 +83,7 @@ def generate_edge_bridge():
             return;
         }}
 
-        if (!CONFIG.isActive) return;
+        if (!CONFIG.isActive || CONFIG.targetLink.startsWith("#INSERT")) return;
 
         // Tự động gán link phân phối vào các nút hành động có mỏ neo '#affiliate-action'
         const actionButtons = document.querySelectorAll('a[href="#affiliate-action"]');
@@ -108,7 +96,7 @@ def generate_edge_bridge():
 }})();
 """
     
-    # Xuất tệp JS phân phối ra thư mục biên CDN
+    # Xuất tệp JS ra thư mục Bridges/
     output_dir = "Bridges"
     os.makedirs(output_dir, exist_ok=True)
     
@@ -116,7 +104,7 @@ def generate_edge_bridge():
     with open(output_path, 'w', encoding='utf-8') as f:
         f.write(js_payload)
         
-    print(f"[SUCCESS] Compile completed! Brand Context: {brand_id} -> Link: {target_link}")
+    print(f"[SUCCESS] Compile completed! Brand Context: {brand_id}")
 
 if __name__ == "__main__":
     generate_edge_bridge()
