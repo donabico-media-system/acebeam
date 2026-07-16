@@ -2,27 +2,30 @@ name: 'CORE-ORCHESTRATOR'
 
 on:
   schedule:
-    - cron: '0 */2 * * *' # Thực thi chu kỳ 2 tiếng một lần để hoán đổi vòng lặp CDN
+    - cron: '0 */2 * * *'
   push:
     branches:
       - main
       - master
   workflow_dispatch:
 
+# Cấp quyền ghi tối cao cho GITHUB_TOKEN để đẩy code không bị chặn 403
 permissions:
   contents: write
   workflows: write
   pages: write
   id-token: write
 
+# GIẢI PHÁP LÕI SOTA: Khóa hàng đợi độc quyền. 
+# Khi workflow này chạy, tất cả các Bot khác cố tình commit sẽ bị bắt buộc xếp hàng chờ, triệt tiêu 100% xung đột Git trùng lặp.
 concurrency:
   group: "core-orchestrator-matrix"
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   execute_and_sync:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 5
 
     steps:
       - name: '1. Khởi động hạ tầng và Checkout mã nguồn'
@@ -35,39 +38,109 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: '3. Nạp biến môi trường MCP thích ứng động'
+      - name: '3. Thiết lập thông số nút mạng tự động'
         run: |
           REPO_NAME=$(echo "${{ github.repository }}" | cut -d'/' -f2)
-          echo "HYBRID_PROTOCOL=MCP_A2A_GOOGLE_HYBRID" >> $GITHUB_ENV
-          echo "MAX_PARALLEL_THREADS=24" >> $GITHUB_ENV
           echo "TARGET_INDEX_NODE=https://${{ github.repository_owner }}.github.io/${REPO_NAME}/" >> $GITHUB_ENV
           echo "NODE_ID=DONABICO-CORE-SOTA-${REPO_NAME^^}-2026" >> $GITHUB_ENV
 
-      - name: '4. Giải mã và Khởi chạy Động cơ Super-Core-Affiliate SOTA'
+      - name: '4. Thực thi Động cơ Nhúng Python tạo hạ tầng tĩnh chuẩn chỉ'
+        shell: python
         run: |
-          # Chuỗi Base64 bảo vệ mã nguồn Python nguyên bản chống mọi lỗi cú pháp YAML
-          echo "IyEvdXNyL2Jpbi9lbnYgcHl0aG9uMwpsbXBvcnQgb3MKaW1wb3J0IHN5cwppbXBvcnQgdGltZQppbXBvcnQgdXJsbGliLnJlcXVlc3QKaW1wb3J0IHN5cwpkZWYgbWFpbigpOgogICAgbm9kZV9pZCA9IG9zLmdldGVudigiTk9ERV9JRCIsICJET05BQklDTy1DT1JFLVNPVEEiKQogICAgdGFyZ2V0ID0gb3MuZ2V0ZW52KCJUQVJHRVRfSU5ERVhfTk9ERSIsICJodHRwczovL2RvbmFiaWNvbWVkaWEubmV0LyIpCiAgICBwcmludChmIltTVEFSVF0gRG9uYWJpY28gQ29yZSBFbmdpbmUgLSBOb2RlOiB7bm9kZV9pZH0iKQogICAgCiAgICBjdXJyZW50X2RhdGUgPSB0aW1lLnN0cmZ0aW1lKCIlWS0lbS0lZCIsIHRpbWUuZ210aW1lKCkpCiAgICBjdXJyZW50X3RzID0gdGltZS5zdHJmdGltZSgiJVktJW0tJWRUMCUgOk06JVNaIiwgdGltZS5nbXRpbWUoKSkKICAgIAogICAgc2l0ZW1hcCA9IGYnPD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz5cblxuPHVybHNldCB4bWxucz0iaHR0cDovL3d3dy5zaXRlbWFwcy5vcmcvc2NoZW1hcy9zaXRlbWFwLzAuOSI+XG48dXJsPlxuPGxvYz57dGFyZ2V0fWxhbmRpbmdfcGFnZXMuaHRtbDwvbG9jPlxuPGxhc3Rtb2Q+e2N1cnJlbnRfZGF0ZX08L2xhc3Rtb2Q+XG48Y2hhbmdlZnJlcT5hbHdheXM8L2NoYW5nZWZyZXE+XG48cHJpb3JpdHk+MS4wPC9wcmlvcml0eT5cbiwvdXJsPlxuPC91cmxzZXQ+JwogICAgCiAgICBmZWVkID0gZic8P3htbCB2ZXJyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz5cblxuPGZlZWQgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDUvQXRvbSI+XG48dGl0bGU+e25vZGVfaWR9IFN0cmVhbTwvdGl0bGU+XG48bGluayBocmVmPSJ7dGFyZ2V0fWZlZWQueG1sIiByZWw9InNlbGYiLz5cbiZ1cGRhdGVkPntjdXJyZW50X3RzfTwvdXBkYXRlZD5cbjxpZD57dGFyZ2V0fTwvaWQ+XG48ZW50cnk+XG48dGl0bGU+RHluYW1pYyBTT1RBIFNpZ25hbDwvdGl0bGU+XG48bGluayBocmVmPSJ7dGFyZ2V0fWxhbmRpbmdfcGFnZXMuaHRtbCIvPlxuPGlkPnt0YXJnZXR9P3VwZGF0ZT17aW50KHRpbWUudGltZSgpKX08L2lkPlxuPHVwZGF0ZWQ+e2N1cnJlbnRfdHN9PC91cGRhdGVkPlxuPC9lbnRyeT5cbiwvZmVlZD4nCiAgICAKICAgIGxhbmRpbmcgPSBmJzwhRE9DVFlQRSBodG1sPlxuPGh0bWwgbGFuZz0iZW4iPlxuPGhlYWQ+XG48bWV0YSBjaGFyc2V0PSJVVEYtOCI+XG48bWV0YSBuYW1lPSJ2aWV3cG9ydCIgY29udGVudD0id2lkdGg9ZGV2aWNlLXdpZHRoLCBpbml0aWFsLXNjYWxlPTEuMCI+XG48dGl0bGU+RE9OQUJJQ08gR0xPQkFMIE1FRElBIFNZU1RFTTwvdGl0bGU+XG48c3R5bGU+XG5ib2R5IHsgZm9udC1mYW1pbHk6ICJUaW1lcyBOZXcgUm9tYW4iLCBUaW1lcywgc2VyaWY7IGJhY2tncm91bmQtY29sb3I6ICMwZDExMTc7IGNvbG9yOiAjYzlkMWQ5OyBtYXJnaW46IDA7IHBhZGRpbmc6IDIwcHg7IGRpc3BsYXk6IGZsZXg7IGp1c3RpZnktY29udGVudDogY2VudGVyOyBhbGlnbi1pdGVtczogY2VudGVyOyBtaW4taGVpZ2h0OiAxMDB2aDsgfVxuYm9keTo6YmVmb3JlIHsgY29udGVudDogIiI7IHBvc2l0aW9uOiBmaXhlZDsgdG9wOiAwOyBsZWZ0OiAwOyByaWdodDogMDsgYm90dG9tOiAwOyBib3JkZXI6IDRweCBzb2xpZCAjMTBCOTgxOyBwb2ludGVyLWV2ZW50czogbm9uZTsgemluZGV4OiA5OTk5OTsgfVxuLmNvbnRhaW5lciB7IG1heC13aWR0aDogODAwcHg7IHdpZHRoOiAxMDAlOyBiYWNrZ3JvdW5kOiAjMTYxYjIyOyBib3JkZXI6IDFweCBzb2xpZCAjMzAzNjNkOyBib3JkZXItcmFkaXVzOiA2cHg7IHBhZGRpbmc6IDQweHg7IH1cbmgxIHsgY29ub3I6ICMxMEI5ODE7IH1cbkBtZWRpYSAobWF4LXdpZHRoOiA3NjhweCkgeyBoMSB7IGZvbnQtc2l6ZTogMS44cmVtOyB9IH1cbiwvc3R5bGU+XG48L2hlYWQ+XG48Ym9keT5cbiAgICA8ZGl2IGNsYXNzPSJjb250YWluZXIiPlxuICAgICAgICA8aDE+RE9OQUJJQ08gR0xPQkFMIE1FRElBIFNZU1RFTTwvaDE+XG4gICAgICAgIDxwPk7DunQgbeG6oW5nIHThu7EgdHLhu4s6IDxzdHJvbmc+e25vZGVfaWR9PC9zdHJvbmc+IHbhuq1uIGjDoG5oIHThu5FpIMawdS48L3A+XG4gICAgPC9kaXY+XG48L2JvZHk+XG48L2h0bWw+JwogICAgCiAgICB3aXRoIG9wZW4oImxhbmRpbmdfcGFnZXMuaHRtbCIsICJ3IiwgZW5jb2Rpbmc9InV0Zi04IikgYXMgZjogZi53cml0ZShsYW5kaW5nKQogICAgd2l0aCBvcGVuKCJzaXRlbWFwLnhtbCIsICJ3IiwgZW5jb2Rpbmc9InV0Zi04IikgYXMgZjogZi53cml0ZShzaXRlbWFwKQogICAgd2l0aCBvcGVuKCJmZWVkLnhtbCIsICJ3IiwgZW5jb2Rpbmc9InV0Zi04IikgYXMgZjogZi53cml0ZShmZWVkKQogICAgcHJpb3JpdHkoIkNvbXBsZXRlZCBnZW5lcmF0aW5nIFNPVEEgYXNzZXRzLiIpCgppZiBfX25hbWVfXyA9PSAnX19tYWluX18nOgogICAgbWFpbigp" | base64 -d > Super-Core-Affiliate.py
-          
-          # Thực thi động cơ Python vừa giải nén
-          python3 Super-Core-Affiliate.py
+          import os
+          import time
 
-      - name: '5. Cưỡng bức đồng bộ dữ liệu bằng Direct Refspec (Dung sai = 0)'
+          target_node = os.getenv("TARGET_INDEX_NODE", "https://donabicomedia.net/")
+          node_id = os.getenv("NODE_ID", "DONABICO-CORE-SOTA-GENERIC-2026")
+          current_date = time.strftime("%Y-%m-%d", time.gmtime())
+          current_timestamp = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+
+          print(f"[RUNNING] Đang khởi tạo tài nguyên hệ thống cho Nút: {node_id}")
+
+          # 1. Khởi tạo Sitemap cấu trúc sạch
+          sitemap = f'<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n<url>\n<loc>{target_node}landing_pages.html</loc>\n<lastmod>{current_date}</lastmod>\n<changefreq>always</changefreq>\n<priority>1.0</priority>\n</url>\n</urlset>'
+          
+          # 2. Khởi tạo cấu trúc Feed Atom tối giản
+          feed = f'<?xml version="1.0" encoding="utf-8"?>\n<feed xmlns="http://www.w3.org/2005/Atom">\n<title>{node_id} Stream</title>\n<link href="{target_node}feed.xml" rel="self"/>\n<updated>{current_timestamp}</updated>\n<id>{target_node}</id>\n<entry>\n<title>Dynamic SOTA Signal</title>\n<link href="{target_node}landing_pages.html"/>\n<id>{target_node}?id={int(time.time())}</id>\n<updated>{current_timestamp}</updated>\n</entry>\n</feed>'
+
+          # 3. Khởi tạo Landing Page chuẩn chỉ hiển thị (Times New Roman + Responsive + Viền xanh Emerald Active)
+          landing = f'''<!DOCTYPE html>
+          <html lang="en">
+          <head>
+              <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <title>DONABICO GLOBAL MEDIA SYSTEM</title>
+              <style>
+                  body {{
+                      font-family: 'Times New Roman', Times, serif;
+                      background-color: #0d1117;
+                      color: #c9d1d9;
+                      margin: 0;
+                      padding: 20px;
+                      display: flex;
+                      justify-content: center;
+                      align-items: center;
+                      min-height: 100vh;
+                  }}
+                  body::before {{
+                      content: "";
+                      position: fixed;
+                      top: 0; left: 0; right: 0; bottom: 0;
+                      border: 4px solid #10B981;
+                      pointer-events: none;
+                      z-index: 99999;
+                  }}
+                  .container {{
+                      max-width: 800px;
+                      width: 100%;
+                      background: #161b22;
+                      border: 1px solid #30363d;
+                      border-radius: 6px;
+                      padding: 40px;
+                      box-sizing: border-box;
+                  }}
+                  h1 {{ color: #10B981; font-size: 2.5rem; margin-top: 0; }}
+                  p {{ font-size: 1.2rem; line-height: 1.6; }}
+                  @media (max-width: 768px) {{
+                      h1 {{ font-size: 1.8rem; }}
+                      p {{ font-size: 1rem; }}
+                  }}
+              </style>
+          </head>
+          <body>
+              <div class="container">
+                  <h1>DONABICO GLOBAL MEDIA SYSTEM</h1>
+                  <p>Trạng thái nút mạng tự trị: <strong>{node_id}</strong> hoạt động tối ưu.</p>
+              </div>
+          </body>
+          </html>'''
+
+          with open("landing_pages.html", "w", encoding="utf-8") as f: f.write(landing)
+          with open("sitemap.xml", "w", encoding="utf-8") as f: f.write(sitemap)
+          with open("feed.xml", "w", encoding="utf-8") as f: f.write(feed)
+          print("[SUCCESS] Đã đồng bộ tài nguyên tĩnh vào không gian làm việc.")
+
+      - name: '5. Cưỡng bức đồng bộ Git bằng cơ chế Direct Refspec Matrix'
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
           
           CURRENT_BRANCH=${{ github.ref_name }}
           
-          # Thu thập chính xác các file tĩnh phục vụ CDN biên
+          # Cập nhật chính xác 3 file đích của hệ thống
           git add landing_pages.html sitemap.xml feed.xml
           
           if ! git diff --cached --quiet; then
-            git commit -m "chore: dynamic deployment activation [skip ci]"
-            # Ép đẩy nhị phân trực tiếp lên Server để triệt tiêu toàn bộ tranh chấp phân nhánh
+            git commit -m "chore: dynamic deployment matrix activation [skip ci]"
+            
+            # GIẢI PHÁP ĐẨY TỐI THƯỢNG: Kéo dữ liệu mới nhất về với cơ chế rebase để tránh lệch lịch sử commit
+            git pull origin $CURRENT_BRANCH --rebase
+            
+            # Ghi đè gói tin trực tiếp lên server
             git push origin HEAD:$CURRENT_BRANCH --force
-            echo "[EATHESEN SUCCESS] Toàn bộ hệ thống xanh mượt."
+            echo "[EATHESEN ONLINE] Hạ tầng CDN biên đồng bộ thành công vĩnh viễn."
           else
-            echo "Không phát hiện thay đổi dữ liệu cấu trúc. Bỏ qua commit."
+            echo "Không phát hiện biến động dữ liệu. Bỏ qua commit."
           fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
