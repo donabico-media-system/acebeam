@@ -2,7 +2,7 @@ name: 'CORE-ORCHESTRATOR'
 
 on:
   schedule:
-    - cron: '0 */2 * * *' # Kích hoạt đều đặn mỗi 2 tiếng
+    - cron: '0 */2 * * *' # Chạy tự động đều đặn mỗi 2 tiếng
   push:
     branches:
       - main
@@ -29,7 +29,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }} # Cấp quyền mã hóa ghi trực tiếp từ gốc
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: '2. Deploy Advanced Python Environment'
         uses: actions/setup-python@v5
@@ -62,29 +62,32 @@ jobs:
         env:
           PYTHONUNBUFFERED: "1"
 
-      - name: '5. Force Commit & Push All Infrastructure Changes'
+      - name: '5. Force Commit & Push All Infrastructure Changes (Conflict-Free Force Matrix)'
         run: |
           # 1. Thiết lập cấu hình định danh Bot
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
           
-          # 2. Định tuyến chính xác về nhánh đang chạy (main hoặc master) để tránh lỗi Detached HEAD
+          # 2. Định tuyến chính xác về nhánh đang chạy để tránh lỗi Detached HEAD
           CURRENT_BRANCH=${{ github.ref_name }}
           git checkout $CURRENT_BRANCH
           
-          # 3. Ép sân thu hoạch toàn bộ thay đổi cấu trúc tệp tin
+          # 3. Thu hoạch toàn bộ thay đổi cấu trúc tệp tin (.js, .py, .yml)
           git add -A
           
           # 4. Kiểm tra xem có gì thay đổi để Commit hay không
           if ! git diff --cached --quiet; then
             git commit -m "chore: dynamic global sync infrastructure state [skip ci]"
             
-            # 5. Thiết lập URL đẩy mã nguồn chứa Token bảo mật để bypass quyền ghi
+            # 5. Xử lý xung đột lịch sử bằng cách kéo mã nguồn mới nhất về và nén lại (Rebase)
+            git pull origin $CURRENT_BRANCH --rebase --strategy-option=theirs
+            
+            # 6. Thiết lập URL đẩy mã nguồn chứa Token bảo mật để bypass quyền ghi
             git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
             
-            # 6. Đẩy cưỡng bức lên hệ thống đa kho
-            git push origin $CURRENT_BRANCH
-            echo "Ecosystem telemetry state synchronized successfully."
+            # 7. ÉP ĐẨY CƯỠNG BỨC HOÀN TOÀN TRÊN ĐA KHO THƯƠNG HIỆU
+            git push origin $CURRENT_BRANCH --force
+            echo "Ecosystem telemetry state synchronized and forced successfully."
           else
             echo "No structural changes detected. Moving forward."
           fi
@@ -97,5 +100,5 @@ jobs:
         run: |
           echo "=========================================================================="
           echo "[ SOTA BROADCAST SUCCESS ] Signal Dispatched via Pure IndexNow Network."
-          echo "All Core Matrix Components (JS, PY, YML) Synced and Secured Clean."
+          echo "All Core Matrix Components Synced and Forced-Push Secured."
           echo "=========================================================================="
