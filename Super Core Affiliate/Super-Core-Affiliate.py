@@ -2,10 +2,10 @@
 # -*- coding: utf-8 -*-
 """
 ===================================================================================
-[ DONABICO GLOBAL MEDIA SYSTEM - SUPER CORE AFFILIATE ENGINE V3.1 ]
-Node ID: DONABICO-CORE-SOTA-2026
+[ DONABICO GLOBAL MEDIA SYSTEM - SUPER CORE AFFILIATE ENGINE V5.0 ]
+Node ID: DYNAMICALLY RESOLVED (2026-COMPLIANT)
 Protocol Framework: MCP A2A Google Hybrid Protocol & BigTech Broadcast Matrix
-Execution Mode: Auto-Generate Bridge & Global BigTech Indexing Ping Swarm (FIXED)
+Execution Mode: Auto-Generate Bridge & Global BigTech Indexing Ping Swarm
 ===================================================================================
 """
 
@@ -17,10 +17,11 @@ import urllib.parse
 import urllib.error
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-# Khai báo cấu hình lõi đồng bộ
+# Khai báo cấu hình lõi đồng bộ hóa động từ Workflow Environment
 TARGET_INDEX_NODE = os.getenv("TARGET_INDEX_NODE", "https://donabico-global-media.github.io/acebeam/")
 MAX_WORKERS = int(os.getenv("MAX_PARALLEL_THREADS", "24"))
 HYBRID_PROTOCOL_NAME = os.getenv("HYBRID_PROTOCOL", "MCP_A2A_GOOGLE_HYBRID")
+NODE_ID_RESOLVED = os.getenv("NODE_ID", "DONABICO-CORE-SOTA-GENERIC-2026")
 
 # ANSI Escape Codes cho hiển thị
 C_GREEN = "\033[92m"
@@ -58,7 +59,7 @@ def broadcast_to_bigtech(engine_name, endpoint_url):
     else:
         final_api_call = f"{endpoint_url}{encoded_url}"
 
-    req_headers = {'User-Agent': 'DONABICO-CORE-SOTA-BROADCASTER/2026 (Compliance Matrix)'}
+    req_headers = {'User-Agent': f'DONABICO-CORE-SOTA-BROADCASTER/2026 ({NODE_ID_RESOLVED})'}
     try:
         req = urllib.request.Request(final_api_call, headers=req_headers)
         with urllib.request.urlopen(req, timeout=12) as response:
@@ -70,13 +71,14 @@ def broadcast_to_bigtech(engine_name, endpoint_url):
 def main():
     print(f"{C_BOLD}{C_CYAN}==========================================================================")
     print(f"[ DONABICO CORE ACTIVATION ] BOOTING UP BROADCAST INGESTION ECOSYSTEM")
+    print(f"Node Identifier  : {NODE_ID_RESOLVED}")
     print(f"Target Sync Node : {TARGET_INDEX_NODE}")
     print(f"=========================================================================={C_RESET}\n")
 
-    # PHASE 1: Tạo tệp cầu nối an toàn
+    # PHASE 1: Tạo tệp cầu nối an toàn với tên Super-Core-Affiliate.js
     print(f"{C_BOLD}[ PHASE 01: BRIDGE GENERATION & ECOSYSTEM PROTECTION ]{C_RESET}")
     bridge_dir = "Bridges"
-    bridge_path = os.path.join(bridge_dir, "Bridge-Super-Core-Affiliate.js")
+    bridge_path = os.path.join(bridge_dir, "Super-Core-Affiliate.js")
     if not os.path.exists(bridge_dir): 
         os.makedirs(bridge_dir)
 
@@ -86,7 +88,8 @@ const DNBC_CORE_CONFIG = {{
     SYSTEM_STATUS: "FULL_COMPLIANCE_STATE_DETECTED",
     EMERALD_BORDER_ACTIVE: true,
     LAST_SYNC_TIMESTAMP: "{current_timestamp}",
-    HYBRID_PROTOCOL: "{HYBRID_PROTOCOL_NAME}"
+    HYBRID_PROTOCOL: "{HYBRID_PROTOCOL_NAME}",
+    NODE_ID: "{NODE_ID_RESOLVED}"
 }};
 (function() {{
     if (DNBC_CORE_CONFIG.EMERALD_BORDER_ACTIVE) {{
@@ -108,10 +111,9 @@ const DNBC_CORE_CONFIG = {{
         for future in as_completed(futures): 
             pass 
 
-    # PHASE 3: BẮN TÍN HIỆU RA ĐẠI DƯƠNG INTERNET (VÁ LỖI SYNTAX THREAD)
+    # PHASE 3: BẮN TÍN HIỆU RA ĐẠI DƯƠNG INTERNET (BIGTECH INGESTION)
     print(f"\n{C_BOLD}[ PHASE 03: BIGTECH CDN OUTBOUND BROADCAST SWARM ]{C_RESET}")
     with ThreadPoolExecutor(max_workers=5) as broadcaster_executor:
-        # Sửa lỗi: Truyền tham chiếu hàm và đối số tách biệt để tránh lỗi 'dict' object is not callable
         broadcast_futures = {
             broadcaster_executor.submit(broadcast_to_bigtech, name, url): name 
             for name, url in BIGTECH_PING_ENDPOINTS.items()
