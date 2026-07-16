@@ -1,1 +1,50 @@
+name: CORE-ORCHESTRATOR
+
+on:
+  schedule:
+    # Chạy lệch pha ngẫu nhiên để tối ưu hóa tài nguyên (mỗi 4 giờ)
+    - cron: '12 */4 * * *'
+  workflow_dispatch: # Cho phép kích hoạt thủ công bằng nút bấm
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python Runtime
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Compile Edge Routing Bridge
+        run: |
+          python Modules/Super-Core-Affiliate.py
+
+      - name: Commit and Push Compiled Assets
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          
+          # Chỉ tiến hành commit nếu có thay đổi trong file Bridges/
+          git add Bridges/
+          if git diff --staged --quiet; then
+            echo "No changes in compiled bridges. Skipping commit."
+          else
+            git commit -m "chore: [system-orchestrator] rebuild edge bridge modules [skip ci]"
+            git push origin main
+          fi
+
+      - name: Deploy static site to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./
+          publish_branch: gh-pages
 
