@@ -43,33 +43,37 @@ jobs:
           echo "TARGET_INDEX_NODE=https://${{ github.repository_owner }}.github.io/${REPO_NAME}/" >> $GITHUB_ENV
           echo "NODE_ID=DONABICO-CORE-SOTA-${REPO_NAME^^}-2026" >> $GITHUB_ENV
 
-      - name: '4. Kích hoạt Động cơ phân tán dữ liệu liên kết'
+      - name: '4. Tự động tìm kiếm và Kích hoạt Động cơ Super-Core-Affiliate.py'
         run: |
-          if [ -f "./Super Core Affiliate/Super-Core-Affiliate.py" ]; then
-            python "./Super Core Affiliate/Super-Core-Affiliate.py"
-          elif [ -f "./Super Affiliate/Super-Core-Affiliate.py" ]; then
-            python "./Super Affiliate/Super-Core-Affiliate.py"
+          echo "[INFO] Đang quét toàn bộ hệ thống để tìm tệp thực thi..."
+          # Sử dụng lệnh find để định vị chính xác vị trí tệp .py trong không gian làm việc
+          PY_PATH=$(find . -name "Super-Core-Affiliate.py" -print -quit)
+          
+          if [ -z "$PY_PATH" ]; then
+            echo "[CRITICAL ERROR] Không tìm thấy tệp Super-Core-Affiliate.py trên kho lưu trữ!"
+            exit 1
           else
-            python "./Super-Core-Affiliate.py"
+            echo "[SUCCESS] Đã tìm thấy động cơ tại vị trí: $PY_PATH"
+            python3 "$PY_PATH"
           fi
 
-      - name: '5. Đẩy dữ liệu bằng cơ chế Direct Refspec Force Matrix'
+      - name: '5. Cưỡng bức đẩy đè dữ liệu bằng Direct Refspec Matrix'
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
           
           CURRENT_BRANCH=${{ github.ref_name }}
           
-          # Đóng gói toàn bộ tài nguyên CDN biên vào khu vực chờ đẩy
+          # Đóng gói 3 tài nguyên CDN biên chiến lược
           git add landing_pages.html sitemap.xml feed.xml || git add -A
           
           if ! git diff --cached --quiet; then
             git commit -m "chore: dynamic global sync infrastructure state [skip ci]"
-            # Ép đẩy gói tin HEAD local đè thẳng lên nhánh của Server để triệt tiêu mọi chặn nhánh từ Bot khác
+            # Lệnh tối thượng: Ép đè mã băm để giải quyết triệt để lỗi xung đột phân nhánh do các bot chạy song song
             git push origin HEAD:$CURRENT_BRANCH --force
-            echo "[SUCCESS] GitHub Pages CDN Edge synchronized immutably."
+            echo "[EATHESEN SUCCESS] Hệ thống CDN biên đã đồng bộ xanh mượt."
           else
-            echo "No structural changes detected. Moving forward."
+            echo "Không phát hiện biến động cấu trúc dữ liệu. Bỏ qua commit."
           fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
