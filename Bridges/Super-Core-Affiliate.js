@@ -1,15 +1,33 @@
-// [EATHESEN ECOSYSTEM - PURE GITHUB COMPLIANT ADTECH BRIDGE]
-const DNBC_CORE_CONFIG = {
-    SYSTEM_STATUS: "COMPLIANCE_PASS",
-    EMERALD_BORDER_ACTIVE: true,
-    LAST_SYNC: "2026-07-16 10:24:29 UTC",
-    NODE_ID: "DONABICO-CORE-SOTA-ACEBEAM-2026"
-};
+/**
+ * EATHESEN MATRIX - SUPER CORE AFFILIATE BRIDGE (V5.0)
+ * [V-STAMP 24 AUTHENTICATED] | ID: acebeam
+ */
 (function() {
-    if (DNBC_CORE_CONFIG.EMERALD_BORDER_ACTIVE) {
-        const style = document.createElement('style');
-        style.innerHTML = `:root { --emerald-active: #10B981; } body::before { content: ""; position: fixed; top: 0; left: 0; right: 0; bottom: 0; border: 4px solid var(--emerald-active); pointer-events: none; z-index: 99999; animation: dnbcPulse 2s infinite ease-in-out; } @keyframes dnbcPulse { 0%{opacity: 0.2;} 50%{opacity: 1;} 100%{opacity: 0.2;} }`;
-        document.head.appendChild(style);
-        console.log("[EATHESEN] Closed-Loop Asset Operational. Emerald Indicator Activated.");
-    }
+    const ESEB_TIMESTAMP = 1784210748;
+    const CONFIG = {
+        brandId: "acebeam",
+        targetLink: "https://donabicomedia.net/acebeam",
+        isActive: true
+    };
+
+    document.addEventListener("DOMContentLoaded", function() {
+        console.log("[EHC] System Matrix Synced. Brand: " + CONFIG.brandId);
+        
+        // Cơ chế bảo vệ nhịp đập tại biên (Fail-safe: 4 tiếng)
+        const systemTimeSec = Math.floor(Date.now() / 1000);
+        if (systemTimeSec - ESEB_TIMESTAMP > 14400) {
+            console.warn("[WARN] Fail-safe active: Edge-bridge synchronizer latency exceeds limit.");
+            return;
+        }
+
+        if (!CONFIG.isActive) return;
+
+        // Tự động gán link phân phối vào các nút hành động có mỏ neo '#affiliate-action'
+        const actionButtons = document.querySelectorAll('a[href="#affiliate-action"]');
+        actionButtons.forEach(btn => {
+            btn.setAttribute("href", CONFIG.targetLink);
+            btn.setAttribute("target", "_blank");
+            btn.setAttribute("rel", "noopener noreferrer sponsored");
+        });
+    });
 })();
