@@ -9,18 +9,15 @@ on:
       - master
   workflow_dispatch:
 
-# Cấp quyền ghi tối cao cho GITHUB_TOKEN để đẩy code không bị chặn 403
 permissions:
   contents: write
   workflows: write
   pages: write
   id-token: write
 
-# GIẢI PHÁP LÕI SOTA: Khóa hàng đợi độc quyền. 
-# Khi workflow này chạy, tất cả các Bot khác cố tình commit sẽ bị bắt buộc xếp hàng chờ, triệt tiêu 100% xung đột Git trùng lặp.
 concurrency:
   group: "core-orchestrator-matrix"
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   execute_and_sync:
@@ -28,42 +25,31 @@ jobs:
     timeout-minutes: 5
 
     steps:
-      - name: '1. Khởi động hạ tầng và Checkout mã nguồn'
+      - name: '1. Checkout mã nguồn'
         uses: actions/checkout@v4
         with:
           fetch-depth: 1
 
-      - name: '2. Cấu hình môi trường Python SOTA'
+      - name: '2. Cấu hình Python'
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
-      - name: '3. Thiết lập thông số nút mạng tự động'
-        run: |
-          REPO_NAME=$(echo "${{ github.repository }}" | cut -d'/' -f2)
-          echo "TARGET_INDEX_NODE=https://${{ github.repository_owner }}.github.io/${REPO_NAME}/" >> $GITHUB_ENV
-          echo "NODE_ID=DONABICO-CORE-SOTA-${REPO_NAME^^}-2026" >> $GITHUB_ENV
-
-      - name: '4. Thực thi Động cơ Nhúng Python tạo hạ tầng tĩnh chuẩn chỉ'
+      - name: '3. Khởi tạo hạ tầng tĩnh chuẩn chỉ'
         shell: python
         run: |
           import os
           import time
 
-          target_node = os.getenv("TARGET_INDEX_NODE", "https://donabicomedia.net/")
-          node_id = os.getenv("NODE_ID", "DONABICO-CORE-SOTA-GENERIC-2026")
+          # Tự động cấu hình thông tin dựa trên repo hiện tại
+          repo = os.getenv("GITHUB_REPOSITORY", "donabico-global-media/acebeam").split("/")[-1]
+          owner = os.getenv("GITHUB_REPOSITORY_OWNER", "donabico-global-media")
+          target_node = f"https://{owner}.github.io/{repo}/"
+          node_id = f"DONABICO-CORE-SOTA-{repo.upper()}-2026"
           current_date = time.strftime("%Y-%m-%d", time.gmtime())
           current_timestamp = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
 
-          print(f"[RUNNING] Đang khởi tạo tài nguyên hệ thống cho Nút: {node_id}")
-
-          # 1. Khởi tạo Sitemap cấu trúc sạch
-          sitemap = f'<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n<url>\n<loc>{target_node}landing_pages.html</loc>\n<lastmod>{current_date}</lastmod>\n<changefreq>always</changefreq>\n<priority>1.0</priority>\n</url>\n</urlset>'
-          
-          # 2. Khởi tạo cấu trúc Feed Atom tối giản
-          feed = f'<?xml version="1.0" encoding="utf-8"?>\n<feed xmlns="http://www.w3.org/2005/Atom">\n<title>{node_id} Stream</title>\n<link href="{target_node}feed.xml" rel="self"/>\n<updated>{current_timestamp}</updated>\n<id>{target_node}</id>\n<entry>\n<title>Dynamic SOTA Signal</title>\n<link href="{target_node}landing_pages.html"/>\n<id>{target_node}?id={int(time.time())}</id>\n<updated>{current_timestamp}</updated>\n</entry>\n</feed>'
-
-          # 3. Khởi tạo Landing Page chuẩn chỉ hiển thị (Times New Roman + Responsive + Viền xanh Emerald Active)
+          # Sinh nội dung Landing Page (Times New Roman, Responsive, Emerald Border Active)
           landing = f'''<!DOCTYPE html>
           <html lang="en">
           <head>
@@ -115,32 +101,29 @@ jobs:
           </body>
           </html>'''
 
+          sitemap = f'<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n<url>\n<loc>{target_node}landing_pages.html</loc>\n<lastmod>{current_date}</lastmod>\n<changefreq>always</changefreq>\n<priority>1.0</priority>\n</url>\n</urlset>'
+          
+          feed = f'<?xml version="1.0" encoding="utf-8"?>\n<feed xmlns="http://www.w3.org/2005/Atom">\n<title>{node_id} Stream</title>\n<link href="{target_node}feed.xml" rel="self"/>\n<updated>{current_timestamp}</updated>\n<id>{target_node}</id>\n<entry>\n<title>Dynamic SOTA Signal</title>\n<link href="{target_node}landing_pages.html"/>\n<id>{target_node}?id={int(time.time())}</id>\n<updated>{current_timestamp}</updated>\n</entry>\n</feed>'
+
           with open("landing_pages.html", "w", encoding="utf-8") as f: f.write(landing)
           with open("sitemap.xml", "w", encoding="utf-8") as f: f.write(sitemap)
           with open("feed.xml", "w", encoding="utf-8") as f: f.write(feed)
-          print("[SUCCESS] Đã đồng bộ tài nguyên tĩnh vào không gian làm việc.")
+          print("[SUCCESS] Sinh tài nguyên hoàn tất.")
 
-      - name: '5. Cưỡng bức đồng bộ Git bằng cơ chế Direct Refspec Matrix'
+      - name: '4. Cưỡng bức đồng bộ Git đẩy đè dữ liệu'
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
           
-          CURRENT_BRANCH=${{ github.ref_name }}
+          # Tự động lấy tên nhánh đang chạy thực tế, loại bỏ cấu hình cứng
+          BRANCH_NAME=${{ github.ref_name }}
           
-          # Cập nhật chính xác 3 file đích của hệ thống
           git add landing_pages.html sitemap.xml feed.xml
           
-          if ! git diff --cached --quiet; then
-            git commit -m "chore: dynamic deployment matrix activation [skip ci]"
-            
-            # GIẢI PHÁP ĐẨY TỐI THƯỢNG: Kéo dữ liệu mới nhất về với cơ chế rebase để tránh lệch lịch sử commit
-            git pull origin $CURRENT_BRANCH --rebase
-            
-            # Ghi đè gói tin trực tiếp lên server
-            git push origin HEAD:$CURRENT_BRANCH --force
-            echo "[EATHESEN ONLINE] Hạ tầng CDN biên đồng bộ thành công vĩnh viễn."
-          else
-            echo "Không phát hiện biến động dữ liệu. Bỏ qua commit."
-          fi
+          # Thực hiện commit bất kể có thay đổi hay không để tránh lỗi trống staging
+          git commit -m "chore: state deployment matrix sync [skip ci]" --allow-empty
+          
+          # Lệnh tối thượng: Ép đẩy đè thẳng lên nhánh hiện tại, bỏ qua mọi xung đột lịch sử
+          git push origin HEAD:$BRANCH_NAME --force
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
