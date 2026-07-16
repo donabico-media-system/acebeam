@@ -2,11 +2,9 @@ name: CORE-ORCHESTRATOR
 
 on:
   schedule:
-    # Hệ thống chạy tự động lệch pha (Mỗi 4 tiếng vào phút thứ 12)
     - cron: '12 */4 * * *'
-  workflow_dispatch: # Cho phép nhấn nút chạy ngay lập tức trên giao diện GitHub
+  workflow_dispatch:
 
-# QUAN TRỌNG: Cấp quyền tối cao để workflow có thể tự sửa lỗi, tự commit code và deploy Pages
 permissions:
   contents: write
   pages: write
@@ -24,81 +22,31 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Compile Edge Routing Bridge (Fully Autonomous)
+      - name: Verify or Auto-Create Super-Core-Affiliate Script
         run: |
-          # 1. Tự tạo thư mục "Super Core Affiliate" nếu chưa tồn tại
+          # Tạo thư mục nếu chưa tồn tại
           mkdir -p "Super Core Affiliate"
           
-          # 2. Tự phục hồi mã nguồn Python sạch nếu file bị thiếu
+          # Chỉ tạo file Python mặc định nếu chưa có sẵn trong repo
           if [ ! -f "Super Core Affiliate/Super-Core-Affiliate.py" ]; then
-            echo "Self-healing: Recreating Super-Core-Affiliate.py..."
-            cat << 'EOF' > "Super Core Affiliate/Super-Core-Affiliate.py"
-# -*- coding: utf-8 -*-
-import os, json, time
-
-def get_brand_context():
-    repo_name = os.getenv('GITHUB_REPOSITORY', 'default/unknown-brand')
-    parts = repo_name.split('/')[-1].split('-')
-    return (parts[-1] if len(parts) > 1 else parts[0]).lower()
-
-def load_global_config(brand_id):
-    config_path = "Protocols/eseb_global_config.json"
-    dynamic_template = { "affiliate_link": f"https://donabicomedia.net/{brand_id}", "active": True }
-    configs = {}
-    os.makedirs(os.path.dirname(config_path) or '.', exist_ok=True)
-    if os.path.exists(config_path):
-        try:
-            with open(config_path, 'r', encoding='utf-8') as f: configs = json.load(f)
-        except: configs = {}
-
-    if "default" not in configs:
-        configs["default"] = { "affiliate_link": "https://donabicomedia.net/fallback", "active": True }
-
-    if brand_id not in configs:
-        configs[brand_id] = dynamic_template
-        try:
-            with open(config_path, 'w', encoding='utf-8') as f: json.dump(configs, f, indent=4)
-        except: pass
-    return configs.get(brand_id, configs.get("default"))
-
-def generate_edge_bridge():
-    brand_id = get_brand_context()
-    brand_config = load_global_config(brand_id)
-    target_link = brand_config.get("affiliate_link")
-    is_active = brand_config.get("active", True)
-    current_timestamp = int(time.time())
-    
-    js_payload = f"""/**
- * EATHESEN MATRIX - SUPER CORE AFFILIATE BRIDGE (V5.0)
- * [V-STAMP 24 AUTHENTICATED]
- */
-(function() {{
-    const ESEB_TIMESTAMP = {current_timestamp};
-    const CONFIG = {{ brandId: "{brand_id}", targetLink: "{target_link}", isActive: {str(is_active).lower()} }};
-    document.addEventListener("DOMContentLoaded", function() {{
-        console.log("[EHC] System Matrix Synced. Brand: " + CONFIG.brandId);
-        const systemTimeSec = Math.floor(Date.now() / 1000);
-        if (systemTimeSec - ESEB_TIMESTAMP > 14400) return;
-        if (!CONFIG.isActive) return;
-        const actionButtons = document.querySelectorAll('a[href="#affiliate-action"]');
-        actionButtons.forEach(btn => {{
-            btn.setAttribute("href", CONFIG.targetLink);
-            btn.setAttribute("target", "_blank");
-            btn.setAttribute("rel", "noopener noreferrer sponsored");
-        }});
-    }});
-}})();"""
-    os.makedirs("Bridges", exist_ok=True)
-    with open("Bridges/Super-Core-Affiliate.js", "w", encoding="utf-8") as f:
-        f.write(js_payload)
-    print(f"[SUCCESS] Compile completed for Brand: {brand_id}")
-
-if __name__ == "__main__":
-    generate_edge_bridge()
-EOF
+            echo "Self-healing triggered: Creating default python script"
+            echo "import os, json, time" > "Super Core Affiliate/Super-Core-Affiliate.py"
+            echo "def get_brand():" >> "Super Core Affiliate/Super-Core-Affiliate.py"
+            echo "    repo = os.getenv('GITHUB_REPOSITORY', 'default/unknown-brand')" >> "Super Core Affiliate/Super-Core-Affiliate.py"
+            echo "    parts = repo.split('/')[-1].split('-')" >> "Super Core Affiliate/Super-Core-Affiliate.py"
+            echo "    return parts[-1].lower() if len(parts) > 1 else parts[0].lower()" >> "Super Core Affiliate/Super-Core-Affiliate.py"
+            echo "def run():" >> "Super Core Affiliate/Super-Core-Affiliate.py"
+            echo "    brand_id = get_brand()" >> "Super Core Affiliate/Super-Core-Affiliate.py"
+            echo "    t = int(time.time())" >> "Super Core Affiliate/Super-Core-Affiliate.py"
+            echo "    link = f'https://donabicomedia.net/{brand_id}'" >> "Super Core Affiliate/Super-Core-Affiliate.py"
+            echo "    js = f'(function(){{const E= {t}; const C={{brandId:\"{brand_id}\",targetLink:\"{link}\",isActive:true}}; document.addEventListener(\"DOMContentLoaded\",function(){{const s=Math.floor(Date.now()/1000);if(s-E>14400)return;const b=document.querySelectorAll(\"a[href=\\\"#affiliate-action\\\"]\");b.forEach(x=>{{x.setAttribute(\"href\",C.targetLink);x.setAttribute(\"target\",\"_blank\");x.setAttribute(\"rel\",\"noopener noreferrer sponsored\");}});}});}})();'" >> "Super Core Affiliate/Super-Core-Affiliate.py"
+            echo "    os.makedirs('Bridges', exist_ok=True)" >> "Super Core Affiliate/Super-Core-Affiliate.py"
+            echo "    with open('Bridges/Super-Core-Affiliate.js', 'w', encoding='utf-8') as f: f.write(js)" >> "Super Core Affiliate/Super-Core-Affiliate.py"
+            echo "if __name__ == '__main__': run()" >> "Super Core Affiliate/Super-Core-Affiliate.py"
           fi
-          
-          # 3. Thực thi file Python
+
+      - name: Compile Edge Routing Bridge
+        run: |
           python "Super Core Affiliate/Super-Core-Affiliate.py"
 
       - name: Commit and Push Compiled Assets
@@ -106,12 +54,10 @@ EOF
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           
-          # Thêm các tệp tự sinh vào Git tracking
           git add "Super Core Affiliate/" Bridges/ Protocols/
           
-          # Chỉ commit nếu có thay đổi thực sự để tránh spam lịch sử Git
           if git diff --staged --quiet; then
-            echo "No changes detected. Skipping push."
+            echo "No compiled asset changes detected. Skipping git push."
           else
             git commit -m "chore: [system-orchestrator] auto-align brand assets [skip ci]"
             git push origin main
