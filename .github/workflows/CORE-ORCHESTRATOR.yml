@@ -2,10 +2,11 @@ name: CORE-ORCHESTRATOR
 
 on:
   schedule:
-    # Lập lịch chạy lệch pha tự động (Mỗi 4 tiếng vào phút thứ 12)
+    # Hệ thống chạy tự động lệch pha (Mỗi 4 tiếng vào phút thứ 12)
     - cron: '12 */4 * * *'
-  workflow_dispatch: # Hỗ trợ nút nhấn chạy lập tức trên GitHub UI
+  workflow_dispatch: # Cho phép nhấn nút chạy ngay lập tức trên giao diện GitHub
 
+# QUAN TRỌNG: Cấp quyền tối cao để workflow có thể tự sửa lỗi, tự commit code và deploy Pages
 permissions:
   contents: write
   pages: write
@@ -25,13 +26,14 @@ jobs:
 
       - name: Compile Edge Routing Bridge (Fully Autonomous)
         run: |
-          # Tự động tạo cấu trúc thư mục chứa lõi xử lý nếu chưa có
+          # 1. Tự tạo thư mục "Super Core Affiliate" nếu chưa tồn tại
           mkdir -p "Super Core Affiliate"
           
-          # Cơ chế tự phục hồi mã nguồn Python động, không phụ thuộc thương hiệu cũ
+          # 2. Tự phục hồi mã nguồn Python sạch nếu file bị thiếu
           if [ ! -f "Super Core Affiliate/Super-Core-Affiliate.py" ]; then
-            echo "Self-healing: Creating dynamic Super-Core-Affiliate.py..."
+            echo "Self-healing: Recreating Super-Core-Affiliate.py..."
             cat << 'EOF' > "Super Core Affiliate/Super-Core-Affiliate.py"
+# -*- coding: utf-8 -*-
 import os, json, time
 
 def get_brand_context():
@@ -96,7 +98,7 @@ if __name__ == "__main__":
 EOF
           fi
           
-          # Thực thi biên dịch và tạo file JS tĩnh phân phối tại biên
+          # 3. Thực thi file Python
           python "Super Core Affiliate/Super-Core-Affiliate.py"
 
       - name: Commit and Push Compiled Assets
@@ -104,11 +106,12 @@ EOF
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           
-          # Lưu trạng thái và đẩy mã nguồn lên Repo
+          # Thêm các tệp tự sinh vào Git tracking
           git add "Super Core Affiliate/" Bridges/ Protocols/
           
+          # Chỉ commit nếu có thay đổi thực sự để tránh spam lịch sử Git
           if git diff --staged --quiet; then
-            echo "No compiled asset changes detected. Skipping git push."
+            echo "No changes detected. Skipping push."
           else
             git commit -m "chore: [system-orchestrator] auto-align brand assets [skip ci]"
             git push origin main
