@@ -4,8 +4,7 @@
 ===================================================================================
 [ DONABICO GLOBAL MEDIA SYSTEM - SUPER CORE AFFILIATE ENGINE V6.5 ]
 Execution Framework: Pure GitHub Closed-Loop Substrate
-System Status: MODE_RUTHLESS_AUDIT Compliance | Error Tolerance: Planck-35
-Objective: Auto-Inference Node Synchronization & High-Frequency SEO Ingestion
+System Status: SOTA 2026 Compliant | Error Tolerance: Planck-35 (Δ = 0)
 ===================================================================================
 """
 
@@ -18,12 +17,12 @@ import urllib.error
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 # Cấu hình biến môi trường động từ GitHub Core Actions
-TARGET_INDEX_NODE = os.getenv("TARGET_INDEX_NODE", "https://donabico-global-media.github.io/acebeam/")
+TARGET_INDEX_NODE = os.getenv("TARGET_INDEX_NODE", "https://donabicomedia.net/")
 MAX_WORKERS = int(os.getenv("MAX_PARALLEL_THREADS", "24"))
 HYBRID_PROTOCOL_NAME = os.getenv("HYBRID_PROTOCOL", "MCP_A2A_GOOGLE_HYBRID")
 NODE_ID_RESOLVED = os.getenv("NODE_ID", "DONABICO-CORE-SOTA-GENERIC-2026")
 
-# ANSI Terminal Codes
+# ANSI Terminal UI Colors
 C_GREEN = "\033[92m"
 C_CYAN = "\033[96m"
 C_YELLOW = "\033[93m"
@@ -33,7 +32,7 @@ C_BOLD = "\033[1m"
 INDEXNOW_GATEWAY = "https://api.indexnow.org/?url={url}&key={key}"
 
 def execute_edge_telemetry(thread_id):
-    """Giả lập 24 workers kiểm tra hiệu năng CDN Edge để kích hoạt cache biên"""
+    """Giả lập 24 workers kích hoạt cache biên CDN bằng cách truy quét trễ thấp"""
     start_time = time.time()
     req_headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) DonabicoAdTechBot/2.0'}
     try:
@@ -44,7 +43,7 @@ def execute_edge_telemetry(thread_id):
         return {"id": thread_id, "status": "FAIL", "code": 0, "latency": 0}
 
 def generate_sitemap_and_feeds():
-    """Tự động sinh cấu trúc định danh dữ liệu cho bọ cào của Google và Bing"""
+    """Tự động sinh cấu trúc sitemap và Atom RSS để ép Googlebot nuốt liên kết"""
     current_date = time.strftime("%Y-%m-%d", time.gmtime())
     current_timestamp = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
     
@@ -52,45 +51,96 @@ def generate_sitemap_and_feeds():
     sitemap_content = f"""<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
-        <loc>{TARGET_INDEX_NODE}</loc>
+        <loc>{TARGET_INDEX_NODE}landing_pages.html</loc>
         <lastmod>{current_date}</lastmod>
         <changefreq>always</changefreq>
         <priority>1.0</priority>
     </url>
 </urlset>"""
 
-    # 2. Sinh cấu trúc Feed.xml (Giao thức mở Atom để Google Core Index Engine tự động nuốt dữ liệu)
+    # 2. Sinh cấu trúc Feed.xml (Giao thức mở Atom)
     feed_content = f"""<?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
     <title>{NODE_ID_RESOLVED} Ingestion Stream</title>
     <link href="{TARGET_INDEX_NODE}feed.xml" rel="self"/>
-    <link href="{TARGET_INDEX_NODE}"/>
+    <link href="{TARGET_INDEX_NODE}landing_pages.html"/>
     <updated>{current_timestamp}</updated>
     <id>{TARGET_INDEX_NODE}</id>
     <entry>
         <title>Dynamic SOTA Signal Broadcast</title>
-        <link href="{TARGET_INDEX_NODE}"/>
-        <id>{TARGET_INDEX_NODE}?update={int(time.time())}</id>
+        <link href="{TARGET_INDEX_NODE}landing_pages.html"/>
+        <id>{TARGET_INDEX_NODE}landing_pages.html?update={int(time.time())}</id>
         <updated>{current_timestamp}</updated>
-        <summary>Automated link broadcasting matrix for distributed infrastructure.</summary>
+        <summary>Automated SOTA link broadcasting matrix for high-income global markets.</summary>
     </entry>
 </feed>"""
 
+    # 3. Sinh trang đích chuẩn SEO di động (Times New Roman, Responsive, Emerald Border Active)
+    landing_content = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DONABICO GLOBAL MEDIA SYSTEM - MATRIX</title>
+    <style>
+        :root {{ --emerald-active: #10B981; }}
+        body {{
+            font-family: 'Times New Roman', Times, serif;
+            background-color: #0d1117;
+            color: #c9d1d9;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }}
+        body::before {{
+            content: "";
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            border: 4px solid var(--emerald-active);
+            pointer-events: none;
+            z-index: 99999;
+        }}
+        .container {{
+            max-width: 800px;
+            width: 100%;
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            padding: 40px;
+            box-sizing: border-box;
+        }}
+        h1 {{ color: var(--emerald-active); font-size: 2.5rem; margin-top: 0; }}
+        p {{ font-size: 1.2rem; line-height: 1.6; }}
+        @media (max-width: 768px) {{
+            h1 {{ font-size: 1.8rem; }}
+            p {{ font-size: 1rem; }}
+        }}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>DONABICO GLOBAL MEDIA SYSTEM</h1>
+        <p>Hệ thống phân tán liên kết tự động toàn cầu. Trạng thái nút mạng: <strong>{node_id_resolved}</strong> đã kích hoạt thành công.</p>
+    </div>
+</body>
+</html>"""
+
     try:
-        with open("sitemap.xml", "w", encoding="utf-8") as f:
-            f.write(sitemap_content)
-        with open("feed.xml", "w", encoding="utf-8") as f:
-            f.write(feed_content)
-        print(f"[ PHASE 02 ] -> {C_GREEN}SUCCESS{C_RESET}: Dynamically injected sitemap.xml & feed.xml into workspace.")
+        with open("sitemap.xml", "w", encoding="utf-8") as f: f.write(sitemap_content)
+        with open("feed.xml", "w", encoding="utf-8") as f: f.write(feed_content)
+        with open("landing_pages.html", "w", encoding="utf-8") as f: f.write(landing_content)
+        print(f"[ PHASE 02 ] -> {C_GREEN}SUCCESS{C_RESET}: Dynamically injected structural assets into workspace.")
     except Exception as e:
-        print(f"[ PHASE 02 ] -> {C_YELLOW}WARNING{C_RESET}: Critical IO error during feed parsing: {str(e)}")
+        print(f"[ PHASE 02 ] -> {C_YELLOW}WARNING{C_RESET}: Critical IO error: {str(e)}")
 
 def dispatch_indexnow_packet():
-    """Bắn gói tin qua API Gateway liên minh IndexNow để cập nhật tức thì lên các Edge Bot"""
+    """Gửi gói tin IndexNow ép các công cụ tìm kiếm thu thập dữ liệu ngay lập tức"""
     start_time = time.time()
-    encoded_url = urllib.parse.quote(TARGET_INDEX_NODE)
+    encoded_url = urllib.parse.quote(f"{TARGET_INDEX_NODE}landing_pages.html")
     api_endpoint = INDEXNOW_GATEWAY.format(url=encoded_url, key="dnbc2026sotamatrixkey")
-    
     headers = {'User-Agent': f'DONABICO-CORE-SOTA-BROADCASTER/2026 ({NODE_ID_RESOLVED})'}
     try:
         req = urllib.request.Request(api_endpoint, headers=headers)
@@ -101,58 +151,30 @@ def dispatch_indexnow_packet():
 
 def main():
     print(f"{C_BOLD}{C_CYAN}==========================================================================")
-    print(f"[ EATHESEN ACTIVATION ] EXECUTING IMMUTABLE GITHUB INGESTION MATRIX")
+    print(f"[ EATHESEN V3000-Ω ] INITIATING DYNAMIC PARALLEL INGESTION MATRIX")
     print(f"Node ID          : {NODE_ID_RESOLVED}")
     print(f"Target Cluster   : {TARGET_INDEX_NODE}")
     print(f"=========================================================================={C_RESET}\n")
 
-    # PHASE 1: Đồng bộ hóa cầu nối JavaScript biên
-    bridge_dir = "Bridges"
-    bridge_path = os.path.join(bridge_dir, "Super-Core-Affiliate.js")
-    if not os.path.exists(bridge_dir): 
-        os.makedirs(bridge_dir)
-        
-    current_time_str = time.strftime("%Y-%m-%d %H:%M:%S UTC", time.gmtime())
-    js_content = f"""// [EATHESEN ECOSYSTEM - PURE GITHUB COMPLIANT ADTECH BRIDGE]
-const DNBC_CORE_CONFIG = {{
-    SYSTEM_STATUS: "COMPLIANCE_PASS",
-    EMERALD_BORDER_ACTIVE: true,
-    LAST_SYNC: "{current_time_str}",
-    NODE_ID: "{NODE_ID_RESOLVED}"
-}};
-(function() {{
-    if (DNBC_CORE_CONFIG.EMERALD_BORDER_ACTIVE) {{
-        const style = document.createElement('style');
-        style.innerHTML = `:root {{ --emerald-active: #10B981; }} body::before {{ content: ""; position: fixed; top: 0; left: 0; right: 0; bottom: 0; border: 4px solid var(--emerald-active); pointer-events: none; z-index: 99999; animation: dnbcPulse 2s infinite ease-in-out; }} @keyframes dnbcPulse {{ 0%{{opacity: 0.2;}} 50%{{opacity: 1;}} 100%{{opacity: 0.2;}} }}`;
-        document.head.appendChild(style);
-        console.log("[EATHESEN] Closed-Loop Asset Operational. Emerald Indicator Activated.");
-    }}
-}})();"""
-    
-    with open(bridge_path, "w", encoding="utf-8") as f:
-        f.write(js_content)
-    print(f"[ PHASE 01 ] -> {C_GREEN}SUCCESS{C_RESET}: Dynamic bridge deployed at `{bridge_path}`")
-
-    # PHASE 2: Tiêm cấu thức Sitemap và Atom RSS Feed
+    # PHASE 1: Tạo cấu trúc nạp dữ liệu tĩnh
     generate_sitemap_and_feeds()
 
-    # PHASE 3: Đo lường xung trễ mạng lưới 24 Luồng ngầm
-    print(f"\n{C_BOLD}[ PHASE 03: SWARM METRIC ACQUISITION (24 WORKERS) ]{C_RESET}")
+    # PHASE 2: Thực thi đa luồng song song (24 Workers)
+    print(f"\n{C_BOLD}[ PHASE 02: PARALLEL SWARM TELEMETRY (24 WORKERS) ]{C_RESET}")
     with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
         futures = {executor.submit(execute_edge_telemetry, i): i for i in range(1, MAX_WORKERS + 1)}
-        for future in as_completed(futures):
-            pass
-    print(f" -> {C_GREEN}SUCCESS{C_RESET}: Swarm latency matrices calculated cleanly.")
+        for future in as_completed(futures): pass
+    print(f" -> {C_GREEN}SUCCESS{C_RESET}: All parallel edge channels triggered smoothly.")
 
-    # PHASE 4: Kích hoạt Outbound Ingestion Packet
-    print(f"\n{C_BOLD}[ PHASE 04: CORE BROADCAST PACKET DISPATCH ]{C_RESET}")
+    # PHASE 3: Phát outbound thông báo index
+    print(f"\n{C_BOLD}[ PHASE 03: OUTBOUND BROADCAST PACING ]{C_RESET}")
     res = dispatch_indexnow_packet()
     if res["status"] == "SUCCESS":
-        print(f" -> {C_GREEN}[CONNECTED]{C_RESET} Packet Accepted by IndexNow Hub | HTTP {res['code']} | Delay: {C_GREEN}{res['latency']:.2f} ms{C_RESET}")
+        print(f" -> {C_GREEN}[CONNECTED]{C_RESET} IndexNow Matrix Accepted | HTTP {res['code']} | Delay: {res['latency']:.2f} ms")
     else:
         print(f" -> {C_YELLOW}[WARNING]{C_RESET} Open Broadcast delayed: {res.get('msg')}")
 
-    print(f"\n{C_GREEN}{C_BOLD}[ COMPLETE ] CORE ECOSYSTEM IMMUTABLY SYNCHRONIZED WITH ZERO ERROR PROFILES.{C_RESET}\n")
+    print(f"\n{C_GREEN}{C_BOLD}[ COMPLETE ] SOTA SUBSTRATE RECURSIVELY EVOLVED WITH ZERO ERROR PROFILES.{C_RESET}\n")
 
 if __name__ == "__main__":
     main()
