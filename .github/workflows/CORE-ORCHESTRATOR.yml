@@ -2,17 +2,22 @@ name: 'CORE-ORCHESTRATOR'
 
 on:
   schedule:
-    - cron: '0 */2 * * *' # Tự động chạy định kỳ mỗi 2 tiếng
+    - cron: '0 */2 * * *'
   push:
     branches:
       - main
       - master
   workflow_dispatch:
 
-# Cấp đặc quyền ghi trực tiếp vào nội dung kho lưu trữ
 permissions:
   contents: write
   workflows: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "core-orchestrator-matrix"
+  cancel-in-progress: false # Không hủy luồng để xếp hàng xử lý dữ liệu chuẩn
 
 jobs:
   execute_and_sync:
@@ -20,10 +25,11 @@ jobs:
     timeout-minutes: 5
 
     steps:
-      - name: '1. Tải mã nguồn từ Repository'
+      - name: '1. Tải toàn bộ lịch sử mã nguồn (Chống lệch pha)'
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          persist-credentials: true
 
       - name: '2. Khởi tạo môi trường Python'
         uses: actions/setup-python@v5
@@ -48,9 +54,32 @@ jobs:
             python "./Super-Core-Affiliate.py"
           fi
 
-      - name: '5. Tự động Commit và Push mọi thay đổi'
-        uses: stefanzweifel/git-auto-commit-action@v5
-        with:
-          commit_message: "chore: auto-sync dynamic SOTA bridge telemetry state [skip ci]"
-          skip_dirty_check: false
-          skip_fetch: false
+      - name: '5. Cơ chế Đẩy Dữ Liệu Miễn Nhiễm Lỗi Xung Đột'
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          
+          CURRENT_BRANCH=${{ github.ref_name }}
+          git checkout $CURRENT_BRANCH
+          
+          # Gom tất cả tài nguyên vừa sinh (Sitemap, RSS Feed, Bridges)
+          git add -A
+          
+          # Chỉ xử lý nếu có biến động dữ liệu thực tế
+          if ! git diff --cached --quiet; then
+            git commit -m "chore: auto-sync dynamic SOTA bridge telemetry state [skip ci]"
+            
+            # GIẢI PHÁP LÕI: Lấy dữ liệu mới nhất vừa phát sinh từ các Workflow khác về để gộp
+            git fetch origin $CURRENT_BRANCH
+            
+            # Ép gộp ưu tiên giữ nguyên file vừa sinh mà không xung đột lịch sử commit
+            git merge origin/$CURRENT_BRANCH --strategy-option=ours --allow-unrelated-histories -m "chore: merge remote state changes"
+            
+            # Đẩy dữ liệu lên an toàn
+            git push origin HEAD:$CURRENT_BRANCH
+            echo "Đẩy dữ liệu lên GitHub Pages CDN hoàn tất với dung sai 0."
+          else
+            echo "Không phát hiện thay đổi cấu trúc dữ liệu biên. Bỏ qua push."
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
