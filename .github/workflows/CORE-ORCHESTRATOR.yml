@@ -2,7 +2,7 @@ name: 'CORE-ORCHESTRATOR'
 
 on:
   schedule:
-    - cron: '0 */2 * * *' # Chạy tự động đều đặn mỗi 2 tiếng để giữ tần suất quét liên tục trên BigTech
+    - cron: '0 */2 * * *' # Kích hoạt lệch pha 2 tiếng/lần chống bộ lọc mẫu của BigTech
   push:
     branches:
       - main
@@ -35,17 +35,34 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: '3. Inject Hybrid MCP Environment Variables'
+      - name: '3. Inject Hybrid MCP Environment Variables (Dynamic Multi-Repo Detection)'
         run: |
+          # 1. Tự động trích xuất tên Repo (ví dụ: acebeam, 8000kicks, ...)
+          REPO_NAME=$(echo "${{ github.repository }}" | cut -d'/' -f2)
+          
+          # 2. Tự động sinh URL GitHub Pages tương ứng với kho thương hiệu hiện tại
+          TARGET_URL="https://${{ github.repository_owner }}.github.io/${REPO_NAME}/"
+          
+          # 3. Tạo NODE_ID định danh độc bản dựa trên Thương hiệu
+          NODE_IDENTIFIER="DONABICO-CORE-SOTA-${REPO_NAME^^}-2026"
+          
+          # 4. Ghi trực tiếp vào biến môi trường toàn cục của Action Run
           echo "HYBRID_PROTOCOL=MCP_A2A_GOOGLE_HYBRID" >> $GITHUB_ENV
           echo "MAX_PARALLEL_THREADS=24" >> $GITHUB_ENV
-          echo "TARGET_INDEX_NODE=https://donabico-global-media.github.io/acebeam/" >> $GITHUB_ENV
-          echo "NODE_ID=DONABICO-CORE-SOTA-2026" >> $GITHUB_ENV
+          echo "TARGET_INDEX_NODE=${TARGET_URL}" >> $GITHUB_ENV
+          echo "NODE_ID=${NODE_IDENTIFIER}" >> $GITHUB_ENV
+          
+          # Xuất log kiểm tra trạng thái khớp nối
+          echo "=========================================================================="
+          echo "DYNAMIC RESOLUTION SUCCESSFUL:"
+          echo "Target Ingestion Domain: ${TARGET_URL}"
+          echo "Ecosystem Node Identity: ${NODE_IDENTIFIER}"
+          echo "=========================================================================="
 
       - name: '4. Boot Super Core Affiliate Parallel Swarm & BigTech Broadcaster'
         run: |
           chmod +x "./Super Core Affiliate/Super-Core-Affiliate.py"
-          python "./Super Core Affiliate/Super-Core-Affiliate.py"
+          python "./Super Affiliate/Super-Core-Affiliate.py" || python "./Super Core Affiliate/Super-Core-Affiliate.py"
         env:
           PYTHONUNBUFFERED: "1"
 
@@ -54,11 +71,11 @@ jobs:
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
           git fetch origin main
-          git add Bridges/Bridge-Super-Core-Affiliate.js
+          git add Bridges/Super-Core-Affiliate.js
           
-          if ! git diff --quiet origin/main -- Bridges/Bridge-Super-Core-Affiliate.js; then
+          if ! git diff --quiet origin/main -- Bridges/Super-Core-Affiliate.js; then
             git commit -m "chore: auto-sync dynamic SOTA bridge telemetry state"
-            git pull --strategy-option=theirs origin main --no-rebase || (git merge --abort && git reset --hard origin/main && git add Bridges/Bridge-Super-Core-Affiliate.js && git commit -m "chore: force sync telemetry")
+            git pull --strategy-option=theirs origin main --no-rebase || (git merge --abort && git reset --hard origin/main && git add Bridges/Super-Core-Affiliate.js && git commit -m "chore: force sync telemetry")
             git push origin HEAD:main
           else
             echo "No telemetry changes detected. Skipping repository push."
