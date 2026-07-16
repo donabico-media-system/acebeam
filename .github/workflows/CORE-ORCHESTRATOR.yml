@@ -2,7 +2,7 @@ name: 'CORE-ORCHESTRATOR'
 
 on:
   schedule:
-    - cron: '0 */2 * * *' # Chạy tự động 2 tiếng một lần
+    - cron: '0 */2 * * *' # Thực thi chu kỳ 2 tiếng một lần để hoán đổi vòng lặp CDN
   push:
     branches:
       - main
@@ -25,17 +25,17 @@ jobs:
     timeout-minutes: 10
 
     steps:
-      - name: '1. Tải cấu trúc mã nguồn Shallow'
+      - name: '1. Khởi động hạ tầng và Checkout mã nguồn'
         uses: actions/checkout@v4
         with:
           fetch-depth: 1
 
-      - name: '2. Khởi tạo môi trường Python SOTA'
+      - name: '2. Cấu hình môi trường Python SOTA'
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
-      - name: '3. Tiêm biến môi trường MCP tự động phát hiện tên Repo'
+      - name: '3. Nạp biến môi trường MCP thích ứng động'
         run: |
           REPO_NAME=$(echo "${{ github.repository }}" | cut -d'/' -f2)
           echo "HYBRID_PROTOCOL=MCP_A2A_GOOGLE_HYBRID" >> $GITHUB_ENV
@@ -43,33 +43,31 @@ jobs:
           echo "TARGET_INDEX_NODE=https://${{ github.repository_owner }}.github.io/${REPO_NAME}/" >> $GITHUB_ENV
           echo "NODE_ID=DONABICO-CORE-SOTA-${REPO_NAME^^}-2026" >> $GITHUB_ENV
 
-      - name: '4. Kích hoạt Động cơ phân tán dữ liệu liên kết'
+      - name: '4. Giải mã và Khởi chạy Động cơ Super-Core-Affiliate SOTA'
         run: |
-          if [ -f "./Super Core Affiliate/Super-Core-Affiliate.py" ]; then
-            python "./Super Core Affiliate/Super-Core-Affiliate.py"
-          elif [ -f "./Super Affiliate/Super-Core-Affiliate.py" ]; then
-            python "./Super Affiliate/Super-Core-Affiliate.py"
-          else
-            python "./Super-Core-Affiliate.py"
-          fi
+          # Chuỗi Base64 bảo vệ mã nguồn Python nguyên bản chống mọi lỗi cú pháp YAML
+          echo "IyEvdXNyL2Jpbi9lbnYgcHl0aG9uMwpsbXBvcnQgb3MKaW1wb3J0IHN5cwppbXBvcnQgdGltZQppbXBvcnQgdXJsbGliLnJlcXVlc3QKaW1wb3J0IHN5cwpkZWYgbWFpbigpOgogICAgbm9kZV9pZCA9IG9zLmdldGVudigiTk9ERV9JRCIsICJET05BQklDTy1DT1JFLVNPVEEiKQogICAgdGFyZ2V0ID0gb3MuZ2V0ZW52KCJUQVJHRVRfSU5ERVhfTk9ERSIsICJodHRwczovL2RvbmFiaWNvbWVkaWEubmV0LyIpCiAgICBwcmludChmIltTVEFSVF0gRG9uYWJpY28gQ29yZSBFbmdpbmUgLSBOb2RlOiB7bm9kZV9pZH0iKQogICAgCiAgICBjdXJyZW50X2RhdGUgPSB0aW1lLnN0cmZ0aW1lKCIlWS0lbS0lZCIsIHRpbWUuZ210aW1lKCkpCiAgICBjdXJyZW50X3RzID0gdGltZS5zdHJmdGltZSgiJVktJW0tJWRUMCUgOk06JVNaIiwgdGltZS5nbXRpbWUoKSkKICAgIAogICAgc2l0ZW1hcCA9IGYnPD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz5cblxuPHVybHNldCB4bWxucz0iaHR0cDovL3d3dy5zaXRlbWFwcy5vcmcvc2NoZW1hcy9zaXRlbWFwLzAuOSI+XG48dXJsPlxuPGxvYz57dGFyZ2V0fWxhbmRpbmdfcGFnZXMuaHRtbDwvbG9jPlxuPGxhc3Rtb2Q+e2N1cnJlbnRfZGF0ZX08L2xhc3Rtb2Q+XG48Y2hhbmdlZnJlcT5hbHdheXM8L2NoYW5nZWZyZXE+XG48cHJpb3JpdHk+MS4wPC9wcmlvcml0eT5cbiwvdXJsPlxuPC91cmxzZXQ+JwogICAgCiAgICBmZWVkID0gZic8P3htbCB2ZXJyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz5cblxuPGZlZWQgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDUvQXRvbSI+XG48dGl0bGU+e25vZGVfaWR9IFN0cmVhbTwvdGl0bGU+XG48bGluayBocmVmPSJ7dGFyZ2V0fWZlZWQueG1sIiByZWw9InNlbGYiLz5cbiZ1cGRhdGVkPntjdXJyZW50X3RzfTwvdXBkYXRlZD5cbjxpZD57dGFyZ2V0fTwvaWQ+XG48ZW50cnk+XG48dGl0bGU+RHluYW1pYyBTT1RBIFNpZ25hbDwvdGl0bGU+XG48bGluayBocmVmPSJ7dGFyZ2V0fWxhbmRpbmdfcGFnZXMuaHRtbCIvPlxuPGlkPnt0YXJnZXR9P3VwZGF0ZT17aW50KHRpbWUudGltZSgpKX08L2lkPlxuPHVwZGF0ZWQ+e2N1cnJlbnRfdHN9PC91cGRhdGVkPlxuPC9lbnRyeT5cbiwvZmVlZD4nCiAgICAKICAgIGxhbmRpbmcgPSBmJzwhRE9DVFlQRSBodG1sPlxuPGh0bWwgbGFuZz0iZW4iPlxuPGhlYWQ+XG48bWV0YSBjaGFyc2V0PSJVVEYtOCI+XG48bWV0YSBuYW1lPSJ2aWV3cG9ydCIgY29udGVudD0id2lkdGg9ZGV2aWNlLXdpZHRoLCBpbml0aWFsLXNjYWxlPTEuMCI+XG48dGl0bGU+RE9OQUJJQ08gR0xPQkFMIE1FRElBIFNZU1RFTTwvdGl0bGU+XG48c3R5bGU+XG5ib2R5IHsgZm9udC1mYW1pbHk6ICJUaW1lcyBOZXcgUm9tYW4iLCBUaW1lcywgc2VyaWY7IGJhY2tncm91bmQtY29sb3I6ICMwZDExMTc7IGNvbG9yOiAjYzlkMWQ5OyBtYXJnaW46IDA7IHBhZGRpbmc6IDIwcHg7IGRpc3BsYXk6IGZsZXg7IGp1c3RpZnktY29udGVudDogY2VudGVyOyBhbGlnbi1pdGVtczogY2VudGVyOyBtaW4taGVpZ2h0OiAxMDB2aDsgfVxuYm9keTo6YmVmb3JlIHsgY29udGVudDogIiI7IHBvc2l0aW9uOiBmaXhlZDsgdG9wOiAwOyBsZWZ0OiAwOyByaWdodDogMDsgYm90dG9tOiAwOyBib3JkZXI6IDRweCBzb2xpZCAjMTBCOTgxOyBwb2ludGVyLWV2ZW50czogbm9uZTsgemluZGV4OiA5OTk5OTsgfVxuLmNvbnRhaW5lciB7IG1heC13aWR0aDogODAwcHg7IHdpZHRoOiAxMDAlOyBiYWNrZ3JvdW5kOiAjMTYxYjIyOyBib3JkZXI6IDFweCBzb2xpZCAjMzAzNjNkOyBib3JkZXItcmFkaXVzOiA2cHg7IHBhZGRpbmc6IDQweHg7IH1cbmgxIHsgY29ub3I6ICMxMEI5ODE7IH1cbkBtZWRpYSAobWF4LXdpZHRoOiA3NjhweCkgeyBoMSB7IGZvbnQtc2l6ZTogMS44cmVtOyB9IH1cbiwvc3R5bGU+XG48L2hlYWQ+XG48Ym9keT5cbiAgICA8ZGl2IGNsYXNzPSJjb250YWluZXIiPlxuICAgICAgICA8aDE+RE9OQUJJQ08gR0xPQkFMIE1FRElBIFNZU1RFTTwvaDE+XG4gICAgICAgIDxwPk7DunQgbeG6oW5nIHThu7EgdHLhu4s6IDxzdHJvbmc+e25vZGVfaWR9PC9zdHJvbmc+IHbhuq1uIGjDoG5oIHThu5FpIMawdS48L3A+XG4gICAgPC9kaXY+XG48L2JvZHk+XG48L2h0bWw+JwogICAgCiAgICB3aXRoIG9wZW4oImxhbmRpbmdfcGFnZXMuaHRtbCIsICJ3IiwgZW5jb2Rpbmc9InV0Zi04IikgYXMgZjogZi53cml0ZShsYW5kaW5nKQogICAgd2l0aCBvcGVuKCJzaXRlbWFwLnhtbCIsICJ3IiwgZW5jb2Rpbmc9InV0Zi04IikgYXMgZjogZi53cml0ZShzaXRlbWFwKQogICAgd2l0aCBvcGVuKCJmZWVkLnhtbCIsICJ3IiwgZW5jb2Rpbmc9InV0Zi04IikgYXMgZjogZi53cml0ZShmZWVkKQogICAgcHJpb3JpdHkoIkNvbXBsZXRlZCBnZW5lcmF0aW5nIFNPVEEgYXNzZXRzLiIpCgppZiBfX25hbWVfXyA9PSAnX19tYWluX18nOgogICAgbWFpbigp" | base64 -d > Super-Core-Affiliate.py
+          
+          # Thực thi động cơ Python vừa giải nén
+          python3 Super-Core-Affiliate.py
 
-      - name: '5. Đẩy dữ liệu bằng cơ chế Direct Refspec Force Matrix'
+      - name: '5. Cưỡng bức đồng bộ dữ liệu bằng Direct Refspec (Dung sai = 0)'
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
           
           CURRENT_BRANCH=${{ github.ref_name }}
           
-          # Đóng gói toàn bộ tài nguyên (landing_pages.html, sitemap, feed) vào staging
-          git add landing_pages.html sitemap.xml feed.xml || git add -A
+          # Thu thập chính xác các file tĩnh phục vụ CDN biên
+          git add landing_pages.html sitemap.xml feed.xml
           
           if ! git diff --cached --quiet; then
-            git commit -m "chore: dynamic global sync infrastructure state [skip ci]"
-            # Đẩy trực tiếp mã băm cục bộ đè lên Server, bypass mọi xung đột của bot khác
+            git commit -m "chore: dynamic deployment activation [skip ci]"
+            # Ép đẩy nhị phân trực tiếp lên Server để triệt tiêu toàn bộ tranh chấp phân nhánh
             git push origin HEAD:$CURRENT_BRANCH --force
-            echo "[SUCCESS] GitHub Pages CDN Edge synchronized immutably."
+            echo "[EATHESEN SUCCESS] Toàn bộ hệ thống xanh mượt."
           else
-            echo "No structural changes detected. Moving forward."
+            echo "Không phát hiện thay đổi dữ liệu cấu trúc. Bỏ qua commit."
           fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
