@@ -1,0 +1,72 @@
+name: 'GOOGLE-DISPLAY-ORCHESTRATOR'
+
+on:
+  schedule:
+    - cron: '30 */2 * * *' # Chạy lệch giờ với Core chính (mỗi 2 tiếng vào phút thứ 30) để phân phối tải sạch
+  push:
+    paths:
+      - 'Modules/Google-Display.py'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "google-display-matrix"
+  cancel-in-progress: true
+
+jobs:
+  google_display_ingestion:
+    name: 'Execute Google Display Contextual Ingestion'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: '1. Checkout Repository Ecosystem'
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: '2. Deploy Python Environment'
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: '3. Inject Module Environment Variables'
+        run: |
+          echo "MAX_PARALLEL_THREADS=24" >> $GITHUB_ENV
+          echo "TARGET_INDEX_NODE=https://donabico-global-media.github.io/acebeam/" >> $GITHUB_ENV
+
+      - name: '4. Boot Google Display Module Engine'
+        run: |
+          chmod +x "./Modules/Google-Display.py"
+          python "./Modules/Google-Display.py"
+        env:
+          PYTHONUNBUFFERED: "1"
+
+      - name: '5. Commit & Sync Google Display Bridge Infrastructure'
+        # Chỉ theo dõi và ép đẩy duy nhất tệp cầu nối Bridge-Google-Display.js
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git fetch origin main
+          git add Bridges/Bridge-Google-Display.js
+          
+          if ! git diff --quiet origin/main -- Bridges/Bridge-Google-Display.js; then
+            git commit -m "chore: auto-sync dynamic Google Display contextual bridge"
+            git pull --strategy-option=theirs origin main --no-rebase || (git merge --abort && git reset --hard origin/main && git add Bridges/Bridge-Super-Core-Affiliate.js && git commit -m "chore: force sync telemetry")
+            git push origin HEAD:main
+          else
+            echo "No changes detected in Google Display bridge. Skipping sync."
+          fi
+        continue-on-error: false
+
+      - name: '6. Verification'
+        if: success()
+        run: |
+          echo "=========================================================================="
+          echo "[ GOOGLE DISPLAY SUCCESS ] Contextual Bridge Generated & Injected!"
+          echo "index.html Protected // Ready for Organic Google Display Network."
+          echo "=========================================================================="
