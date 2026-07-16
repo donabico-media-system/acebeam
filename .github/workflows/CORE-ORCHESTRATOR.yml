@@ -9,34 +9,36 @@ on:
       - master
   workflow_dispatch:
 
-# KHÓA VÀNG SOTA: Ép buộc mở quyền ghi cho GITHUB_TOKEN mặc định (Bypass 100% lỗi 403 không có secret)
+# Cấp quyền cho máy ảo đóng gói và xuất bản thẳng lên GitHub Pages
 permissions:
-  contents: write
-  workflows: write
+  contents: read
   pages: write
   id-token: write
 
 concurrency:
-  group: "core-orchestrator-matrix"
+  group: "pages"
   cancel-in-progress: true
 
 jobs:
-  execute_and_sync:
+  execute_and_deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 5
 
     steps:
-      - name: '1. Tải cấu trúc mã nguồn Shallow'
+      - name: '1. Tải cấu trúc mã nguồn'
         uses: actions/checkout@v4
         with:
           fetch-depth: 1
 
-      - name: '2. Khởi tạo môi trường Python SOTA'
+      - name: '2. Khởi tạo môi trường Python'
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
-      - name: '3. Thiết lập biến môi trường tự động phát hiện tên Repo'
+      - name: '3. Thiết lập thông số nút mạng tự động'
         run: |
           REPO_NAME=$(echo "${{ github.repository }}" | cut -d'/' -f2)
           echo "HYBRID_PROTOCOL=MCP_A2A_GOOGLE_HYBRID" >> $GITHUB_ENV
@@ -44,36 +46,31 @@ jobs:
           echo "TARGET_INDEX_NODE=https://${{ github.repository_owner }}.github.io/${REPO_NAME}/" >> $GITHUB_ENV
           echo "NODE_ID=DONABICO-CORE-SOTA-${REPO_NAME^^}-2026" >> $GITHUB_ENV
 
-      - name: '4. Tự động tìm kiếm và Kích hoạt Động cơ Super-Core-Affiliate.py'
+      - name: '4. Tự động tìm kiếm và Kích hoạt Động cơ Python'
         run: |
-          echo "[INFO] Đang quét toàn bộ hệ thống để tìm tệp thực thi..."
           PY_PATH=$(find . -name "Super-Core-Affiliate.py" -print -quit)
-          
           if [ -z "$PY_PATH" ]; then
-            echo "[CRITICAL ERROR] Không tìm thấy tệp Super-Core-Affiliate.py trên kho lưu trữ!"
+            echo "[CRITICAL ERROR] Không tìm thấy tệp Super-Core-Affiliate.py!"
             exit 1
           else
-            echo "[SUCCESS] Đã tìm thấy động cơ tại vị trí: $PY_PATH"
             python3 "$PY_PATH"
           fi
 
-      - name: '5. Cưỡng bức đẩy đè dữ liệu bằng Token Tự Động'
+      - name: '5. Chuẩn bị thư mục xuất bản độc lập'
         run: |
-          git config --global user.name 'github-actions[bot]'
-          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-          
-          CURRENT_BRANCH=${{ github.ref_name }}
-          
-          # Đóng gói 3 tài nguyên CDN biên chiến lược
-          git add landing_pages.html sitemap.xml feed.xml || git add -A
-          
-          if ! git diff --cached --quiet; then
-            git commit -m "chore: dynamic global sync infrastructure state [skip ci]"
-            # Sử dụng GITHUB_TOKEN tự động đã được cấp quyền ở trên để force push đè bẹp lỗi chặn nhánh
-            git push origin HEAD:$CURRENT_BRANCH --force
-            echo "[EATHESEN SUCCESS] Hệ thống CDN biên đã đồng bộ xanh mượt."
-          else
-            echo "Không phát hiện biến động cấu trúc dữ liệu. Bỏ qua commit."
-          fi
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Gom toàn bộ file vừa sinh vào một thư mục tạm để đẩy lên Pages
+          mkdir -p _site
+          cp landing_pages.html _site/
+          cp sitemap.xml _site/
+          cp feed.xml _site/
+          # Copy thêm file index.html trỏ về landing_pages.html để đảm bảo không bị lỗi 404 trang chủ
+          cp landing_pages.html _site/index.html
+
+      - name: '6. Đóng gói tài nguyên tĩnh (Bypass Git)'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '_site'
+
+      - name: '7. Xuất bản trực tiếp lên GitHub Pages CDN'
+        id: deployment
+        uses: actions/deploy-pages@v4
