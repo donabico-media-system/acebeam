@@ -3,8 +3,6 @@ name: GOOGLE DISPLAY PROTOCOL
 on:
   push:
     branches: [ "gh-pages" ]
-    paths:
-      - 'Modules/Google-Display.py'
   workflow_dispatch:
 
 permissions:
@@ -26,14 +24,25 @@ jobs:
 
       - name: Execute Gravity Compiler
         run: |
-          python Modules/Google-Display.py
+          # Kiểm tra sự tồn tại của file Python trước khi chạy để tránh lỗi im lặng
+          if [ -f "Modules/Google-Display.py" ]; then
+            python Modules/Google-Display.py
+          else
+            echo "::error::Khong tim thay Modules/Google-Display.py tren nhanh gh-pages! Hãy dam bao file py da duoc push."
+            exit 1
+          fi
 
       - name: Deploy and Commit directly to gh-pages Root
         run: |
           git config --global user.name "donabico-global-media"
           git config --global user.email "donabico.media.system@gmail.com"
           
-          # Chỉ thêm duy nhất file cầu nối JS vào luồng kiểm soát
-          git add Bridges/Google-Display.js
-          git diff-index --quiet HEAD || git commit -m "build(yocto): clean gh-pages core deploy [skip ci]"
-          git push origin gh-pages
+          # Cơ chế kiểm tra an toàn tầng Yocto: Chỉ add nếu tệp thực sự được tạo ra
+          if [ -f "Bridges/Google-Display.js" ]; then
+            git add Bridges/Google-Display.js
+            git diff-index --quiet HEAD || git commit -m "build(yocto): clean gh-pages core deploy [skip ci]"
+            git push origin gh-pages
+          else
+            echo "::error::Tep cau noi Bridges/Google-Display.js khong duoc tao ra tu file Python!"
+            exit 1
+          fi
