@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - master
+  workflow_dispatch: # Giữ nút bấm kích hoạt thủ công cho Ngài trên Mobile/Web
 
 permissions:
   contents: write
@@ -30,8 +31,8 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           
-          # Force add cả file sitemap và file JS được sinh tự động
-          git add sitemap.xml Protocols/eseb_global_config.json Bridges/SEP-Observer.js
+          # Chỉ theo dõi và tự push ngược lại sitemap.xml và file cầu nối JS
+          git add sitemap.xml Bridges/SEP-Observer.js
           
-          # Chỉ commit và push nếu có sự thay đổi thực tế
-          git diff --quiet && git diff --staged --quiet || (git commit -m "sys(SOTA): auto-generate sitemap, config and bridges" && git push)
+          # Thực hiện commit nếu có thay đổi thực tế
+          git diff --quiet && git diff --staged --quiet || (git commit -m "sys(SOTA): auto-generate sitemap & dynamic bridge [skip ci]" && git push)
