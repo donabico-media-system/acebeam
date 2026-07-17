@@ -1,6 +1,5 @@
 {
-    "name": "DONABICO Global Media System Partner",
-    "description": "Premium global affiliate and advertising traffic-siphoning node.",
-    "affiliate_url": "https://donabicomedia.net/gateway/default",
-    "repo_name": "acebeam"
+    "brand_id": "acebeam",
+    "affiliate_link": "#INSERT_YOUR_AFFILIATE_LINK_HERE",
+    "active": true
 }
