@@ -1,10 +1,6 @@
 import os
 from datetime import datetime
-
-def create_directory_if_not_exists(file_path):
-    directory = os.path.dirname(file_path)
-    if directory and not os.path.exists(directory):
-        os.makedirs(directory)
+from pathlib import Path
 
 def generate_sitemap():
     sitemap_path = "sitemap.xml"
@@ -29,45 +25,50 @@ def generate_sitemap():
     print("✓ Successfully generated sitemap.xml")
 
 def generate_bridge():
-    bridge_path = "Bridges/SEP-Observer.js"
-    create_directory_if_not_exists(bridge_path)
+    # Sử dụng Path để tự động xử lý tạo thư mục cha (Bridges/) một cách an toàn
+    bridge_file = Path("Bridges/SEP-Observer.js")
+    bridge_file.parent.mkdir(parents=True, exist_ok=True)
     
-    bridge_content = """/**
+    # Để chắc chắn file luôn thay đổi để Git phát hiện, chúng ta chèn mốc thời gian động vào comment
+    current_time_str = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S UTC')
+    
+    bridge_content = f"""/**
  * DONABICO GLOBAL MEDIA SYSTEM
  * [SEP-Observer.js] - SOTA Dynamic Bridge Engine
+ * Generated on: {current_time_str}
  * Active Status Indicator & Traffic Routing Core
  */
 
 (function() {
     'use strict';
 
-    const BridgeConfig = {
+    const BridgeConfig = {{
         name: "SEP-Observer",
         version: "3.2.0-Omega",
         activeBorderColor: "#10B981",
         trackingTarget: "https://acebeamflashlight.sjv.io/donabio_global_media"
-    };
+    }};
 
     function initBridge() {
-        console.log(`[${BridgeConfig.name}] v${BridgeConfig.version} initialized successfully.`);
+        console.log(`[${{BridgeConfig.name}}] v${{BridgeConfig.version}} initialized successfully.`);
         
         // Theo dõi hành vi người dùng và tối ưu liên kết đích (Không gây nhảy trang)
         const actionLinks = document.querySelectorAll('.action-link');
-        actionLinks.forEach(link => {
-            if (!link.getAttribute('href') || link.getAttribute('href') === '#') {
+        actionLinks.forEach(link => {{
+            if (!link.getAttribute('href') || link.getAttribute('href') === '#') {{
                 link.setAttribute('href', BridgeConfig.trackingTarget);
-            }
-        });
+            }}
+        }});
     }
 
-    if (document.readyState === 'loading') {
+    if (document.readyState === 'loading') {{
         document.addEventListener('DOMContentLoaded', initBridge);
-    } else {
+    } else {{
         initBridge();
-    }
+    }}
 })();"""
     
-    with open(bridge_path, "w", encoding="utf-8") as f:
+    with open(bridge_file, "w", encoding="utf-8") as f:
         f.write(bridge_content)
     print("✓ Successfully generated Bridges/SEP-Observer.js")
 
