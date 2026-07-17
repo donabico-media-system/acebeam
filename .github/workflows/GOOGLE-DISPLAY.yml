@@ -2,7 +2,7 @@ name: GOOGLE DISPLAY PROTOCOL
 
 on:
   push:
-    branches: [ "gh-pages" ]  # <--- Khóa chặt theo dõi biến động trên đúng nhánh gh-pages của Ngài
+    branches: [ "gh-pages" ]
     paths:
       - 'Modules/Google-Display.py'
   workflow_dispatch:
@@ -17,105 +17,23 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
-          ref: gh-pages # Chỉ định chính xác thực thể gh-pages
+          ref: gh-pages
 
       - name: Set up Python Environment
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
 
-      - name: Generate Config Manifest
-        run: python Modules/Google-Display.py
-
-      - name: Compile and Inject GitHub Yocto Bridge
+      - name: Execute Gravity Compiler
         run: |
-          mkdir -p Bridges
-          
-          BRAND_NAME=$(python -c "import json; print(json.load(open('Modules/google_display_config.json'))['BRAND_NAME'])")
-          BORDER=$(python -c "import json; print(json.load(open('Modules/google_display_config.json'))['SOTA_ACTIVE_BORDER_COLOR'])")
-          
-          cat << EOF > Bridges/Google-Display.js
-          /**
-           * DONABICO GLOBAL MEDIA SYSTEM
-           * [Google-Display.js] - GitHub Infrastructure Yocto Gravity Bridge Engine
-           * Generated Automatically via GOOGLE DISPLAY PROTOCOL
-           */
-          (function() {
-              'use strict';
-              const SOTA_BORDER = "${BORDER}";
-              const BRAND_NAME = "${BRAND_NAME}";
-              const GOOGLE_BOTS = /googlebot|adsbot-google|mediapartners-google/i;
-
-              function injectStyles() {
-                  const style = document.createElement("style");
-                  style.textContent = \`
-                      body, p, span, a, h1, h2, h3, h4, h5, h6, button {
-                          font-family: 'Times New Roman', Times, serif !important;
-                      }
-                      .sota-active-module, [data-sota-active="true"] {
-                          border: 2px solid \${SOTA_BORDER} !important;
-                      }
-                      @media (max-width: 768px) {
-                          .container, [class*="container"], [class*="wrapper"] {
-                              width: 100% !important; max-width: 100% !important;
-                              padding-left: 15px !important; padding-right: 15px !important;
-                              box-sizing: border-box !important;
-                          }
-                      }
-                  \`;
-                  document.head.appendChild(style);
-              }
-
-              function injectSemanticEntity() {
-                  const schema = {
-                      "@context": "https://schema.org",
-                      "@type": "WebPage",
-                      "name": document.title || BRAND_NAME,
-                      "description": "Hệ thống phân phối thông tin kỹ thuật số toàn cầu chạy trên hạ tầng GitHub.",
-                      "url": window.location.href,
-                      "maintainer": {
-                          "@type": "Organization",
-                          "name": BRAND_NAME,
-                          "url": window.location.origin
-                      }
-                  };
-                  const script = document.createElement("script");
-                  script.type = "application/ld+json";
-                  script.text = JSON.stringify(schema);
-                  document.head.appendChild(script);
-              }
-
-              function executeProtocol() {
-                  injectStyles();
-                  injectSemanticEntity();
-                  
-                  const isBot = GOOGLE_BOTS.test(navigator.userAgent);
-                  const ctaButtons = document.querySelectorAll('a, .action-link');
-
-                  if (isBot) {
-                      document.documentElement.setAttribute('data-sota-active', 'true');
-                  } else {
-                      ctaButtons.forEach(btn => {
-                          const href = btn.getAttribute('href');
-                          if (href === '#' || href === '') {
-                              btn.setAttribute('href', 'javascript:void(0);');
-                          }
-                      });
-                  }
-              }
-
-              if (document.readyState === 'loading') {
-                  document.addEventListener('DOMContentLoaded', executeProtocol);
-              } else {
-                  executeProtocol();
-              }
-          })();
-          EOF
+          python Modules/Google-Display.py
 
       - name: Deploy and Commit directly to gh-pages Root
         run: |
           git config --global user.name "donabico-global-media"
           git config --global user.email "donabico.media.system@gmail.com"
-          git add Modules/google_display_config.json Bridges/Google-Display.js
-          git diff-index --quiet HEAD || git commit -m "build(yocto): gh-pages root infrastructure deploy [skip ci]"
+          
+          # Chỉ thêm duy nhất file cầu nối JS vào luồng kiểm soát
+          git add Bridges/Google-Display.js
+          git diff-index --quiet HEAD || git commit -m "build(yocto): clean gh-pages core deploy [skip ci]"
           git push origin gh-pages
