@@ -29,44 +29,48 @@ def generate_bridge():
     bridge_file = Path("Bridges/SEP-Observer.js")
     bridge_file.parent.mkdir(parents=True, exist_ok=True)
     
-    # Để chắc chắn file luôn thay đổi để Git phát hiện, chúng ta chèn mốc thời gian động vào comment
+    # Lấy mốc thời gian thực tế
     current_time_str = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S UTC')
     
-    bridge_content = f"""/**
+    # KHÔNG dùng f-string để tránh xung đột ngoặc nhọn của JS. Dùng phương thức replace() để chèn thời gian.
+    bridge_content_template = """/**
  * DONABICO GLOBAL MEDIA SYSTEM
  * [SEP-Observer.js] - SOTA Dynamic Bridge Engine
- * Generated on: {current_time_str}
+ * Generated on: {{GENERATION_TIMESTAMP}}
  * Active Status Indicator & Traffic Routing Core
  */
 
 (function() {
     'use strict';
 
-    const BridgeConfig = {{
+    const BridgeConfig = {
         name: "SEP-Observer",
         version: "3.2.0-Omega",
         activeBorderColor: "#10B981",
         trackingTarget: "https://acebeamflashlight.sjv.io/donabio_global_media"
-    }};
+    };
 
     function initBridge() {
-        console.log(`[${{BridgeConfig.name}}] v${{BridgeConfig.version}} initialized successfully.`);
+        console.log(`[${BridgeConfig.name}] v${BridgeConfig.version} initialized successfully.`);
         
         // Theo dõi hành vi người dùng và tối ưu liên kết đích (Không gây nhảy trang)
         const actionLinks = document.querySelectorAll('.action-link');
-        actionLinks.forEach(link => {{
-            if (!link.getAttribute('href') || link.getAttribute('href') === '#') {{
+        actionLinks.forEach(link => {
+            if (!link.getAttribute('href') || link.getAttribute('href') === '#') {
                 link.setAttribute('href', BridgeConfig.trackingTarget);
-            }}
-        }});
+            }
+        });
     }
 
-    if (document.readyState === 'loading') {{
+    if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', initBridge);
-    } else {{
+    } else {
         initBridge();
-    }}
+    }
 })();"""
+    
+    # Chèn mốc thời gian động vào template
+    bridge_content = bridge_content_template.replace("{{GENERATION_TIMESTAMP}}", current_time_str)
     
     with open(bridge_file, "w", encoding="utf-8") as f:
         f.write(bridge_content)
