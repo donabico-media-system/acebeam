@@ -9,7 +9,6 @@
     const BRAND_NAME = "DONABICO GLOBAL MEDIA SYSTEM";
     const GOOGLE_BOTS = /googlebot|adsbot-google|mediapartners-google/i;
 
-    // Giao thức 1: Ép chuẩn hiển thị vật lý đồng bộ cho toàn bộ hệ sinh thái
     function injectStyles() {
         const style = document.createElement("style");
         style.textContent = `
@@ -30,7 +29,6 @@
         document.head.appendChild(style);
     }
 
-    // Giao thức 2: Định danh Thực thể tối cao dựa vào tọa độ vị trí trực tiếp trên hạ tầng GitHub
     function injectSemanticEntity() {
         const schema = {
             "@context": "https://schema.org",
@@ -59,10 +57,7 @@
 
         if (isBot) {
             document.documentElement.setAttribute('data-sota-active', 'true');
-            console.log("[Yocto-24] Core Gravity: System entity indexed under GitHub Infra for " + BRAND_NAME);
         } else {
-            // Chế độ người dùng thật: Bảo lưu liên kết tĩnh động trên từng kho vệ tinh, 
-            // Loại bỏ các thẻ nhảy trang gây lỗi.
             ctaButtons.forEach(btn => {
                 const href = btn.getAttribute('href');
                 if (href === '#' || href === '') {
