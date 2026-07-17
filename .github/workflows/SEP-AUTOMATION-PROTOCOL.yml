@@ -5,7 +5,7 @@ on:
     branches:
       - main
       - master
-  workflow_dispatch: # Giữ nút bấm kích hoạt thủ công cho Ngài trên Mobile/Web
+  workflow_dispatch: # Giữ nút bấm kích hoạt thủ công trên Mobile/Web
 
 permissions:
   contents: write
@@ -16,6 +16,8 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Cho phép đọc lịch sử để thực hiện rebase không lỗi
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -31,8 +33,14 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           
-          # Chỉ theo dõi và tự push ngược lại sitemap.xml và file cầu nối JS
+          # Chỉ theo dõi và tự động push sitemap.xml và Bridges/SEP-Observer.js
           git add sitemap.xml Bridges/SEP-Observer.js
           
-          # Thực hiện commit nếu có thay đổi thực tế
-          git diff --quiet && git diff --staged --quiet || (git commit -m "sys(SOTA): auto-generate sitemap & dynamic bridge [skip ci]" && git push)
+          # Thực hiện commit và push an toàn bằng cơ chế rebase
+          if ! git diff --quiet --staged; then
+            git commit -m "sys(SOTA): auto-generate sitemap & dynamic bridge [skip ci]"
+            git pull --rebase origin main
+            git push origin main
+          else
+            echo "No changes detected. Skipping push."
+          fi
