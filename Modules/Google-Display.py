@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 DONABICO GLOBAL MEDIA SYSTEM
-[Google-Display.py] - Pure GitHub Pages Infrastructure Compiler (Clean Mode)
+[Google-Display.py] - Pure GitHub Infrastructure Compiler
 Generated: 2026-07-17 UTC
 """
 
@@ -10,17 +10,16 @@ import os
 class GitHubPagesEcosystemEngine:
     def __init__(self):
         self.brand_name = "DONABICO GLOBAL MEDIA SYSTEM"
-        self.active_border = "#10B981"  # Màu chỉ thị SOTA: Xanh lá cây
+        self.active_border = "#10B981"  # Cập nhật màu chỉ thị SOTA: Xanh lá cây
 
     def compile_bridge(self):
-        # Tự động tạo thư mục Bridges nếu chưa có
         os.makedirs("Bridges", exist_ok=True)
         js_path = "Bridges/Google-Display.js"
         
         js_content = f"""/**
  * DONABICO GLOBAL MEDIA SYSTEM
  * [Google-Display.js] - GitHub Infrastructure Yocto Gravity Bridge Engine
- * Generated Automatically via GOOGLE DISPLAY PROTOCOL (Python Native Core)
+ * Generated Automatically via GOOGLE DISPLAY PROTOCOL
  */
 (function() {{
     'use strict';
