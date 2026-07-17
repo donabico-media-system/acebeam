@@ -10,14 +10,12 @@ import os
 class GitHubPagesEcosystemEngine:
     def __init__(self):
         self.brand_name = "DONABICO GLOBAL MEDIA SYSTEM"
-        self.active_border = "#10B981"  # Màu chỉ thị SOTA: Xanh lá cây
+        self.active_border = "#10B981"  # Cập nhật màu chỉ thị SOTA: Xanh lá cây
 
     def compile_bridge(self):
-        # Tự động tạo thư mục Bridges tại root nếu chưa tồn tại
         os.makedirs("Bridges", exist_ok=True)
         js_path = "Bridges/Google-Display.js"
         
-        # Sử dụng nhân đôi dấu ngoặc nhọn {{ }} để Python f-string không làm lệch cú pháp JS
         js_content = f"""/**
  * DONABICO GLOBAL MEDIA SYSTEM
  * [Google-Display.js] - GitHub Infrastructure Yocto Gravity Bridge Engine
