@@ -4,7 +4,7 @@
  * [BIGTECH INTEGRATION: GOOGLEBOT / BINGBOT / MICROSOFT ADTECH SYNC]
  */
 (function() {
-    const ESEB_TIMESTAMP = 1784259125;
+    const ESEB_TIMESTAMP = 1784269484;
     const CONFIG = {
         brandId: "acebeam",
         targetLink: "#",
