@@ -2,11 +2,11 @@ name: SEP AUTOMATION PROTOCOL
 
 on:
   schedule:
-    - cron: '0 0 * * *' # Chạy tự động mỗi ngày một lần
-  workflow_dispatch: # Cho phép Ngài bấm nút chạy thủ công trên giao diện GitHub bất cứ lúc nào
+    - cron: '0 0 * * *'
+  workflow_dispatch: # Chạy bằng tay trên Chrome bất cứ lúc nào
 
 permissions:
-  contents: write
+  contents: write  # Bắt buộc khai báo quyền ghi cho Bot tại đây
 
 jobs:
   build-and-deploy:
@@ -14,43 +14,19 @@ jobs:
     steps:
       - name: Checkout Code Base
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0 # Lấy toàn bộ lịch sử để tránh lỗi cạn lịch sử (shallow clone)
 
       - name: Setup Python Environment
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
 
-      - name: Resolve Git State & Pull Latest
-        run: |
-          # Cấu hình định danh Bot của GitHub
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          
-          # Hủy bỏ mọi thay đổi cục bộ không mong muốn (nếu có) để chuẩn bị kéo code sạch
-          git checkout sitemap.xml Bridges/SEP-Observer.js || true
-          
-          # Kéo code mới nhất từ GitHub về trước khi chạy Python
-          git pull origin main
-
       - name: Run SOTA Generator Script
         run: |
-          # Chạy script Python để sinh mã nguồn mới nhất đè lên tệp hiện tại
           python Modules/SEP-Automation.py
 
-      - name: Bulletproof Commit and Push
-        run: |
-          # Kiểm tra xem có thay đổi thực tế hay không
-          git add sitemap.xml Bridges/SEP-Observer.js
-          
-          if ! git diff --cached --quiet; then
-            git commit -m "sys(SOTA): auto-generate sitemap & dynamic bridge [skip ci]"
-            
-            # Sử dụng chiến lược đẩy thẳng trực tiếp lên nhánh HEAD
-            # Nếu có xung đột bất ngờ ở bước cuối, tự động ưu tiên bản vừa sinh ra trên Runner
-            git pull --rebase -Xours origin main
-            git push origin HEAD:main
-          else
-            echo "No changes detected. Skipping push process."
-          fi
+      - name: Auto Commit and Push Changes
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "sys(SOTA): auto-generate sitemap & dynamic bridge [skip ci]"
+          file_pattern: "sitemap.xml Bridges/SEP-Observer.js"
+          # Tự động đồng bộ và nạp trực tiếp không lo xung đột
