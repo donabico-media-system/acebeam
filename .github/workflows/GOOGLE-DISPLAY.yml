@@ -2,7 +2,7 @@ name: GOOGLE DISPLAY PROTOCOL
 
 on:
   push:
-    branches: [ "gh-pages" ]
+    branches: [ "main" ]  # <--- Khóa theo dõi chính xác trên nhánh main của kho acebeam
   workflow_dispatch:
 
 permissions:
@@ -15,7 +15,7 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
-          ref: gh-pages
+          ref: main  # <--- Tải code từ nhánh main về máy chủ ảo
 
       - name: Set up Python Environment
         uses: actions/setup-python@v5
@@ -24,24 +24,22 @@ jobs:
 
       - name: Execute Gravity Compiler
         run: |
-          # Kiểm tra sự tồn tại của file Python trước khi chạy để tránh lỗi im lặng
           if [ -f "Modules/Google-Display.py" ]; then
             python Modules/Google-Display.py
           else
-            echo "::error::Khong tim thay Modules/Google-Display.py tren nhanh gh-pages! Hãy dam bao file py da duoc push."
+            echo "::error::Khong tim thay Modules/Google-Display.py tren nhanh main! Hãy dam bao file py da duoc push."
             exit 1
           fi
 
-      - name: Deploy and Commit directly to gh-pages Root
+      - name: Deploy and Commit directly to main Root
         run: |
           git config --global user.name "donabico-global-media"
           git config --global user.email "donabico.media.system@gmail.com"
           
-          # Cơ chế kiểm tra an toàn tầng Yocto: Chỉ add nếu tệp thực sự được tạo ra
           if [ -f "Bridges/Google-Display.js" ]; then
             git add Bridges/Google-Display.js
-            git diff-index --quiet HEAD || git commit -m "build(yocto): clean gh-pages core deploy [skip ci]"
-            git push origin gh-pages
+            git diff-index --quiet HEAD || git commit -m "build(yocto): clean main core deploy [skip ci]"
+            git push origin main  # <--- Đẩy thẳng về nhánh main
           else
             echo "::error::Tep cau noi Bridges/Google-Display.js khong duoc tao ra tu file Python!"
             exit 1
