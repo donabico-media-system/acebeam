@@ -2,7 +2,7 @@ name: GOOGLE DISPLAY PROTOCOL
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "gh-pages" ]  # <--- Khóa chặt theo dõi biến động trên đúng nhánh gh-pages của Ngài
     paths:
       - 'Modules/Google-Display.py'
   workflow_dispatch:
@@ -16,6 +16,8 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+        with:
+          ref: gh-pages # Chỉ định chính xác thực thể gh-pages
 
       - name: Set up Python Environment
         uses: actions/setup-python@v5
@@ -44,7 +46,6 @@ jobs:
               const BRAND_NAME = "${BRAND_NAME}";
               const GOOGLE_BOTS = /googlebot|adsbot-google|mediapartners-google/i;
 
-              // Giao thức 1: Ép chuẩn hiển thị vật lý đồng bộ cho toàn bộ hệ sinh thái
               function injectStyles() {
                   const style = document.createElement("style");
                   style.textContent = \`
@@ -65,7 +66,6 @@ jobs:
                   document.head.appendChild(style);
               }
 
-              // Giao thức 2: Định danh Thực thể tối cao dựa vào tọa độ vị trí trực tiếp trên hạ tầng GitHub
               function injectSemanticEntity() {
                   const schema = {
                       "@context": "https://schema.org",
@@ -94,10 +94,7 @@ jobs:
 
                   if (isBot) {
                       document.documentElement.setAttribute('data-sota-active', 'true');
-                      console.log("[Yocto-24] Core Gravity: System entity indexed under GitHub Infra for " + BRAND_NAME);
                   } else {
-                      // Chế độ người dùng thật: Bảo lưu liên kết tĩnh động trên từng kho vệ tinh, 
-                      // Loại bỏ các thẻ nhảy trang gây lỗi.
                       ctaButtons.forEach(btn => {
                           const href = btn.getAttribute('href');
                           if (href === '#' || href === '') {
@@ -115,10 +112,10 @@ jobs:
           })();
           EOF
 
-      - name: Deploy and Commit to Bridges
+      - name: Deploy and Commit directly to gh-pages Root
         run: |
           git config --global user.name "donabico-global-media"
           git config --global user.email "donabico.media.system@gmail.com"
           git add Modules/google_display_config.json Bridges/Google-Display.js
-          git diff-index --quiet HEAD || git commit -m "build(yocto): pure github infrastructure deploy [skip ci]"
-          git push origin main || echo "No deployment updates needed."
+          git diff-index --quiet HEAD || git commit -m "build(yocto): gh-pages root infrastructure deploy [skip ci]"
+          git push origin gh-pages
