@@ -485,6 +485,162 @@
         });
     </script>
 
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="page-title">DONABICO Secure Gateway</title>
+    
+    <!-- Meta SEO Phục vụ Bot Crawl -->
+    <meta id="meta-desc" name="description" content="DONABICO Partner Node.">
+    <meta id="og-title" property="og:title" content="DONABICO Alliance Platform">
+    <meta id="og-desc" property="og:description" content="Global Decentralized Web Hub.">
+
+    <style>
+        body {
+            font-family: 'Times New Roman', Times, serif;
+            background-color: #0c0c0c;
+            color: #d1d1d1;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .showcase-container {
+            max-width: 650px;
+            width: 100%;
+            padding: 24px;
+            box-sizing: border-box;
+            text-align: center;
+        }
+
+        /* Khung hiển thị Module chuẩn SOTA - Viền hoạt động Xanh Lá Cây */
+        .active-module-sota {
+            border: 1px solid #00ff00; 
+            padding: 30px;
+            border-radius: 6px;
+            background-color: #111111;
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            color: #ffffff;
+            margin-top: 0;
+            margin-bottom: 12px;
+            font-weight: normal;
+            letter-spacing: 1px;
+        }
+
+        p.desc {
+            font-size: 1.15rem;
+            line-height: 1.6;
+            color: #a0a0a0;
+            margin-bottom: 25px;
+        }
+
+        /* Nút chuyển hướng - Triệt tiêu lỗi nhảy trang bằng cách loại bỏ ký tự # */
+        .action-link {
+            display: inline-block;
+            padding: 12px 30px;
+            background-color: #008000;
+            color: #ffffff;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1.1rem;
+            border-radius: 4px;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .action-link:hover {
+            background-color: #00a000;
+        }
+
+        .action-link:active {
+            transform: scale(0.98);
+        }
+
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.7rem;
+            }
+            p.desc {
+                font-size: 1.05rem;
+            }
+            .active-module-sota {
+                padding: 20px;
+            }
+        }
+    </style>
+
+    <!-- NẠP DUY NHẤT CẦU NỐI TỰ SINH CỦA ĐẠO OMEGA -->
+    <script src="Bridges/SEP-Observer.js" defer></script>
+</head>
+<body>
+
+    <div class="showcase-container">
+        <div class="active-module-sota">
+            <h1 id="brand-title">Connecting Node Authority...</h1>
+            <p id="brand-desc" class="desc">Resolving secure environment matrix and credentials...</p>
+            
+            <button id="checkout-link" class="action-link">Trải Nghiệm Ngay</button>
+        </div>
+    </div>
+
+    <script>
+        async function initESEBGateway() {
+            const titleNode = document.getElementById('brand-title');
+            const descNode = document.getElementById('brand-desc');
+            const pageTitle = document.getElementById('page-title');
+            const actionBtn = document.getElementById('checkout-link');
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const targetUrl = urlParams.get('src');
+
+            let affiliateDestination = "https://donabicomedia.net/gateway/default";
+
+            try {
+                const response = await fetch('Protocols/eseb_global_config.json');
+                if (response.ok) {
+                    const brand = await response.json();
+                    titleNode.textContent = brand.name;
+                    descNode.textContent = brand.description;
+                    pageTitle.textContent = `${brand.name} | Official Gateway`;
+
+                    document.getElementById('meta-desc').setAttribute('content', brand.description);
+                    document.getElementById('og-title').setAttribute('content', brand.name);
+                    document.getElementById('og-desc').setAttribute('content', brand.description);
+
+                    affiliateDestination = brand.affiliate_url;
+                }
+            } catch (err) {
+                console.warn("[ESEB-Gateway] Falling back to system routing:", err);
+                titleNode.textContent = "DONABICO Alliance Node";
+                descNode.textContent = "Autonomous digital traffic distribution network. Secure gateway.";
+            }
+
+            const finalLink = targetUrl ? decodeURIComponent(targetUrl) : affiliateDestination;
+
+            actionBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                if (window.SEP_Observer && typeof window.SEP_Observer.negotiate === 'function') {
+                    window.SEP_Observer.negotiate(finalLink);
+                } else {
+                    window.location.href = finalLink;
+                }
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', initESEBGateway);
+    </script>
+
 <script src="Bridges/Super-Core-Affiliate.js" defer></script>
 <script src="Bridges/SEP-Observer.js" defer></script>
 
