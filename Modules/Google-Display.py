@@ -1,30 +1,37 @@
 # -*- coding: utf-8 -*-
 """
 DONABICO GLOBAL MEDIA SYSTEM
-[Google-Display.py] - Pure GitHub Infrastructure Compiler
-Generated: 2026-07-17 UTC
+[Google-Display.py] - EATESEN SEED ENTITY BRIDGE (ESEB) Engine
 """
 
 import os
 
 class GitHubPagesEcosystemEngine:
     def __init__(self):
-        self.brand_name = "DONABICO GLOBAL MEDIA SYSTEM"
-        self.active_border = "#10B981"  # Cập nhật màu chỉ thị SOTA: Xanh lá cây
+        # TỰ ĐỘNG NHẬN DIỆN MÔI TRƯỜNG KHO CHỨA ĐỂ ĐỊNH DANH THỰC THỂ
+        self.github_user = os.getenv("GITHUB_REPOSITORY_OWNER", "donabico-global-media")
+        self.repo_name = os.getenv("GITHUB_REPOSITORY", "donabico-global-media/acebeam").split("/")[-1]
+        
+        self.brand_name = f"{self.github_user.upper()} GLOBAL SYSTEM"
+        self.active_border = "#10B981"  # Chỉ thị màu SOTA: Xanh lá cây
+        
+        # CỔNG AFFILIATE ĐỘNG: Cấu hình tập trung tại đầu file để dễ dàng thay đổi
+        self.affiliate_target = "https://acebeamflashlight.sjv.io/donabio_global_media"
 
     def compile_bridge(self):
         os.makedirs("Bridges", exist_ok=True)
         js_path = "Bridges/Google-Display.js"
         
         js_content = f"""/**
- * DONABICO GLOBAL MEDIA SYSTEM
- * [Google-Display.js] - GitHub Infrastructure Yocto Gravity Bridge Engine
+ * {self.brand_name}
+ * [Google-Display.js] - ESEB Standard Compliant Gravity Bridge
  * Generated Automatically via GOOGLE DISPLAY PROTOCOL
  */
 (function() {{
     'use strict';
     const SOTA_BORDER = "{self.active_border}";
     const BRAND_NAME = "{self.brand_name}";
+    const AFFILIATE_TARGET = "{self.affiliate_target}";
     const GOOGLE_BOTS = /googlebot|adsbot-google|mediapartners-google/i;
 
     function injectStyles() {{
@@ -47,12 +54,13 @@ class GitHubPagesEcosystemEngine:
         document.head.appendChild(style);
     }}
 
-    function injectSemanticEntity() {{
+    function injectFriendlyHandshake() {{
+        // GIAO THỨC BẮT TAY THÂN THIỆN (ESEB STANDARD): Định hình cấu trúc thực thể sạch cho Google Bots
         const schema = {{
             "@context": "https://schema.org",
             "@type": "WebPage",
             "name": document.title || BRAND_NAME,
-            "description": "Hệ thống phân phối thông tin kỹ thuật số toàn cầu chạy trên hạ tầng GitHub.",
+            "description": "Hệ thống phân phối kỹ thuật số toàn cầu tích hợp trên hạ tầng lưu trữ đám mây.",
             "url": window.location.href,
             "maintainer": {{
                 "@type": "Organization",
@@ -68,18 +76,20 @@ class GitHubPagesEcosystemEngine:
 
     function executeProtocol() {{
         injectStyles();
-        injectSemanticEntity();
+        injectFriendlyHandshake();
         
         const isBot = GOOGLE_BOTS.test(navigator.userAgent);
         const ctaButtons = document.querySelectorAll('a, .action-link');
 
         if (isBot) {{
+            // Bắt tay với Bot: Kích hoạt chỉ thị SOTA và định danh thực thể hệ thống
             document.documentElement.setAttribute('data-sota-active', 'true');
         }} else {{
+            // Điều hướng mượt cho Người dùng: Triệt tiêu hoàn toàn dấu '#' gây nhảy trang
             ctaButtons.forEach(btn => {{
                 const href = btn.getAttribute('href');
-                if (href === '#' || href === '') {{
-                    btn.setAttribute('href', 'javascript:void(0);');
+                if (href === '#' || href === '' || href === null) {{
+                    btn.setAttribute('href', AFFILIATE_TARGET);
                 }}
             }});
         }}
@@ -94,7 +104,7 @@ class GitHubPagesEcosystemEngine:
 """
         with open(js_path, "w", encoding="utf-8") as f:
             f.write(js_content)
-        print(f"[Success] Yocto Core Bridge injected directly at {js_path}")
+        print(f"[Success] ESEB Core Bridge deployed dynamically at {js_path}")
 
 if __name__ == "__main__":
     engine = GitHubPagesEcosystemEngine()
