@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://donabico-global-media.github.io/acebeam/sitemap.xml
