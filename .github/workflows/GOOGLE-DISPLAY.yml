@@ -1,8 +1,10 @@
 name: GOOGLE DISPLAY PROTOCOL
 
 on:
+  schedule:
+    - cron: '0 */4 * * *'  # CHU KỲ MỚI: Tự động chạy ngầm chính xác 4 tiếng một lần cho toàn bộ hệ thống
   push:
-    branches: [ "main" ]  # <--- Khóa theo dõi chính xác trên nhánh main của kho acebeam
+    branches: [ "main", "master" ]
   workflow_dispatch:
 
 permissions:
@@ -15,7 +17,7 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
-          ref: main  # <--- Tải code từ nhánh main về máy chủ ảo
+          fetch-depth: 0
 
       - name: Set up Python Environment
         uses: actions/setup-python@v5
@@ -27,20 +29,21 @@ jobs:
           if [ -f "Modules/Google-Display.py" ]; then
             python Modules/Google-Display.py
           else
-            echo "::error::Khong tim thay Modules/Google-Display.py tren nhanh main! Hãy dam bao file py da duoc push."
+            echo "::error::Khong tim thay Modules/Google-Display.py!"
             exit 1
           fi
 
-      - name: Deploy and Commit directly to main Root
+      - name: Deploy and Commit Dynamically to Root
         run: |
-          git config --global user.name "donabico-global-media"
-          git config --global user.email "donabico.media.system@gmail.com"
+          # Nhận diện tự động Actor của kho chứa để tránh lỗi chặn quyền ghi (Permission Denied)
+          git config --global user.name "${{ github.actor }}"
+          git config --global user.email "${{ github.actor }}@users.noreply.github.com"
           
           if [ -f "Bridges/Google-Display.js" ]; then
             git add Bridges/Google-Display.js
-            git diff-index --quiet HEAD || git commit -m "build(yocto): clean main core deploy [skip ci]"
-            git push origin main  # <--- Đẩy thẳng về nhánh main
+            git diff-index --quiet HEAD || git commit -m "build(eseb): dynamic handshake bridge deploy [skip ci]"
+            git push origin HEAD:${{ github.ref_name }}
           else
-            echo "::error::Tep cau noi Bridges/Google-Display.js khong duoc tao ra tu file Python!"
+            echo "::error::Tep cau noi Bridges/Google-Display.js khong duoc tao ra!"
             exit 1
           fi
