@@ -1,4 +1,5 @@
 /**
+ * DONABICO GLOBAL MEDIA SYSTEM
  * DONABICO-MEDIA-SYSTEM GLOBAL SYSTEM
  * [Google-Display.js] - ESEB Standard Compliant Gravity Bridge
  * Generated Automatically via GOOGLE DISPLAY PROTOCOL
@@ -6,7 +7,7 @@
 (function() {
     'use strict';
     const SOTA_BORDER = "#10B981";
-    const BRAND_NAME = "DONABICO-MEDIA-SYSTEM GLOBAL SYSTEM";
+    const BRAND_NAME = "DONABICO GLOBAL MEDIA SYSTEM";
     const AFFILIATE_TARGET = "https://acebeamflashlight.sjv.io/donabio_global_media";
     const GOOGLE_BOTS = /googlebot|adsbot-google|mediapartners-google/i;
 
@@ -31,7 +32,6 @@
     }
 
     function injectFriendlyHandshake() {
-        // GIAO THỨC BẮT TAY THÂN THIỆN (ESEB STANDARD): Định hình cấu trúc thực thể sạch cho Google Bots
         const schema = {
             "@context": "https://schema.org",
             "@type": "WebPage",
@@ -51,23 +51,27 @@
     }
 
     function executeProtocol() {
-        injectStyles();
-        injectFriendlyHandshake();
+        // CỨU NGUY CLS: Đưa việc render UI phụ vào hàng đợi không đồng bộ
+        setTimeout(() => {
+            injectStyles();
+            injectFriendlyHandshake();
+        }, 0);
         
         const isBot = GOOGLE_BOTS.test(navigator.userAgent);
-        const ctaButtons = document.querySelectorAll('a, .action-link');
 
         if (isBot) {
-            // Bắt tay với Bot: Kích hoạt chỉ thị SOTA và định danh thực thể hệ thống
             document.documentElement.setAttribute('data-sota-active', 'true');
         } else {
-            // Điều hướng mượt cho Người dùng: Triệt tiêu hoàn toàn dấu '#' gây nhảy trang
-            ctaButtons.forEach(btn => {
-                const href = btn.getAttribute('href');
-                if (href === '#' || href === '' || href === null) {
-                    btn.setAttribute('href', AFFILIATE_TARGET);
+            # THAY THẾ VÒNG LẶP NẶNG BẰNG EVENT DELEGATION - ĐƯA INP VỀ XANH TUYỆT ĐỐI
+            document.body.addEventListener('click', function(event) {
+                const targetLink = event.target.closest('a, .action-link');
+                if (targetLink) {
+                    const href = targetLink.getAttribute('href');
+                    if (href === '#' || href === '' || href === null) {
+                        targetLink.setAttribute('href', AFFILIATE_TARGET);
+                    }
                 }
-            });
+            }, { passive: true });
         }
     }
 
