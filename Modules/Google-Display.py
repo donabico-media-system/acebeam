@@ -8,14 +8,13 @@ import os
 
 class GitHubPagesEcosystemEngine:
     def __init__(self):
-        # TỰ ĐỘNG NHẬN DIỆN MÔI TRƯỜNG KHO CHỨA ĐỂ ĐỊNH DANH THỰC THỂ
-        self.github_user = os.getenv("GITHUB_REPOSITORY_OWNER", "donabico-global-media")
-        self.repo_name = os.getenv("GITHUB_REPOSITORY", "donabico-global-media/acebeam").split("/")[-1]
+        # ĐỒNG BỘ DANH TÍNH THƯƠNG HIỆU MỚI TOÀN HỆ THỐNG
+        self.github_user = os.getenv("GITHUB_REPOSITORY_OWNER", "donabico-media-system")
+        self.repo_name = os.getenv("GITHUB_REPOSITORY", "donabico-media-system/landing_pages").split("/")[-1]
         
-        self.brand_name = f"{self.github_user.upper()} GLOBAL SYSTEM"
-        self.active_border = "#10B981"  # Chỉ thị màu SOTA: Xanh lá cây
-        
-        # CỔNG AFFILIATE ĐỘNG: Cấu hình tập trung tại đầu file để dễ dàng thay đổi
+        self.brand_name = "DONABICO GLOBAL MEDIA SYSTEM"
+        self.system_identity = f"{self.github_user.upper()} GLOBAL SYSTEM"
+        self.active_border = "#10B981"  # Màu xanh lá cây chỉ thị active-modules
         self.affiliate_target = "https://acebeamflashlight.sjv.io/donabio_global_media"
 
     def compile_bridge(self):
@@ -24,6 +23,7 @@ class GitHubPagesEcosystemEngine:
         
         js_content = f"""/**
  * {self.brand_name}
+ * {self.system_identity}
  * [Google-Display.js] - ESEB Standard Compliant Gravity Bridge
  * Generated Automatically via GOOGLE DISPLAY PROTOCOL
  */
@@ -55,7 +55,6 @@ class GitHubPagesEcosystemEngine:
     }}
 
     function injectFriendlyHandshake() {{
-        // GIAO THỨC BẮT TAY THÂN THIỆN (ESEB STANDARD): Định hình cấu trúc thực thể sạch cho Google Bots
         const schema = {{
             "@context": "https://schema.org",
             "@type": "WebPage",
@@ -75,23 +74,27 @@ class GitHubPagesEcosystemEngine:
     }}
 
     function executeProtocol() {{
-        injectStyles();
-        injectFriendlyHandshake();
+        // CỨU NGUY CLS: Đưa việc render UI phụ vào hàng đợi không đồng bộ
+        setTimeout(() => {{
+            injectStyles();
+            injectFriendlyHandshake();
+        }}, 0);
         
         const isBot = GOOGLE_BOTS.test(navigator.userAgent);
-        const ctaButtons = document.querySelectorAll('a, .action-link');
 
         if (isBot) {{
-            // Bắt tay với Bot: Kích hoạt chỉ thị SOTA và định danh thực thể hệ thống
             document.documentElement.setAttribute('data-sota-active', 'true');
         }} else {{
-            // Điều hướng mượt cho Người dùng: Triệt tiêu hoàn toàn dấu '#' gây nhảy trang
-            ctaButtons.forEach(btn => {{
-                const href = btn.getAttribute('href');
-                if (href === '#' || href === '' || href === null) {{
-                    btn.setAttribute('href', AFFILIATE_TARGET);
+            # THAY THẾ VÒNG LẶP NẶNG BẰNG EVENT DELEGATION - ĐƯA INP VỀ XANH TUYỆT ĐỐI
+            document.body.addEventListener('click', function(event) {{
+                const targetLink = event.target.closest('a, .action-link');
+                if (targetLink) {{
+                    const href = targetLink.getAttribute('href');
+                    if (href === '#' || href === '' || href === null) {{
+                        targetLink.setAttribute('href', AFFILIATE_TARGET);
+                    }}
                 }}
-            }});
+            }}, {{ passive: true }});
         }}
     }}
 
