@@ -1,0 +1,50 @@
+name: GOOGLE SEARCH PROTOCOL
+
+on:
+  schedule:
+    - cron: '0 */4 * * *'  # Vận hành đồng bộ chu kỳ chuẩn 4 tiếng/lần bảo vệ hệ thống ma trận ESEB
+  push:
+    branches: [ "main", "master" ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  orchestrate-search:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python Environment
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Execute Search Compiler
+        run: |
+          if [ -f "Modules/Google-Search.py" ]; then
+            python Modules/Google-Search.py
+          else
+            echo "::error::Khong tim thay Modules/Google-Search.py!"
+            exit 1
+          fi
+
+      - name: Commit Search Core to Bridges Directory
+        run: |
+          # Thiết lập danh tính Git tự động đồng bộ theo tài khoản mới
+          git config --global user.name "${{ github.actor }}"
+          git config --global user.email "${{ github.actor }}@users.noreply.github.com"
+          
+          # Đẩy chính xác file JS trong thư mục Bridges
+          if [ -f "Bridges/Google-Search.js" ]; then
+            git add Bridges/Google-Search.js
+            git diff-index --quiet HEAD || git commit -m "seo(eseb): refresh organic search bridge in Bridges folder [skip ci]"
+            git push origin HEAD:${{ github.ref_name }}
+          else
+            echo "::error::Tep cau noi Bridges/Google-Search.js khong duoc tao ra!"
+            exit 1
+          fi
