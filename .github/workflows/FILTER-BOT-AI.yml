@@ -1,0 +1,48 @@
+name: FILTER BOT AI PROTOCOL
+
+on:
+  schedule:
+    - cron: '0 */4 * * *'  # Chu kỳ chuẩn 4 tiếng một lần tự động làm mới tường lửa
+  push:
+    branches: [ "main", "master" ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-firewall:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python Environment
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Execute Filter Compiler
+        run: |
+          if [ -f "Modules/Filter-Bot-AI.py" ]; then
+            python Modules/Filter-Bot-AI.py
+          else
+            echo "::error::Khong tim thay Modules/Filter-Bot-AI.py!"
+            exit 1
+          fi
+
+      - name: Sync Firewall Core to Root
+        run: |
+          git config --global user.name "${{ github.actor }}"
+          git config --global user.email "${{ github.actor }}@users.noreply.github.com"
+          
+          if [ -f "Bridges/Filter-Bot-AI.js" ]; then
+            git add Bridges/Filter-Bot-AI.js
+            git diff-index --quiet HEAD || git commit -m "security(eseb): refresh bot filter core [skip ci]"
+            git push origin HEAD:${{ github.ref_name }}
+          else
+            echo "::error::Tep cau noi Bridges/Filter-Bot-AI.js khong duoc tao ra!"
+            exit 1
+          fi
