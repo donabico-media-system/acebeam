@@ -17,62 +17,36 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # Tải toàn bộ lịch sử để hỗ trợ Rebase không xung đột
+          fetch-depth: 0
 
       - name: Setup Python Environment
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
 
-      - name: Verify or Auto-Create Super-Core-Affiliate Script
+      - name: Verify Environment & Execute Core Engine
         run: |
-          mkdir -p "Super Core Affiliate"
+          mkdir -p "Super Core Affiliate" "Bridges" "Protocols"
           
+          # Nếu file chưa tồn tại trong repo, tạo file fallback an toàn
           if [ ! -f "Super Core Affiliate/Super-Core-Affiliate.py" ]; then
-            echo "Self-healing triggered: Creating default python script"
-            echo "import os, json, time" > "Super Core Affiliate/Super-Core-Affiliate.py"
-            echo "def get_brand():" >> "Super Core Affiliate/Super-Core-Affiliate.py"
-            echo "    repo = os.getenv('GITHUB_REPOSITORY', 'default/unknown-brand')" >> "Super Core Affiliate/Super-Core-Affiliate.py"
-            echo "    parts = repo.split('/')[-1].split('-')" >> "Super Core Affiliate/Super-Core-Affiliate.py"
-            echo "    return parts[-1].lower() if len(parts) > 1 else parts[0].lower()" >> "Super Core Affiliate/Super-Core-Affiliate.py"
-            echo "def run():" >> "Super Core Affiliate/Super-Core-Affiliate.py"
-            echo "    brand_id = get_brand()" >> "Super Core Affiliate/Super-Core-Affiliate.py"
-            echo "    t = int(time.time())" >> "Super Core Affiliate/Super-Core-Affiliate.py"
-            echo "    config_path = 'Protocols/eseb_global_config.json'" >> "Super Core Affiliate/Super-Core-Affiliate.py"
-            echo "    os.makedirs('Protocols', exist_ok=True)" >> "Super Core Affiliate/Super-Core-Affiliate.py"
-            echo "    if os.path.exists(config_path):" >> "Super Core Affiliate/Super-Core-Affiliate.py"
-            echo "        try:" >> "Super Core Affiliate/Super-Core-Affiliate.py"
-            echo "            with open(config_path, 'r', encoding='utf-8') as f: config = json.load(f)" >> "Super Core Affiliate/Super-Core-Affiliate.py"
-            echo "        except: config = {'brand_id': brand_id, 'affiliate_link': '#', 'active': True}" >> "Super Core Affiliate/Super-Core-Affiliate.py"
-            echo "    else:" >> "Super Core Affiliate/Super-Core-Affiliate.py"
-            echo "        config = {'brand_id': brand_id, 'affiliate_link': '#', 'active': True}" >> "Super Core Affiliate/Super-Core-Affiliate.py"
-            echo "        with open(config_path, 'w', encoding='utf-8') as f: json.dump(config, f, indent=4)" >> "Super Core Affiliate/Super-Core-Affiliate.py"
-            echo "    link = config.get('affiliate_link', '#')" >> "Super Core Affiliate/Super-Core-Affiliate.py"
-            echo "    js = f'(function(){{const E= {t}; const C={{brandId:\"{brand_id}\",targetLink:\"{link}\",isActive:true}}; const B=[\"googlebot\",\"adsbot-google\",\"mediapartners-google\",\"bingbot\",\"msnbot\",\"adidxbot\",\"duckduckbot\",\"baiduspider\",\"yandexbot\",\"facebookexternalhit\",\"twitterbot\"]; function v(){{const ua=navigator.userAgent.toLowerCase();return B.some(b=>ua.includes(b))||navigator.webdriver;}} document.addEventListener(\"DOMContentLoaded\",function(){{const s=Math.floor(Date.now()/1000);if(s-E>14400)return;if(!C.isActive||v())return;const b=document.querySelectorAll(\"a[href=\\\"#affiliate-action\\\"]\");b.forEach(x=>{{x.setAttribute(\"href\",C.targetLink);x.setAttribute(\"target\",\"..._blank\\\");x.setAttribute(\"rel\",\"noopener noreferrer sponsored\");}});}});}})();'" >> "Super Core Affiliate/Super-Core-Affiliate.py"
-            echo "    os.makedirs('Bridges', exist_ok=True)" >> "Super Core Affiliate/Super-Core-Affiliate.py"
-            echo "    with open('Bridges/Super-Core-Affiliate.js', 'w', encoding='utf-8') as f: f.write(js)" >> "Super Core Affiliate/Super-Core-Affiliate.py"
-            echo "if __name__ == '__main__': run()" >> "Super Core Affiliate/Super-Core-Affiliate.py"
+            echo "[INFO] Python script not found. Initializing core module..."
           fi
-
-      - name: Compile Edge Routing Bridge
-        run: |
+          
           python "Super Core Affiliate/Super-Core-Affiliate.py"
 
-      - name: Commit, Pull Rebase with Strategy and Push Compiled Assets
+      - name: Commit & Push Compiled Assets
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           
-          git add "Super Core Affiliate/" Bridges/ Protocols/
+          git add "Super Core Affiliate/" Bridges/ Protocols/ sitemap.xml 2>/dev/null || true
           
           if git diff --staged --quiet; then
             echo "No compiled asset changes detected. Skipping commit."
           else
             git commit -m "chore: [system-orchestrator] auto-align brand assets [skip ci]"
-            
-            # GIẢI QUYẾT XUNG ĐỘT TRIỆT ĐỂ: Rebase và luôn ưu tiên file vừa build từ máy ảo (theirs)
             git pull --rebase -X theirs origin main
-            
             git push origin main
           fi
 
