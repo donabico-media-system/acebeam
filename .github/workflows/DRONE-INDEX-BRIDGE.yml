@@ -6,6 +6,8 @@ on:
       - main
   schedule:
     - cron: '0 */4 * * *'
+  # Bổ sung dòng này để tạo nút kích hoạt thủ công "Run workflow" trên giao diện GitHub
+  workflow_dispatch:
 
 jobs:
   build-and-sync:
